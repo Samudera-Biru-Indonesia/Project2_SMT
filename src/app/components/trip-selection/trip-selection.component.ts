@@ -26,8 +26,8 @@ export class TripSelectionComponent implements OnInit {
       return;
     }
 
-    // Generate trip number if not exists
-    this.tripNumber = localStorage.getItem('tripNumber') || this.generateTripNumber();
+    // Use the truck barcode as trip number (surat jalan) instead of generating new one
+    this.tripNumber = this.truckBarcode;
     localStorage.setItem('tripNumber', this.tripNumber);
 
     // Check if we have trip data from API
@@ -50,22 +50,10 @@ export class TripSelectionComponent implements OnInit {
     }
   }
 
-  generateTripNumber(): string {
-    const now = new Date();
-    const year = now.getFullYear().toString().slice(-2);
-    const month = (now.getMonth() + 1).toString().padStart(2, '0');
-    const day = now.getDate().toString().padStart(2, '0');
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const seconds = now.getSeconds().toString().padStart(2, '0');
-    
-    return `${this.truckBarcode}-${year}${month}${day}${hours}${minutes}${seconds}`;
-  }
-
   selectTripType(type: 'IN' | 'OUT') {
     localStorage.setItem('tripType', type);
     
-    // Trip number already generated in ngOnInit
+    // Trip number already set in ngOnInit (using truck barcode)
     localStorage.setItem('tripNumber', this.tripNumber);
     
     if (type === 'OUT') {

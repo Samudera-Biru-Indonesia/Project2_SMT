@@ -27,6 +27,10 @@ export class OdometerComponent implements OnInit {
     this.tripType = localStorage.getItem('tripType') || '';
     this.tripNumber = localStorage.getItem('tripNumber') || '';
     
+    console.log('Odometer Component - Trip Type:', this.tripType);
+    console.log('Odometer Component - Trip Type Class:', this.tripType.toLowerCase() + '-trip');
+    console.log('Odometer Component - Button Style:', this.getButtonStyle());
+    
     // Get plate number from trip data if available
     const tripDataString = localStorage.getItem('currentTripData');
     if (tripDataString) {
@@ -146,6 +150,23 @@ export class OdometerComponent implements OnInit {
     
     console.log('🚀 Navigating to trip-complete page...');
     this.router.navigate(['/trip-complete']);
+  }
+
+  // Method to get button style based on trip type
+  getButtonStyle() {
+    if (this.tripType === 'OUT') {
+      return {
+        'background': 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)',
+        'border': 'none',
+        'color': 'white'
+      };
+    } else {
+      return {
+        'background': 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
+        'border': 'none',
+        'color': 'white'
+      };
+    }
   }
 
   // Function to send data to API
