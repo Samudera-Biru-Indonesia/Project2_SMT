@@ -12,6 +12,7 @@ export interface TripData {
   chk4: boolean;
   chk5: boolean;
   tripNum: string;
+  note: string;
 }
 
 export interface TripInfo {
@@ -54,17 +55,43 @@ export class ApiService {
       'X-API-Key': environment.api.apiKey
     });
 
-    console.log('Trip Data Request:', data);
-    console.log('Request Headers:', {
+    // Ensure data is properly formatted
+    const requestData = {
+      odometer: Number(data.odometer) || 0,
+      type: String(data.type || ''),
+      chk1: Boolean(data.chk1),
+      chk2: Boolean(data.chk2),
+      chk3: Boolean(data.chk3),
+      chk4: Boolean(data.chk4),
+      chk5: Boolean(data.chk5),
+      tripNum: String(data.tripNum || ''),
+      note: String(data.note || '')
+    };
+
+    console.log('🚀 Original data received:', data);
+    console.log('🚀 Trip Data Request (formatted):', requestData);
+    console.log('� Request data types:', {
+      odometer: typeof requestData.odometer,
+      type: typeof requestData.type,
+      chk1: typeof requestData.chk1,
+      chk2: typeof requestData.chk2,
+      chk3: typeof requestData.chk3,
+      chk4: typeof requestData.chk4,
+      chk5: typeof requestData.chk5,
+      tripNum: typeof requestData.tripNum,
+      note: typeof requestData.note
+    });
+    console.log('�📡 Request Headers:', {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'Authorization': `Basic ${basicAuth}`,
+      'Authorization': `Basic ${basicAuth.substring(0, 20)}...`,
       'Company': 'test',
-      'X-API-Key': environment.api.apiKey
+      'X-API-Key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
     });
-    console.log('API URL:', this.sendTripDataUrl);
+    console.log('🌐 API URL:', this.sendTripDataUrl);
+    console.log('📤 Final JSON payload:', JSON.stringify(requestData, null, 2));
 
-    return this.http.post(this.sendTripDataUrl, data, { headers });
+    return this.http.post(this.sendTripDataUrl, requestData, { headers });
   }
 
   /**

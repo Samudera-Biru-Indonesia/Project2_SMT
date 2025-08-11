@@ -1,6 +1,29 @@
 <div class="complete-container">
   <main class="complete-content">
     <div class="complete-card">
+      <!-- Trip Summary Info -->
+      <div class="trip-summary-info">
+        <h3>📋 Ringkasan Perjalanan</h3>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <span class="summary-label">Trip Number:</span>
+            <span class="summary-value">{{ tripNumber }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Plat Nomor:</span>
+            <span class="summary-value">{{ plateNumber }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Kendaraan:</span>
+            <span class="summary-value">{{ truckBarcode }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Jenis Trip:</span>
+            <span class="summary-value trip-type" [class]="tripType.toLowerCase()">{{ tripType }}</span>
+          </div>
+        </div>
+      </div>
+
       <div class="success-section">
         <div class="success-icon">✅</div>
         <h1>Perjalanan Selesai!</h1>

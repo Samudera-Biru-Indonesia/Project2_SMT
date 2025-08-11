@@ -6,6 +6,18 @@
 
   <main class="trip-content">
     <div class="trip-card">
+      <!-- Trip Header Info - Always Visible -->
+      <div class="trip-header-info">
+        <div class="trip-number-display">
+          <span class="trip-label">Trip Number:</span>
+          <span class="trip-value">{{ tripNumber }}</span>
+        </div>
+        <div class="plate-number-display">
+          <span class="plate-label">Plat Nomor:</span>
+          <span class="plate-value">{{ plateNumber }}</span>
+        </div>
+      </div>
+
       <!-- Compact Vehicle Info -->
       <div class="vehicle-info-compact">
         <span class="vehicle-barcode">🚚 {{ truckBarcode }}</span>
@@ -15,7 +27,6 @@
       <div class="trip-data-compact" *ngIf="hasTripData && tripData">
         <div class="compact-info">
           <span>Driver: {{ tripData.driver || '-' }}</span> |
-          <span>Plat: {{ tripData.truckPlate || '-' }}</span> |
           <span>Rute: {{ tripData.routeID || '-' }}</span>
         </div>
       </div>

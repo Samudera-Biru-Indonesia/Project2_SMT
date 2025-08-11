@@ -1,77 +1,119 @@
 .odometer-container {
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: #f5f5f5;
   margin: 0;
   padding: 0;
 }
 
 .header {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 20px;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 12px 16px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .back-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 15px;
+  background: white;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 12px;
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.3s ease;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
 .back-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #f8f9fa;
+  border-color: #bbb;
 }
 
 .header h1 {
-  color: white;
+  color: #333;
   margin: 0;
-  font-size: 28px;
+  font-size: 18px;
   font-weight: 600;
 }
 
 .odometer-content {
-  padding: 40px 20px;
+  padding: 20px;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
 }
 
 .odometer-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  padding: 24px;
   width: 100%;
-  max-width: 700px;
-  pointer-events: auto;
-  position: relative;
-  z-index: 1;
+  max-width: 600px;
 }
 
+/* Trip Header Info */
+.trip-header-info {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.trip-number-display, .plate-number-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.trip-number-display:last-child, .plate-number-display:last-child {
+  border-bottom: none;
+}
+
+.trip-label, .plate-label {
+  font-weight: 500;
+  color: #555;
+  font-size: 14px;
+}
+
+.trip-value, .plate-value {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 3px;
+  border: 1px solid #e9ecef;
+}
+
+.odometer-form {
+
 .vehicle-info {
-  margin-bottom: 30px;
-  padding-bottom: 20px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
   border-bottom: 1px solid #eee;
 }
 
 .vehicle-info h2 {
   color: #333;
-  margin-bottom: 20px;
-  font-size: 24px;
+  margin-bottom: 16px;
+  font-size: 20px;
   text-align: center;
 }
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
 }
 
 .info-item {
@@ -79,57 +121,59 @@
   justify-content: space-between;
   align-items: center;
   background: #f8f9fa;
-  padding: 12px 16px;
+  padding: 10px 12px;
   border-radius: 8px;
 }
 
 .info-item .label {
   color: #666;
   font-weight: 500;
+  font-size: 14px;
 }
 
 .info-item .value {
   color: #333;
   font-weight: 600;
   font-family: monospace;
+  font-size: 14px;
 }
 
 .out-badge {
   background: #dc3545;
   color: white;
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: 20px;
-  font-size: 14px;
+  font-size: 12px;
   font-family: sans-serif !important;
 }
 
 .in-badge {
   background: #28a745;
   color: white;
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: 20px;
-  font-size: 14px;
+  font-size: 12px;
   font-family: sans-serif !important;
 }
 
 .odometer-form {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 20px;
   pointer-events: auto;
 }
 
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   pointer-events: auto;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   position: relative;
   z-index: 1;
 }
@@ -137,7 +181,7 @@
 .form-group label {
   color: #333;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14px;
   pointer-events: none;
 }
 
@@ -148,10 +192,10 @@
 
 .odometer-input,
 .text-input {
-  padding: 15px 20px;
+  padding: 12px 16px;
   border: 2px solid #e1e5e9;
   border-radius: 8px;
-  font-size: 18px;
+  font-size: 16px;
   font-family: monospace;
   text-align: center;
   transition: border-color 0.3s ease;
@@ -168,10 +212,10 @@
 }
 
 .textarea-input {
-  padding: 15px 20px;
+  padding: 12px 16px;
   border: 2px solid #e1e5e9;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 14px;
   font-family: inherit;
   resize: vertical;
   transition: border-color 0.3s ease;
@@ -298,43 +342,45 @@
 /* Enhanced Mobile Responsiveness */
 @media (max-width: 768px) {
   .header {
-    padding: 18px 16px;
+    padding: 12px 14px;
   }
   
   .header h1 {
-    font-size: 24px;
+    font-size: 18px;
   }
   
   .back-btn {
-    padding: 10px 14px;
-    font-size: 14px;
+    padding: 8px 10px;
+    font-size: 13px;
   }
   
   .odometer-content {
-    padding: 24px 16px;
+    padding: 16px 12px;
+    padding-top: 25px;
+    align-items: flex-start;
   }
   
   .odometer-card {
-    padding: 24px 20px;
+    padding: 20px 16px;
     max-width: none;
     margin: 0;
   }
   
   .vehicle-info h2 {
-    font-size: 20px;
-    margin-bottom: 16px;
+    font-size: 18px;
+    margin-bottom: 14px;
   }
   
   .info-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 10px;
   }
   
   .info-item {
     flex-direction: column;
     align-items: flex-start;
-    gap: 6px;
-    padding: 10px 14px;
+    gap: 4px;
+    padding: 8px 12px;
   }
   
   .info-item .label {
@@ -433,47 +479,47 @@
 
 @media (max-width: 480px) {
   .header {
-    padding: 14px 12px;
-    flex-wrap: wrap;
-    gap: 12px;
+    padding: 10px 8px;
+    flex-wrap: nowrap;
+    gap: 8px;
   }
   
   .header h1 {
-    font-size: 20px;
-    text-align: center;
-    width: 100%;
+    font-size: 16px;
   }
   
   .back-btn {
-    padding: 8px 12px;
-    font-size: 13px;
+    padding: 6px 8px;
+    font-size: 12px;
   }
   
   .odometer-content {
-    padding: 20px 12px;
+    padding: 12px 8px;
+    padding-top: 20px;
+    align-items: flex-start;
   }
   
   .odometer-card {
-    border-radius: 16px;
-    padding: 20px 16px;
+    border-radius: 12px;
+    padding: 16px 12px;
   }
   
   .vehicle-info {
-    margin-bottom: 24px;
-    padding-bottom: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
   }
   
   .vehicle-info h2 {
-    font-size: 18px;
-    margin-bottom: 14px;
+    font-size: 16px;
+    margin-bottom: 12px;
   }
   
   .info-grid {
-    gap: 10px;
+    gap: 8px;
   }
   
   .info-item {
-    padding: 8px 12px;
+    padding: 6px 8px;
   }
   
   .info-item .label {

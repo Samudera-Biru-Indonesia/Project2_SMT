@@ -21,6 +21,8 @@ interface ChecklistItem {
 export class ChecklistComponent implements OnInit {
   truckBarcode: string = '';
   tripType: string = '';
+  tripNumber: string = '';
+  plateNumber: string = '';
   
   checklistItems: ChecklistItem[] = [
     { id: 'chk1', label: 'Engine Oil Level', checked: false, required: true },
@@ -35,6 +37,21 @@ export class ChecklistComponent implements OnInit {
   ngOnInit() {
     this.truckBarcode = localStorage.getItem('currentTruckBarcode') || '';
     this.tripType = localStorage.getItem('tripType') || '';
+    this.tripNumber = localStorage.getItem('tripNumber') || '';
+    
+    // Get plate number from trip data if available
+    const tripDataString = localStorage.getItem('currentTripData');
+    if (tripDataString) {
+      try {
+        const tripData = JSON.parse(tripDataString);
+        this.plateNumber = tripData?.truckPlate || 'N/A';
+      } catch (error) {
+        console.error('Error parsing trip data:', error);
+        this.plateNumber = 'N/A';
+      }
+    } else {
+      this.plateNumber = 'N/A';
+    }
     
     if (!this.truckBarcode || this.tripType !== 'OUT') {
       this.router.navigate(['/trip-selection']);
@@ -68,7 +85,8 @@ export class ChecklistComponent implements OnInit {
         chk3: this.checklistItems.find(item => item.id === 'chk3')?.checked || false,
         chk4: this.checklistItems.find(item => item.id === 'chk4')?.checked || false,
         chk5: this.checklistItems.find(item => item.id === 'chk5')?.checked || false,
-        tripNum: localStorage.getItem('tripNumber') || ''
+        tripNum: localStorage.getItem('tripNumber') || '',
+        note: '' // Will be filled in odometer component
       };
       
       // Save trip data for later use in odometer component

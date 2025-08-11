@@ -14,6 +14,8 @@ export class TripSelectionComponent implements OnInit {
   truckBarcode: string = '';
   tripData: TripInfo | null = null;
   hasTripData: boolean = false;
+  tripNumber: string = '';
+  plateNumber: string = '';
 
   constructor(private router: Router) {}
 
@@ -24,29 +26,47 @@ export class TripSelectionComponent implements OnInit {
       return;
     }
 
+    // Generate trip number if not exists
+    this.tripNumber = localStorage.getItem('tripNumber') || this.generateTripNumber();
+    localStorage.setItem('tripNumber', this.tripNumber);
+
     // Check if we have trip data from API
     const tripDataString = localStorage.getItem('currentTripData');
     if (tripDataString) {
       try {
         this.tripData = JSON.parse(tripDataString);
         this.hasTripData = true;
+        this.plateNumber = this.tripData?.truckPlate || 'N/A';
         console.log('Trip data loaded:', this.tripData);
       } catch (error) {
         console.error('Error parsing trip data:', error);
         this.hasTripData = false;
+        this.plateNumber = 'N/A';
       }
     } else {
       this.hasTripData = false;
+      this.plateNumber = 'N/A';
       console.log('No trip data available - manual mode');
     }
+  }
+
+  generateTripNumber(): string {
+    const now = new Date();
+    const year = now.getFullYear().toString().slice(-2);
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    
+    return `${this.truckBarcode}-${year}${month}${day}${hours}${minutes}${seconds}`;
   }
 
   selectTripType(type: 'IN' | 'OUT') {
     localStorage.setItem('tripType', type);
     
-    // Generate trip number based on truck and timestamp
-    const tripNumber = `${this.truckBarcode}-${Date.now()}`;
-    localStorage.setItem('tripNumber', tripNumber);
+    // Trip number already generated in ngOnInit
+    localStorage.setItem('tripNumber', this.tripNumber);
     
     if (type === 'OUT') {
       // For OUT trips, go to checklist first

@@ -6,15 +6,25 @@
 
   <main class="checklist-content">
     <div class="checklist-card">
+      <!-- Trip Header Info -->
+      <div class="trip-header-info">
+        <div class="trip-number-display">
+          <span class="trip-label">Trip Number:</span>
+          <span class="trip-value">{{ tripNumber }}</span>
+        </div>
+        <div class="plate-number-display">
+          <span class="plate-label">Plat Nomor:</span>
+          <span class="plate-value">{{ plateNumber }}</span>
+        </div>
+      </div>
+
       <div class="vehicle-info">
         <h2>🚚 Checklist Sebelum Berangkat</h2>
-        <div class="info-row">
-          <span class="label">Kendaraan:</span>
-          <span class="value">{{ truckBarcode }}</span>
-        </div>
-        <div class="info-row">
+        <div class="info-grid aligned">
+          <span class="label">Surat Jalan:</span>
+          <span class="value sj-value">{{ truckBarcode }}</span>
           <span class="label">Jenis:</span>
-          <span class="value out-badge">{{ tripType }}</span>
+          <span class="value out-badge type-value">{{ tripType }}</span>
         </div>
       </div>
 
