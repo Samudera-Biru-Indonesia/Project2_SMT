@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { GeolocationService, UserLocation } from './geolocation.service';
+import { SessionNotificationService } from './session-notification.service';
 import { environment } from '../../environments/environment';
 
 export interface AuthUser {
@@ -10,6 +11,8 @@ export interface AuthUser {
   site: string;
   role: string;
   loginTime: Date;
+  lastActivityTime: Date;
+  sessionExpiryTime: Date;
   location?: UserLocation;
   apiResponse?: any;
 }
@@ -39,16 +42,32 @@ export class AuthService {
   private readonly API_URL = `${environment.api.baseUrl}${environment.api.endpoints.login}`;
   private readonly API_KEY = environment.api.apiKey;
   
+  // Session configuration
+  private readonly SESSION_DURATION_HOURS = 8;
+  private readonly SESSION_WARNING_MINUTES = 30; // Warn 30 minutes before expiry
+  private readonly ACTIVITY_CHECK_INTERVAL = 60000; // Check every minute
+  
+  // Timer untuk check session
+  private sessionCheckTimer: any;
+  private sessionWarningShown = false;
+  
   // Basic Auth credentials dari environment
   private readonly BASIC_AUTH_USERNAME = environment.api.basicAuth.username;
   private readonly BASIC_AUTH_PASSWORD = environment.api.basicAuth.password;
 
   constructor(
     private http: HttpClient,
-    private geolocationService: GeolocationService
+    private geolocationService: GeolocationService,
+    private sessionNotificationService: SessionNotificationService
   ) {
     // Check if user is already logged in
     this.loadUserFromStorage();
+    
+    // Start session monitoring
+    this.startSessionMonitoring();
+    
+    // Track user activity
+    this.trackUserActivity();
   }
 
   /**
@@ -136,12 +155,18 @@ export class AuthService {
 
       if (isLoginSuccessful) {
         // Login berhasil
+        const now = new Date();
+        const sessionDurationHours = 8;
+        const sessionExpiryTime = new Date(now.getTime() + (sessionDurationHours * 60 * 60 * 1000));
+        
         const authUser: AuthUser = {
           username: empCode.trim().toUpperCase(),
           empCode: empCode.trim().toUpperCase(),
           site: site.trim().toUpperCase(),
           role: this.determineRole(empCode), // Tentukan role berdasarkan empCode
-          loginTime: new Date(),
+          loginTime: now,
+          lastActivityTime: now,
+          sessionExpiryTime: sessionExpiryTime,
           location: location,
           apiResponse: response
         };
@@ -150,6 +175,7 @@ export class AuthService {
         this.saveUserToStorage(authUser);
 
         console.log('Login successful! User authenticated:', authUser);
+        console.log('Session will expire at:', sessionExpiryTime);
 
         return {
           success: true,
@@ -246,6 +272,10 @@ export class AuthService {
   logout(): void {
     this.currentUserSubject.next(null);
     localStorage.removeItem(this.STORAGE_KEY);
+    this.sessionWarningShown = false;
+    this.stopSessionMonitoring();
+    this.sessionNotificationService.clearNotification();
+    console.log('User logged out');
   }
 
   /**
@@ -303,6 +333,11 @@ export class AuthService {
    */
   private setCurrentUser(user: AuthUser): void {
     this.currentUserSubject.next(user);
+    
+    // Start session monitoring when user is set
+    if (user && !this.sessionCheckTimer) {
+      this.startSessionMonitoring();
+    }
   }
 
   /**
@@ -324,15 +359,38 @@ export class AuthService {
       const storedUser = localStorage.getItem(this.STORAGE_KEY);
       if (storedUser) {
         const user: AuthUser = JSON.parse(storedUser);
-        // Check if login is still valid (e.g., not expired)
-        const loginTime = new Date(user.loginTime);
-        const now = new Date();
-        const hoursSinceLogin = (now.getTime() - loginTime.getTime()) / (1000 * 60 * 60);
         
-        // Auto logout after 8 hours
-        if (hoursSinceLogin < 8) {
-          this.setCurrentUser(user);
+        const now = new Date();
+        let sessionExpiryTime: Date;
+        let lastActivityTime: Date;
+        
+        // Handle both old and new user formats
+        if (user.sessionExpiryTime) {
+          sessionExpiryTime = new Date(user.sessionExpiryTime);
+          lastActivityTime = user.lastActivityTime ? new Date(user.lastActivityTime) : new Date(user.loginTime);
         } else {
+          // For backward compatibility with old format
+          const loginTime = new Date(user.loginTime);
+          sessionExpiryTime = new Date(loginTime.getTime() + (this.SESSION_DURATION_HOURS * 60 * 60 * 1000));
+          lastActivityTime = loginTime;
+        }
+        
+        // Update user object with missing properties if needed
+        const updatedUser: AuthUser = {
+          ...user,
+          loginTime: new Date(user.loginTime),
+          lastActivityTime: lastActivityTime,
+          sessionExpiryTime: sessionExpiryTime
+        };
+        
+        // Check if session is still valid
+        if (now < sessionExpiryTime) {
+          this.setCurrentUser(updatedUser);
+          // DON'T save here to avoid changing the expiry time on refresh
+          console.log('User session restored from storage. Expires at:', sessionExpiryTime);
+          console.log('Time remaining:', Math.ceil((sessionExpiryTime.getTime() - now.getTime()) / (1000 * 60)), 'minutes');
+        } else {
+          console.log('Stored session has expired, logging out');
           this.logout();
         }
       }
@@ -424,5 +482,192 @@ export class AuthService {
            lowerMessage.includes('longitude') ||
            lowerMessage.includes('lokasi') ||
            lowerMessage.includes('cabang');
+  }
+
+  /**
+   * Start session monitoring
+   */
+  private startSessionMonitoring(): void {
+    this.sessionCheckTimer = setInterval(() => {
+      this.checkSessionValidity();
+    }, this.ACTIVITY_CHECK_INTERVAL);
+  }
+
+  /**
+   * Stop session monitoring
+   */
+  private stopSessionMonitoring(): void {
+    if (this.sessionCheckTimer) {
+      clearInterval(this.sessionCheckTimer);
+      this.sessionCheckTimer = null;
+    }
+  }
+
+  /**
+   * Check session validity
+   */
+  private checkSessionValidity(): void {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser) return;
+
+    const now = new Date();
+    const sessionExpiryTime = new Date(currentUser.sessionExpiryTime);
+    const warningTime = new Date(sessionExpiryTime.getTime() - (this.SESSION_WARNING_MINUTES * 60 * 1000));
+
+    // Check if session has expired
+    if (now >= sessionExpiryTime) {
+      console.log('Session expired, logging out user');
+      this.sessionNotificationService.showSessionExpired();
+      this.logout();
+      return;
+    }
+
+    // Show warning if approaching expiry and warning hasn't been shown yet
+    if (now >= warningTime && !this.sessionWarningShown) {
+      this.showSessionWarning();
+      this.sessionWarningShown = true;
+    }
+  }
+
+  /**
+   * Show session warning
+   */
+  private showSessionWarning(): void {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser) return;
+
+    const expiryTime = new Date(currentUser.sessionExpiryTime);
+    const now = new Date();
+    const minutesLeft = Math.ceil((expiryTime.getTime() - now.getTime()) / (1000 * 60));
+
+    console.log(`Session warning: ${minutesLeft} minutes remaining`);
+    
+    // Use session notification service instead of alert
+    this.sessionNotificationService.showSessionWarning(minutesLeft);
+  }
+
+  /**
+   * Track user activity to extend session
+   */
+  private trackUserActivity(): void {
+    // Track significant user activities only
+    const significantEvents = ['click', 'keypress', 'touchstart'];
+    
+    // Throttle activity updates to prevent excessive updates
+    let lastActivityUpdate = 0;
+    const activityThrottle = 5 * 60 * 1000; // 5 minutes minimum between activity updates
+    
+    significantEvents.forEach(event => {
+      document.addEventListener(event, () => {
+        const now = Date.now();
+        if (now - lastActivityUpdate > activityThrottle) {
+          this.updateLastActivity();
+          lastActivityUpdate = now;
+        }
+      }, { passive: true });
+    });
+  }
+
+  /**
+   * Update last activity time and extend session if needed
+   */
+  public updateLastActivity(): void {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser) return;
+
+    const now = new Date();
+    const sessionExpiryTime = new Date(currentUser.sessionExpiryTime);
+    const timeUntilExpiry = sessionExpiryTime.getTime() - now.getTime();
+    const oneHour = 60 * 60 * 1000;
+    
+    // Only extend session if it's going to expire within the next hour
+    // This prevents constant extension but ensures session doesn't expire during active use
+    if (timeUntilExpiry > oneHour) {
+      // Just update last activity time without extending session
+      const updatedUser: AuthUser = {
+        ...currentUser,
+        lastActivityTime: now
+      };
+      
+      this.setCurrentUser(updatedUser);
+      this.saveUserToStorage(updatedUser);
+      return;
+    }
+
+    // Extend session by full duration from current time
+    const newExpiryTime = new Date(now.getTime() + (this.SESSION_DURATION_HOURS * 60 * 60 * 1000));
+
+    const updatedUser: AuthUser = {
+      ...currentUser,
+      lastActivityTime: now,
+      sessionExpiryTime: newExpiryTime
+    };
+
+    this.setCurrentUser(updatedUser);
+    this.saveUserToStorage(updatedUser);
+    
+    // Reset warning flag when session is extended
+    this.sessionWarningShown = false;
+
+    console.log('User activity detected, session extended until:', newExpiryTime);
+  }
+
+  /**
+   * Get session info
+   */
+  public getSessionInfo(): { 
+    isValid: boolean; 
+    expiresAt: Date | null; 
+    minutesRemaining: number; 
+    lastActivity: Date | null; 
+  } {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser) {
+      return {
+        isValid: false,
+        expiresAt: null,
+        minutesRemaining: 0,
+        lastActivity: null
+      };
+    }
+
+    const now = new Date();
+    const expiresAt = new Date(currentUser.sessionExpiryTime);
+    const minutesRemaining = Math.max(0, Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60)));
+    const isValid = now < expiresAt;
+
+    return {
+      isValid,
+      expiresAt,
+      minutesRemaining,
+      lastActivity: new Date(currentUser.lastActivityTime)
+    };
+  }
+
+  /**
+   * Manually extend session
+   */
+  public extendSession(): boolean {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser) return false;
+
+    const now = new Date();
+    const newExpiryTime = new Date(now.getTime() + (this.SESSION_DURATION_HOURS * 60 * 60 * 1000));
+
+    const updatedUser: AuthUser = {
+      ...currentUser,
+      lastActivityTime: now,
+      sessionExpiryTime: newExpiryTime
+    };
+
+    this.setCurrentUser(updatedUser);
+    this.saveUserToStorage(updatedUser);
+    
+    // Reset warning flag when session is manually extended
+    this.sessionWarningShown = false;
+    
+    this.sessionNotificationService.showSessionExtended();
+    console.log('Session manually extended until:', newExpiryTime);
+    return true;
   }
 }

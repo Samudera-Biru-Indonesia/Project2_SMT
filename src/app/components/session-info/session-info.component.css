@@ -1,0 +1,205 @@
+/* Session Info Styles */
+.session-info {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  border: 1px solid #e0e0e0;
+}
+
+.session-timer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.session-time {
+  color: #666;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.session-time.warning {
+  color: #ff6b35;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Session Notification Modal */
+.session-notification-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.session-notification {
+  background: white;
+  border-radius: 12px;
+  min-width: 320px;
+  max-width: 480px;
+  margin: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease;
+}
+
+.session-notification.warning {
+  border-left: 4px solid #ff6b35;
+}
+
+.session-notification.expired {
+  border-left: 4px solid #dc2626;
+}
+
+.session-notification.info {
+  border-left: 4px solid #059669;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.notification-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.notification-body {
+  padding: 10px 20px 20px;
+}
+
+.notification-body p {
+  margin: 0 0 20px;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.btn-secondary {
+  background-color: #6b7280;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #4b5563;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .session-info {
+    top: 5px;
+    right: 5px;
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .session-notification {
+    min-width: 280px;
+    margin: 10px;
+  }
+
+  .notification-header {
+    padding: 15px 15px 8px;
+  }
+
+  .notification-header h3 {
+    font-size: 16px;
+  }
+
+  .notification-body {
+    padding: 8px 15px 15px;
+  }
+
+  .notification-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+}
