@@ -67,14 +67,14 @@ export class AuthService {
       if (!empCode.trim()) {
         return {
           success: false,
-          message: 'Employee code is required'
+          message: 'Isi Kode Pegawai!'
         };
       }
 
       if (!site.trim()) {
         return {
           success: false,
-          message: 'Site code is required'
+          message: 'Isi Kode Cabang!'
         };
       }
 
