@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -25,6 +25,10 @@ export class LoginComponent implements OnInit {
   // Plant list properties
   plants: Plant[] = [];
   plantsLoading: boolean = false;
+  
+  // Custom dropdown properties
+  dropdownOpen: boolean = false;
+  selectedPlantText: string = 'Pilih Site';
 
   constructor(
     private router: Router,
@@ -236,5 +240,29 @@ export class LoginComponent implements OnInit {
 
   formatCoordinate(coord: number): string {
     return coord.toFixed(6);
+  }
+
+  // Custom dropdown methods
+  toggleDropdown() {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  selectSite(plantCode: string, displayText: string) {
+    this.site = plantCode;
+    this.selectedPlantText = displayText;
+    this.dropdownOpen = false;
+  }
+
+  getSelectedPlantText(): string {
+    return this.selectedPlantText;
+  }
+
+  // Close dropdown when clicking outside
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.custom-dropdown')) {
+      this.dropdownOpen = false;
+    }
   }
 }
