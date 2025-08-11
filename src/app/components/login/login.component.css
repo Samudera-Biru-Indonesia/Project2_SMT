@@ -193,17 +193,11 @@
   color: #1976d2;
 }
 
-.option-code {
-  font-weight: 600;
-  color: #333;
-  font-size: 13px;
-  margin-bottom: 2px;
-}
-
 .option-name {
-  font-size: 12px;
-  color: #666;
-  line-height: 1.2;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.4;
+  font-weight: 500;
 }
 
 .plant-loading {
@@ -487,12 +481,8 @@
     font-size: 13px;
   }
   
-  .option-code {
-    font-size: 12px;
-  }
-  
   .option-name {
-    font-size: 11px;
+    font-size: 13px;
   }
   
   .logo-section h1 {
@@ -591,13 +581,8 @@
     font-size: 12px;
   }
   
-  .option-code {
-    font-size: 11px;
-    margin-bottom: 1px;
-  }
-  
   .option-name {
-    font-size: 10px;
+    font-size: 12px;
   }
   
   .logo-section {
@@ -711,13 +696,8 @@
     font-size: 11px;
   }
   
-  .option-code {
-    font-size: 10px;
-    margin-bottom: 1px;
-  }
-  
   .option-name {
-    font-size: 9px;
+    font-size: 11px;
   }
   
   .logo-section h1 {

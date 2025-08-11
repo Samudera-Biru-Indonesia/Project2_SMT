@@ -195,40 +195,34 @@ export class LoginComponent {
       if (response) {
         if (response.Result && response.Result.Plant && Array.isArray(response.Result.Plant)) {
           this.plants = response.Result.Plant.sort((a: Plant, b: Plant) => {
-            // Sort by Plant code first, then by Name
-            if (a.Plant < b.Plant) return -1;
-            if (a.Plant > b.Plant) return 1;
+            // Sort by Name alphabetically (ascending)
             return a.Name.localeCompare(b.Name);
           });
-          console.log('🏭 Using response.Result.Plant array (sorted)');
+          console.log('🏭 Using response.Result.Plant array (sorted by name)');
         } else if (Array.isArray(response)) {
           this.plants = response.sort((a: Plant, b: Plant) => {
-            if (a.Plant < b.Plant) return -1;
-            if (a.Plant > b.Plant) return 1;
+            // Sort by Name alphabetically (ascending)
             return a.Name.localeCompare(b.Name);
           });
-          console.log('🏭 Using response directly as array (sorted)');
+          console.log('🏭 Using response directly as array (sorted by name)');
         } else if (response.Result && Array.isArray(response.Result)) {
           this.plants = response.Result.sort((a: Plant, b: Plant) => {
-            if (a.Plant < b.Plant) return -1;
-            if (a.Plant > b.Plant) return 1;
+            // Sort by Name alphabetically (ascending)
             return a.Name.localeCompare(b.Name);
           });
-          console.log('🏭 Using response.Result array (sorted)');
+          console.log('🏭 Using response.Result array (sorted by name)');
         } else if (response.plants && Array.isArray(response.plants)) {
           this.plants = response.plants.sort((a: Plant, b: Plant) => {
-            if (a.Plant < b.Plant) return -1;
-            if (a.Plant > b.Plant) return 1;
+            // Sort by Name alphabetically (ascending)
             return a.Name.localeCompare(b.Name);
           });
-          console.log('🏭 Using response.plants array (sorted)');
+          console.log('🏭 Using response.plants array (sorted by name)');
         } else if (response.data && Array.isArray(response.data)) {
           this.plants = response.data.sort((a: Plant, b: Plant) => {
-            if (a.Plant < b.Plant) return -1;
-            if (a.Plant > b.Plant) return 1;
+            // Sort by Name alphabetically (ascending)
             return a.Name.localeCompare(b.Name);
           });
-          console.log('🏭 Using response.data array (sorted)');
+          console.log('🏭 Using response.data array (sorted by name)');
         } else {
           console.log('🏭 Unexpected plant list response structure:', response);
           this.plants = [];

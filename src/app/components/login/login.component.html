@@ -29,8 +29,7 @@
             <div class="dropdown-option" 
                  *ngFor="let plant of plants" 
                  [class.selected]="site === plant.Plant"
-                 (click)="selectSite(plant.Plant, plant.Plant + ' - ' + plant.Name)">
-              <div class="option-code">{{ plant.Plant }}</div>
+                 (click)="selectSite(plant.Plant, plant.Name)">
               <div class="option-name">{{ plant.Name }}</div>
             </div>
           </div>
