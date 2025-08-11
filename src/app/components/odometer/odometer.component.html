@@ -1,20 +1,20 @@
 <div class="odometer-container">
   <header class="header">
-    <button class="back-btn" (click)="goBack()">← Back</button>
-    <h1>Odometer Reading</h1>
+    <button class="back-btn" (click)="goBack()">← Kembali</button>
+    <h1>Pembacaan Odometer</h1>
   </header>
 
   <main class="odometer-content">
     <div class="odometer-card">
       <div class="vehicle-info">
-        <h2>📊 Record Trip Data</h2>
+        <h2>📊 Catat Data Perjalanan</h2>
         <div class="info-grid">
           <div class="info-item">
-            <span class="label">Vehicle:</span>
+            <span class="label">Kendaraan:</span>
             <span class="value">{{ truckBarcode }}</span>
           </div>
           <div class="info-item">
-            <span class="label">Trip Type:</span>
+            <span class="label">Jenis Perjalanan:</span>
             <span class="value" [class]="tripType.toLowerCase() + '-badge'">{{ tripType }}</span>
           </div>
         </div>
@@ -23,13 +23,13 @@
       <form (ngSubmit)="onSubmit()" class="odometer-form">
         <div class="form-section">
           <div class="form-group">
-            <label for="odometer" class="required">Odometer Reading (KM)</label>
+            <label for="odometer" class="required">Pembacaan Odometer (KM)</label>
             <input
               type="number"
               id="odometer"
               [(ngModel)]="odometerReading"
               name="odometerReading"
-              placeholder="Enter current odometer reading"
+              placeholder="Masukkan pembacaan odometer saat ini"
               class="odometer-input"
               min="0"
               step="0.1"
@@ -39,13 +39,13 @@
           </div>
 
           <div class="form-group">
-            <label for="driver" class="required">Driver Name</label>
+            <label for="driver" class="required">Nama Driver</label>
             <input
               type="text"
               id="driver"
               [(ngModel)]="driverName"
               name="driverName"
-              placeholder="Enter driver's name"
+              placeholder="Masukkan nama driver"
               class="text-input"
               required
               autocomplete="off"
@@ -53,12 +53,12 @@
           </div>
 
           <div class="form-group">
-            <label for="notes">Additional Notes (Optional)</label>
+            <label for="notes">Catatan Tambahan (Opsional)</label>
             <textarea
               id="notes"
               [(ngModel)]="notes"
               name="notes"
-              placeholder="Enter any additional notes or observations"
+              placeholder="Masukkan catatan atau pengamatan tambahan"
               class="textarea-input"
               rows="4"
               autocomplete="off"
@@ -68,33 +68,33 @@
 
         <div class="form-actions">
           <div class="summary-section">
-            <h4>Trip Summary</h4>
+            <h4>Ringkasan Perjalanan</h4>
             <div class="summary-grid">
               <div class="summary-item">
-                <span class="summary-label">Vehicle:</span>
+                <span class="summary-label">Kendaraan:</span>
                 <span class="summary-value">{{ truckBarcode }}</span>
               </div>
               <div class="summary-item">
-                <span class="summary-label">Type:</span>
+                <span class="summary-label">Jenis:</span>
                 <span class="summary-value">{{ tripType }}</span>
               </div>
               <div class="summary-item" *ngIf="tripType === 'OUT'">
                 <span class="summary-label">Checklist:</span>
-                <span class="summary-value complete">✓ Completed</span>
+                <span class="summary-value complete">✓ Selesai</span>
               </div>
               <div class="summary-item">
                 <span class="summary-label">Odometer:</span>
-                <span class="summary-value">{{ odometerReading || 'Not set' }} KM</span>
+                <span class="summary-value">{{ odometerReading || 'Belum diatur' }} KM</span>
               </div>
               <div class="summary-item">
                 <span class="summary-label">Driver:</span>
-                <span class="summary-value">{{ driverName || 'Not set' }}</span>
+                <span class="summary-value">{{ driverName || 'Belum diatur' }}</span>
               </div>
             </div>
           </div>
           
           <button type="submit" class="complete-btn">
-            Complete Trip Registration
+            Selesaikan Registrasi Perjalanan
           </button>
         </div>
       </form>

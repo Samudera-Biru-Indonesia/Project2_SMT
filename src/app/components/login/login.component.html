@@ -2,17 +2,21 @@
   <div class="login-card">
     <div class="logo-section">
       <h1>🚚 Truck Management</h1>
+      <h1>🚚 Manajemen Truk</h1>
+      <p>Silakan login untuk melanjutkan</p>
     </div>
     
     <form (ngSubmit)="onLogin()" class="login-form" *ngIf="!isLoading">
       <div class="form-group">
         <label for="site">Kode Cabang</label>
+        <label for="site">Kode Site</label>
         <input
           type="text"
           id="site"
           [(ngModel)]="site"
           name="site"
           placeholder="Isi Kode Cabang (misal: SGI030)"
+          placeholder="Masukkan kode site (contoh: SGI030)"
           (input)="onSiteChange()"
           required
           [class.error]="errorMessage"
@@ -21,40 +25,70 @@
 
       <div class="form-group">
         <label for="empCode">Kode Pegawai</label>
+        <label for="empCode">Kode Karyawan</label>
         <input
           type="text"
           id="empCode"
           [(ngModel)]="empCode"
           name="empCode"
           placeholder="Isi Kode Pegawai"
+          placeholder="Masukkan kode karyawan Anda"
           (input)="onEmpCodeChange()"
           required
           [class.error]="errorMessage"
         />
       </div>
+      
+      <button type="submit" class="login-btn" [disabled]="!empCode.trim() || !site.trim() || !manualLatitude || !manualLongitude">
+        🚀 Login dengan Lokasi Khusus
+      </button>
+      
+      <button type="button" class="location-check-btn" (click)="getLocationOnly()">
+        📍 Lihat Lokasi Saat Ini
+      </button>
 
-      <!-- Current Location Display - Read Only -->
+      <!-- Location Input Form - Always Visible -->
       <div class="location-section">
-        <h4>📍 Current Location</h4>
+        <h4>📍 Atur Koordinat Lokasi</h4>
         <p style="font-size: 12px; color: #666; margin: 0 0 16px 0; text-align: center;">
-          ℹ️ Your current GPS coordinates (automatically detected)
+          ℹ️ Masukkan koordinat secara manual atau gunakan "Lihat Lokasi Saat Ini" untuk mendeteksi dan menyalin koordinat GPS Anda
         </p>
 
-        <!-- Single Row Coordinate Display -->
-        <div class="coordinate-display-single">
-          <div class="coordinate-item-single">
-            <div class="coordinate-row">
-              <div class="coordinate-part">
-                <label>Lat:</label>
-                <span class="coord-value">{{ manualLatitude || 'Detecting...' }}</span>
-              </div>
-              <div class="coordinate-separator">|</div>
-              <div class="coordinate-part">
-                <label>Long:</label>
-                <span class="coord-value">{{ manualLongitude || 'Detecting...' }}</span>
-              </div>
-            </div>
+        <!-- Coordinate Inputs -->
+        <div class="coordinate-inputs">
+          <div class="form-group">
+            <label for="manualLatitude">Latitude *</label>
+            <input
+              type="text"
+              id="manualLatitude"
+              [(ngModel)]="manualLatitude"
+              name="manualLatitude"
+              placeholder="e.g., -6.2088"
+              (input)="onCoordinateChange()"
+              [class.error]="errorMessage"
+              required
+            />
           </div>
+          
+          <div class="form-group">
+            <label for="manualLongitude">Longitude *</label>
+            <input
+              type="text"
+              id="manualLongitude"
+              [(ngModel)]="manualLongitude"
+              name="manualLongitude"
+              placeholder="e.g., 106.8456"
+              (input)="onCoordinateChange()"
+              [class.error]="errorMessage"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="coordinate-info" *ngIf="manualLatitude && manualLongitude">
+          <p class="coord-display">
+            📍 Saat ini: {{ manualLatitude }}, {{ manualLongitude }}
+          </p>
         </div>
       </div>
       
@@ -70,12 +104,123 @@
     </div>
 
     <!-- Error Message -->
-    <div class="error-alert" *ngIf="errorMessage && !isLoading">
+    <div class="error-alert" *ngIf="errorMessage && !isLoading && !showLocationInfo && !showAutoLocation">
       <p>⚠️ {{ errorMessage }}</p>
     </div>
 
+    <!-- Auto-Detected Location Information -->
+    <div class="location-info" *ngIf="showAutoLocation && !isLoading">
+      <div class="location-status success">
+        <h3>📍 Lokasi Terdeteksi Otomatis</h3>
+        <p>{{ locationStatus }}</p>
+      </div>
+
+      <div class="location-details" *ngIf="autoDetectedLocation">
+        <h4>🌍 Lokasi GPS Anda Saat Ini</h4>
+        <div class="coordinate-item">
+          <label>Latitude:</label>
+          <div class="coordinate-value">
+            <span>{{ formatCoordinate(autoDetectedLocation.latitude) }}</span>
+            <button class="copy-btn" (click)="copyToClipboard(formatCoordinate(autoDetectedLocation.latitude))">
+              📋
+            </button>
+          </div>
+        </div>
+        
+        <div class="coordinate-item">
+          <label>Longitude:</label>
+          <div class="coordinate-value">
+            <span>{{ formatCoordinate(autoDetectedLocation.longitude) }}</span>
+            <button class="copy-btn" (click)="copyToClipboard(formatCoordinate(autoDetectedLocation.longitude))">
+              📋
+            </button>
+          </div>
+        </div>
+
+        <div class="coordinate-item">
+          <label>Koordinat:</label>
+          <div class="coordinate-value">
+            <span>{{ formatCoordinate(autoDetectedLocation.latitude) }}, {{ formatCoordinate(autoDetectedLocation.longitude) }}</span>
+            <button class="copy-btn" (click)="copyToClipboard(formatCoordinate(autoDetectedLocation.latitude) + ', ' + formatCoordinate(autoDetectedLocation.longitude))">
+              📋
+            </button>
+          </div>
+        </div>
+
+        <div class="coordinate-item" *ngIf="autoDetectedLocation.accuracy">
+          <label>Akurasi:</label>
+          <div class="coordinate-value">
+            <span>{{ autoDetectedLocation.accuracy.toFixed(0) }}m</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="location-actions">
+        <button class="btn-retry" (click)="useDetectedLocation()">
+          ✅ Gunakan Lokasi Ini
+        </button>
+        <button class="btn-close" (click)="hideAutoLocation()">
+          ✖ Tutup
+        </button>
+      </div>
+    </div>
+
+    <!-- Location Information -->
+    <div class="location-info" *ngIf="showLocationInfo && !isLoading && !showAutoLocation">
+      <div class="location-status success">
+        <h3>📍 Informasi Lokasi</h3>
+        <p>{{ locationStatus }}</p>
+      </div>
+
+      <div class="location-details" *ngIf="userLocation">
+        <h4>📍 Lokasi Anda Saat Ini</h4>
+        <div class="coordinate-item">
+          <label>Latitude:</label>
+          <div class="coordinate-value">
+            <span>{{ formatCoordinate(userLocation.latitude) }}</span>
+            <button class="copy-btn" (click)="copyToClipboard(formatCoordinate(userLocation.latitude))">
+              📋
+            </button>
+          </div>
+        </div>
+        
+        <div class="coordinate-item">
+          <label>Longitude:</label>
+          <div class="coordinate-value">
+            <span>{{ formatCoordinate(userLocation.longitude) }}</span>
+            <button class="copy-btn" (click)="copyToClipboard(formatCoordinate(userLocation.longitude))">
+              📋
+            </button>
+          </div>
+        </div>
+
+        <div class="coordinate-item">
+          <label>Koordinat:</label>
+          <div class="coordinate-value">
+            <span>{{ formatCoordinate(userLocation.latitude) }}, {{ formatCoordinate(userLocation.longitude) }}</span>
+            <button class="copy-btn" (click)="copyToClipboard(formatCoordinate(userLocation.latitude) + ', ' + formatCoordinate(userLocation.longitude))">
+              📋
+            </button>
+          </div>
+        </div>
+
+        <div class="coordinate-item" *ngIf="userLocation.accuracy">
+          <label>Akurasi:</label>
+          <div class="coordinate-value">
+            <span>{{ userLocation.accuracy.toFixed(0) }}m</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="location-actions">
+        <button class="btn-close" (click)="hideLocationInfo()">
+          ✖ Close
+        </button>
+      </div>
+    </div>
+
     <!-- Success Message -->
-    <div class="success-message" *ngIf="locationStatus.includes('successful') && isLoading">
+    <div class="success-message" *ngIf="locationStatus.includes('successfully') && isLoading">
       <h3>🎉 Location Detected!</h3>
       <p>Redirecting to dashboard...</p>
     </div>

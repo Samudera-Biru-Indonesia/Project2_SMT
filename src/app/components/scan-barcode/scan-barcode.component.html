@@ -1,7 +1,7 @@
 <div class="scan-container">
   <header class="header">
-    <button class="back-btn" (click)="goBack()">← Back</button>
-    <h1>Scan Vehicle Barcode</h1>
+    <button class="back-btn" (click)="goBack()">← Kembali</button>
+    <h1>Scan Barcode Kendaraan</h1>
   </header>
 
   <main class="scan-content">
@@ -34,8 +34,8 @@
           
           <!-- Scanning Status -->
           <div class="scanner-status" *ngIf="isScanning">
-            <span class="scanning-text">🔍 Scanning for barcode...</span>
-            <p class="scan-instruction">Point camera at barcode</p>
+            <span class="scanning-text">🔍 Mencari barcode...</span>
+            <p class="scan-instruction">Arahkan kamera ke barcode</p>
           </div>
         </div>
         
@@ -46,7 +46,7 @@
             [disabled]="isScanning || !hasCamera"
             *ngIf="!isScanning"
           >
-            {{ hasCamera ? 'Start Camera Scan' : 'Camera Unavailable' }}
+            {{ hasCamera ? 'Mulai Scan Kamera' : 'Kamera Tidak Tersedia' }}
           </button>
           
           <button 
@@ -54,7 +54,16 @@
             (click)="stopScanning()"
             *ngIf="isScanning"
           >
-            Stop Scanning
+            Berhenti Scan
+          </button>
+          
+          <!-- Manual Input Toggle Button -->
+          <button 
+            class="manual-toggle-btn" 
+            (click)="toggleManualInput()"
+            [disabled]="isScanning"
+          >
+            {{ showManualInput ? 'Sembunyikan Input Manual' : 'Masukkan Barcode Manual' }}
           </button>
         </div>
         
@@ -62,37 +71,23 @@
         <div class="error-message" *ngIf="cameraError">
           <span class="error-icon">⚠️</span>
           <p>{{ cameraError }}</p>
-          <small>Please use manual input below</small>
-        </div>
-
-        <!-- Scanning Tips for Long Barcodes -->
-        <div class="scan-tips" *ngIf="hasCamera">
-          <h4>📋 Scanning Tips for Long Barcodes</h4>
-          <ul>
-            <li>🔦 Ensure bright, even lighting</li>
-            <li>📏 Keep barcode 20-40cm from camera for long codes</li>
-            <li>📐 Hold phone steady and parallel to barcode</li>
-            <li>🎯 Center the entire barcode in the scanning area</li>
-            <li>🔍 Wait for auto-focus to stabilize</li>
-            <li>📱 Use landscape orientation for very long barcodes</li>
-            <li>🔄 Try multiple angles if detection fails</li>
-          </ul>
+          <small>Silakan gunakan input manual di bawah</small>
         </div>
       </div>
 
-      <div class="divider">
-        <span>OR</span>
+      <div class="divider" *ngIf="showManualInput">
+        <span>ATAU</span>
       </div>
 
-      <div class="manual-input-section">
-        <h3>Enter Barcode Manually</h3>
+      <div class="manual-input-section" *ngIf="showManualInput">
+        <h3>Masukkan Barcode Manual</h3>
         <form (ngSubmit)="onSubmit()">
           <div class="input-group">
             <input
               type="text"
               [(ngModel)]="barcodeInput"
               name="barcode"
-              placeholder="Enter vehicle barcode"
+              placeholder="Masukkan barcode kendaraan"
               class="barcode-input"
               [disabled]="isLoadingTripData"
               (input)="onBarcodeInputChange()"
@@ -106,7 +101,7 @@
                 {{ isValidBarcodeInput() ? '✅' : '❌' }}
               </span>
               <span class="validation-text">
-                {{ isValidBarcodeInput() ? 'Valid format' : 'Invalid barcode format' }}
+                {{ isValidBarcodeInput() ? 'Format valid' : 'Format barcode tidak valid' }}
               </span>
             </div>
           </div>
@@ -114,7 +109,7 @@
           <!-- Loading State -->
           <div class="loading-section" *ngIf="isLoadingTripData">
             <div class="loading-spinner"></div>
-            <p class="loading-text">Getting trip data...</p>
+            <p class="loading-text">Mengambil data perjalanan...</p>
           </div>
           
           <!-- Error Message -->
@@ -128,7 +123,7 @@
             class="submit-btn"
             [disabled]="isLoadingTripData || !barcodeInput.trim()"
           >
-            {{ isLoadingTripData ? 'Loading...' : 'Get Trip Data' }}
+            {{ isLoadingTripData ? 'Memuat...' : 'Ambil Data Perjalanan' }}
           </button>
         </form>
       </div>

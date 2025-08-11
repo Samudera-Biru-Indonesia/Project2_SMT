@@ -1,85 +1,48 @@
 <div class="trip-container">
   <header class="header">
-    <button class="back-btn" (click)="goBack()">← Back</button>
-    <h1>Trip Type Selection</h1>
+    <button class="back-btn" (click)="goBack()">← Kembali</button>
+    <h1>Pilih Jenis Perjalanan</h1>
   </header>
 
   <main class="trip-content">
     <div class="trip-card">
-      <div class="vehicle-info">
-        <h2>🚚 Vehicle Information</h2>
-        <div class="barcode-display">
-          <span class="label">Barcode:</span>
-          <span class="barcode">{{ truckBarcode }}</span>
+      <!-- Compact Vehicle Info -->
+      <div class="vehicle-info-compact">
+        <span class="vehicle-barcode">🚚 {{ truckBarcode }}</span>
+      </div>
+
+      <!-- Compact Trip Data Display -->
+      <div class="trip-data-compact" *ngIf="hasTripData && tripData">
+        <div class="compact-info">
+          <span>Driver: {{ tripData.driver || '-' }}</span> |
+          <span>Plat: {{ tripData.truckPlate || '-' }}</span> |
+          <span>Rute: {{ tripData.routeID || '-' }}</span>
         </div>
       </div>
 
-      <!-- Trip Data Display (if available from API) -->
-      <div class="trip-data-section" *ngIf="hasTripData && tripData">
-        <h3>📋 Trip Details</h3>
-        <div class="trip-data-grid">
-          <div class="data-item">
-            <span class="label">Driver:</span>
-            <span class="value">{{ tripData.driver || 'Not specified' }}</span>
-          </div>
-          <div class="data-item">
-            <span class="label">Co-Driver:</span>
-            <span class="value">{{ tripData.codriver || 'Not specified' }}</span>
-          </div>
-          <div class="data-item">
-            <span class="label">Truck Plate:</span>
-            <span class="value">{{ tripData.truckPlate || 'Not specified' }}</span>
-          </div>
-          <div class="data-item">
-            <span class="label">Route ID:</span>
-            <span class="value">{{ tripData.routeID || 'Not specified' }}</span>
-          </div>
-          <div class="data-item">
-            <span class="label">Plant:</span>
-            <span class="value">{{ tripData.plant || 'Not specified' }}</span>
-          </div>
-          <div class="data-item">
-            <span class="label">ETA Date:</span>
-            <span class="value">{{ tripData.ETADate || 'Not specified' }}</span>
-          </div>
-          <div class="data-item full-width">
-            <span class="label">Description:</span>
-            <span class="value">{{ tripData.truckDesc || 'Not specified' }}</span>
-          </div>
-        </div>
+      <!-- Compact No Trip Data Message -->
+      <div class="no-data-compact" *ngIf="!hasTripData">
+        <span class="info-compact">ℹ️ Mode manual</span>
       </div>
 
-      <!-- No Trip Data Message -->
-      <div class="no-data-section" *ngIf="!hasTripData">
-        <div class="info-message">
-          <span class="info-icon">ℹ️</span>
-          <p>Trip data not available from server. Proceeding in manual mode.</p>
-        </div>
-      </div>
-
+      <!-- Main Selection Buttons -->
       <div class="selection-section">
-        <h3>Select Trip Type</h3>
-        <p>Choose whether this vehicle is going OUT or coming IN</p>
-        
-        <div class="trip-options">
-          <button class="trip-option out" (click)="selectTripType('OUT')">
-            <div class="option-icon">🚛</div>
-            <div class="option-content">
-              <h4>OUT</h4>
-              <p>Vehicle leaving</p>
-              <small>Requires checklist + odometer</small>
+        <h3>Pilih Jenis Perjalanan</h3>
+        <div class="trip-options-horizontal">
+          <button class="trip-option-modern out" (click)="selectTripType('OUT')">
+            <div class="option-icon-modern">🚛</div>
+            <div class="option-text-modern">
+              <h4>KELUAR</h4>
+              <small>Checklist + Odometer</small>
             </div>
-            <div class="option-arrow">→</div>
           </button>
 
-          <button class="trip-option in" (click)="selectTripType('IN')">
-            <div class="option-icon">🏠</div>
-            <div class="option-content">
-              <h4>IN</h4>
-              <p>Vehicle returning</p>
-              <small>Odometer only</small>
+          <button class="trip-option-modern in" (click)="selectTripType('IN')">
+            <div class="option-icon-modern">🏠</div>
+            <div class="option-text-modern">
+              <h4>MASUK</h4>
+              <small>Hanya Odometer</small>
             </div>
-            <div class="option-arrow">→</div>
           </button>
         </div>
       </div>

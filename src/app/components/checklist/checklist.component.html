@@ -1,27 +1,27 @@
 <div class="checklist-container">
   <header class="header">
-    <button class="back-btn" (click)="goBack()">← Back</button>
-    <h1>Vehicle Checklist (OUT)</h1>
+    <button class="back-btn" (click)="goBack()">← Kembali</button>
+    <h1>Checklist Kendaraan (KELUAR)</h1>
   </header>
 
   <main class="checklist-content">
     <div class="checklist-card">
       <div class="vehicle-info">
-        <h2>🚚 Pre-Departure Checklist</h2>
+        <h2>🚚 Checklist Sebelum Berangkat</h2>
         <div class="info-row">
-          <span class="label">Vehicle:</span>
+          <span class="label">Kendaraan:</span>
           <span class="value">{{ truckBarcode }}</span>
         </div>
         <div class="info-row">
-          <span class="label">Type:</span>
+          <span class="label">Jenis:</span>
           <span class="value out-badge">{{ tripType }}</span>
         </div>
       </div>
 
       <div class="progress-section">
         <div class="progress-header">
-          <h3>Checklist Progress</h3>
-          <span class="progress-text">{{ completedCount }} / {{ totalCount }} completed</span>
+          <h3>Progress Checklist</h3>
+          <span class="progress-text">{{ completedCount }} / {{ totalCount }} selesai</span>
         </div>
         <div class="progress-bar">
           <div 
@@ -56,7 +56,7 @@
         <div class="form-actions">
           <div class="required-notice" *ngIf="!requiredItemsCompleted">
             <span class="warning-icon">⚠️</span>
-            All required items (*) must be checked before proceeding
+            Semua item wajib (*) harus dicentang sebelum melanjutkan
           </div>
           
           <button 
@@ -64,7 +64,7 @@
             class="continue-btn"
             [disabled]="!requiredItemsCompleted"
           >
-            Continue to Odometer
+            Lanjut ke Odometer
           </button>
         </div>
       </form>

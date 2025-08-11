@@ -82,7 +82,7 @@ export class OdometerComponent implements OnInit {
       
       this.router.navigate(['/trip-complete']);
     } else {
-      alert('Please fill in all required fields');
+      alert('Silakan isi semua field yang wajib');
     }
   }
 

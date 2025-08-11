@@ -22,6 +22,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   cameraError: string = '';
   isLoadingTripData: boolean = false;
   tripDataError: string = '';
+  showManualInput: boolean = false; // Add this property to control manual input visibility
   
   private codeReader: BrowserMultiFormatReader;
   private stream: MediaStream | null = null;
@@ -51,18 +52,18 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       this.hasCamera = devices.some(device => device.kind === 'videoinput');
       
       if (!this.hasCamera) {
-        this.cameraError = 'No camera found on this device';
+        this.cameraError = 'Kamera tidak ditemukan pada perangkat ini';
       }
     } catch (error) {
       console.error('Error checking camera:', error);
-      this.cameraError = 'Unable to access camera permissions';
+      this.cameraError = 'Tidak dapat mengakses izin kamera';
       this.hasCamera = false;
     }
   }
 
   async startScan() {
     if (!this.hasCamera) {
-      alert('Camera not available. Please use manual input.');
+      alert('Kamera tidak tersedia. Silakan gunakan input manual.');
       return;
     }
 
@@ -127,7 +128,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       }
     } catch (error) {
       console.error('Error starting camera:', error);
-      this.cameraError = 'Unable to start camera. Please check permissions and lighting.';
+      this.cameraError = 'Tidak dapat memulai kamera. Periksa izin dan pencahayaan.';
       this.isScanning = false;
     }
   }
@@ -256,7 +257,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
     if (this.barcodeInput.trim()) {
       this.getTripDataFromAPI(this.barcodeInput.trim());
     } else {
-      alert('Please scan or enter a barcode');
+      alert('Silakan scan atau masukkan barcode');
     }
   }
 
@@ -286,18 +287,18 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
         console.error('Error getting trip data:', error);
         this.isLoadingTripData = false;
         
-        let errorMessage = 'Failed to get trip data.';
+        let errorMessage = 'Gagal mengambil data perjalanan.';
         
         if (error.status === 0) {
-          errorMessage += ' Please check your internet connection.';
+          errorMessage += ' Periksa koneksi internet Anda.';
         } else if (error.status === 401) {
-          errorMessage += ' Authentication failed.';
+          errorMessage += ' Autentikasi gagal.';
         } else if (error.status === 403) {
-          errorMessage += ' Access denied.';
+          errorMessage += ' Akses ditolak.';
         } else if (error.status === 404) {
-          errorMessage += ' Trip not found or API endpoint not available.';
+          errorMessage += ' Perjalanan tidak ditemukan atau API endpoint tidak tersedia.';
         } else if (error.status >= 500) {
-          errorMessage += ' Server error.';
+          errorMessage += ' Kesalahan server.';
         } else {
           errorMessage += ` (HTTP ${error.status})`;
         }
@@ -306,7 +307,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
         
         // Show error but still allow manual proceed
         const proceedManually = confirm(
-          `${errorMessage}\n\nWould you like to proceed manually without trip data?`
+          `${errorMessage}\n\nApakah Anda ingin melanjutkan secara manual tanpa data perjalanan?`
         );
         
         if (proceedManually) {
@@ -337,5 +338,11 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       return false;
     }
     return this.validateDetectedBarcodeEnhanced(this.barcodeInput.trim());
+  }
+
+  toggleManualInput() {
+    this.showManualInput = !this.showManualInput;
+    // Reset any existing error when toggling
+    this.tripDataError = '';
   }
 }

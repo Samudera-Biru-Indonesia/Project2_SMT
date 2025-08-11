@@ -202,8 +202,10 @@
 /* Scanner Controls */
 .scanner-controls {
   display: flex;
+  flex-direction: column;
   gap: 10px;
   justify-content: center;
+  align-items: center;
   margin-bottom: 20px;
 }
 
@@ -328,6 +330,29 @@
 }
 
 .scan-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.manual-toggle-btn {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 10px;
+}
+
+.manual-toggle-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+}
+
+.manual-toggle-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

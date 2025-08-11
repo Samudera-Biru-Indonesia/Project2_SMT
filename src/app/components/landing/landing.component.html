@@ -1,10 +1,10 @@
 <div class="landing-container">
   <header class="header">
     <div class="header-content">
-      <h1>🚚 Truck Management System</h1>
+      <h1>🚚 Sistem Manajemen Truk</h1>
       <div class="user-info">
-        <span>Welcome, {{ currentUser }}</span>
-        <button class="logout-btn" (click)="logout()">Logout</button>
+        <span>Selamat datang, {{ currentUser }}</span>
+        <button class="logout-btn" (click)="logout()">Keluar</button>
       </div>
     </div>
   </header>
@@ -12,13 +12,13 @@
   <main class="main-content">
     <div class="dashboard-card">
       <div class="time-section">
-        <h2>Current Time</h2>
+        <h2>Waktu Saat Ini</h2>
         <p class="time-display">{{ currentTime }}</p>
       </div>
 
       <div class="action-section">
-        <h2>Start Trip Management</h2>
-        <p>Scan vehicle barcode to begin trip process</p>
+        <h2>Mulai Manajemen Perjalanan</h2>
+        <p>Scan barcode kendaraan untuk memulai proses perjalanan</p>
         
         <button class="scan-btn" (click)="goToScanBarcode()">
           <span class="icon">📱</span>
