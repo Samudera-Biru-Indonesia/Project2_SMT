@@ -35,12 +35,24 @@ export interface GetTripDataResponse {
   message?: string;
 }
 
+export interface Plant {
+  Plant: string;  // Plant code like "SGI053"
+  Name: string;   // Plant name like "SGI YOGYAKARTA"
+}
+
+export interface GetPlantListResponse {
+  plants?: Plant[];
+  data?: Plant[];
+  // API might return different structure, so we handle both
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
   private sendTripDataUrl = 'https://epictestapp.samator.com/KineticTest2/api/v2/efx/SGI/SMTTruckCheckApp/InsertStagingTable';
   private getTripDataUrl = `${environment.api.baseUrl}${environment.api.endpoints.getTripData}`;
+  private getPlantListUrl = 'https://epictestapp.samator.com/KineticTest2/api/v2/efx/SGI/SMTTruckCheckApp/GetListPlant';
 
   constructor(private http: HttpClient) {}
 
@@ -121,5 +133,33 @@ export class ApiService {
     console.log('API URL:', this.getTripDataUrl);
 
     return this.http.post<TripInfo>(this.getTripDataUrl, requestBody, { headers });
+  }
+
+  /**
+   * Get list of plants
+   */
+  getPlantList(): Observable<any> {
+    const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth}`,
+      'X-API-Key': environment.api.apiKey
+    });
+
+    // POST request with empty body (as per requirement)
+    const emptyBody = {};
+
+    console.log('Get Plant List Request');
+    console.log('Request Headers:', {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth.substring(0, 20)}...`,
+      'X-API-Key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
+    });
+    console.log('API URL:', this.getPlantListUrl);
+
+    return this.http.post<any>(this.getPlantListUrl, emptyBody, { headers });
   }
 }

@@ -65,23 +65,41 @@
   font-size: 14px;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   padding: 10px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
   transition: border-color 0.2s ease;
   background: white;
+  width: 100%;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
   border-color: #007bff;
 }
 
-.form-group input.error {
+.form-group input.error,
+.form-group select.error {
   border-color: #dc3545;
   background-color: #fff5f5;
+}
+
+.form-group select {
+  cursor: pointer;
+}
+
+.plant-loading {
+  margin-top: 5px;
+}
+
+.plant-loading small {
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
 }
 
 .login-btn {

@@ -96,6 +96,8 @@ export class AuthService {
         curLongitude: location.longitude
       };
 
+      console.log('Login Request:', loginRequest);
+
       // Prepare headers dengan Basic Auth dan API Key
       const basicAuth = btoa(`${this.BASIC_AUTH_USERNAME}:${this.BASIC_AUTH_PASSWORD}`);
       const headers = new HttpHeaders({
@@ -104,16 +106,13 @@ export class AuthService {
         'X-API-Key': this.API_KEY
       });
 
-      console.log('=== LOGIN DEBUG INFO ===');
-      console.log('Login Request:', loginRequest);
-      console.log('Request JSON:', JSON.stringify(loginRequest, null, 2));
       console.log('Request Headers:', {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${basicAuth.substring(0, 20)}...`,
-        'X-API-Key': this.API_KEY ? `${this.API_KEY.substring(0, 10)}...` : 'Not set'
+        'Authorization': `Basic ${basicAuth}`,
+        'X-API-Key': this.API_KEY
       });
+
       console.log('API URL:', this.API_URL);
-      console.log('========================');
 
       // Make API call
       const response = await firstValueFrom(
@@ -166,26 +165,11 @@ export class AuthService {
       }
 
     } catch (error: any) {
-      console.error('=== LOGIN ERROR DEBUG ===');
-      console.error('Full Error Object:', error);
-      console.error('Error Status:', error.status);
-      console.error('Error StatusText:', error.statusText);
-      console.error('Error Message:', error.message);
-      console.error('Error Body:', error.error);
-      console.error('Error Headers:', error.headers);
-      console.error('Error URL:', error.url);
-      console.error('========================');
+      console.error('Login error:', error);
       
       let errorMessage = 'Login failed. Please try again.';
       
-      if (error.status === 400) {
-        errorMessage = 'Bad Request - Invalid data format or missing required fields.';
-        if (error.error && typeof error.error === 'string') {
-          errorMessage += ' Details: ' + error.error;
-        } else if (error.error && typeof error.error === 'object') {
-          errorMessage += ' Details: ' + JSON.stringify(error.error);
-        }
-      } else if (error.status === 401) {
+      if (error.status === 401) {
         errorMessage = 'Invalid credentials. Please check your employee code and site.';
       } else if (error.status === 403) {
         errorMessage = 'Access denied. You are not authorized to use this application.';
