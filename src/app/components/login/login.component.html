@@ -49,32 +49,6 @@
         />
       </div>
 
-      <!-- Current Location Display -->
-      <div class="location-section">
-        <h4>📍 Lokasi Saat Ini</h4>
-        
-        <!-- Location Loading -->
-        <div class="location-loading" *ngIf="locationLoading">
-          <div class="small-spinner"></div>
-          <p>Mendeteksi lokasi...</p>
-        </div>
-
-        <!-- Location Display -->
-        <div class="location-display" *ngIf="currentLocation && !locationLoading">
-          <div class="location-item">
-            <span class="location-label">Latitude:</span>
-            <span class="location-value">{{ formatCoordinate(currentLocation.latitude) }}</span>
-          </div>
-          <div class="location-item">
-            <span class="location-label">Longitude:</span>
-            <span class="location-value">{{ formatCoordinate(currentLocation.longitude) }}</span>
-          </div>
-          <div class="location-item" *ngIf="currentLocation.accuracy">
-            <span class="location-label">Akurasi:</span>
-            <span class="location-value">{{ currentLocation.accuracy.toFixed(0) }}m</span>
-          </div>
-        </div>
-
         <!-- Location Error -->
         <div class="location-error" *ngIf="!currentLocation && !locationLoading">
           <p>❌ Lokasi tidak terdeteksi</p>
@@ -82,8 +56,7 @@
             🔄 Refresh Lokasi
           </button>
         </div>
-      </div>
-      
+
       <button 
         type="submit" 
         class="login-btn" 
