@@ -85,7 +85,8 @@ export class ChecklistComponent implements OnInit {
         chk3: this.checklistItems.find(item => item.id === 'chk3')?.checked || false,
         chk4: this.checklistItems.find(item => item.id === 'chk4')?.checked || false,
         chk5: this.checklistItems.find(item => item.id === 'chk5')?.checked || false,
-        tripNum: localStorage.getItem('tripNumber') || ''
+        tripNum: localStorage.getItem('tripNumber') || '',
+        note: '' // Will be filled in odometer component
       };
       
       // Save trip data for later use in odometer component

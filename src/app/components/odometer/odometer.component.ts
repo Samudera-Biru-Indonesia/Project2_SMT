@@ -47,100 +47,146 @@ export class OdometerComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.odometerReading && this.driverName) {
-      // Get trip data from localStorage (set by checklist component for OUT trips)
-      const savedTripData = localStorage.getItem('tripData');
-      
-      let tripData: TripData;
-      
-      if (savedTripData && this.tripType === 'OUT') {
-        // For OUT trips, use data from checklist
-        tripData = JSON.parse(savedTripData);
-        tripData.odometer = parseFloat(this.odometerReading);
-      } else {
-        // For IN trips or if no saved data, create new trip data
-        tripData = {
-          odometer: parseFloat(this.odometerReading),
-          type: this.tripType,
-          chk1: false, // For IN trips, all checks are false
-          chk2: false,
-          chk3: false,
-          chk4: false,
-          chk5: false,
-          tripNum: localStorage.getItem('tripNumber') || ''
-        };
-      }
-      
-      // Send data to API
-      this.sendTripDataToAPI(tripData);
-      
-      // Save trip data locally as well
-      const localTripData = {
-        truckBarcode: this.truckBarcode,
-        tripType: this.tripType,
-        odometerReading: this.odometerReading,
-        driverName: this.driverName,
-        notes: this.notes,
-        timestamp: new Date().toISOString(),
-        checklistData: this.tripType === 'OUT' ? localStorage.getItem('checklistData') : null
-      };
-      
-      // Save to localStorage (in real app, would send to server)
-      const existingTrips = JSON.parse(localStorage.getItem('trips') || '[]');
-      existingTrips.push(localTripData);
-      localStorage.setItem('trips', JSON.stringify(existingTrips));
-      
-      // Clean up temporary data
-      localStorage.removeItem('currentTruckBarcode');
-      localStorage.removeItem('tripType');
-      localStorage.removeItem('checklistData');
-      localStorage.removeItem('tripData');
-      localStorage.removeItem('tripNumber');
-      
-      this.router.navigate(['/trip-complete']);
-    } else {
-      alert('Silakan isi semua field yang wajib');
+    console.log('🔄 Form submitted with values:', {
+      odometerReading: this.odometerReading,
+      driverName: this.driverName,
+      notes: this.notes,
+      truckBarcode: this.truckBarcode,
+      tripType: this.tripType
+    });
+
+    if (!this.odometerReading || !this.driverName) {
+      alert('Silakan isi semua field yang wajib (Odometer dan Nama Driver)');
+      return;
     }
+
+    // Validate odometer reading
+    const odometerValue = parseFloat(this.odometerReading);
+    if (isNaN(odometerValue) || odometerValue < 0) {
+      alert('Pembacaan odometer harus berupa angka yang valid dan tidak negatif');
+      return;
+    }
+
+    // Get trip data from localStorage (set by checklist component for OUT trips)
+    const savedTripData = localStorage.getItem('tripData');
+    const tripNumber = localStorage.getItem('tripNumber') || '';
+    
+    console.log('📦 Retrieved localStorage data:', {
+      savedTripData: savedTripData ? JSON.parse(savedTripData) : null,
+      tripNumber: tripNumber,
+      tripType: this.tripType
+    });
+
+    let tripData: TripData;
+    
+    if (savedTripData && this.tripType === 'OUT') {
+      // For OUT trips, use data from checklist
+      try {
+        tripData = JSON.parse(savedTripData);
+        tripData.odometer = odometerValue;
+        tripData.note = this.notes || ''; // Add notes from odometer form
+        console.log('✅ Using saved checklist data for OUT trip');
+      } catch (e) {
+        console.error('❌ Failed to parse saved trip data:', e);
+        alert('Error parsing saved trip data. Please try again.');
+        return;
+      }
+    } else {
+      // For IN trips or if no saved data, create new trip data
+      tripData = {
+        odometer: odometerValue,
+        type: this.tripType,
+        chk1: false, // For IN trips, all checks are false
+        chk2: false,
+        chk3: false,
+        chk4: false,
+        chk5: false,
+        tripNum: tripNumber,
+        note: this.notes || ''
+      };
+      console.log('✅ Created new trip data for IN trip or missing checklist data');
+    }
+    
+    console.log('📋 Final trip data to send:', tripData);
+
+    // Validate required fields
+    if (!tripData.tripNum) {
+      console.warn('⚠️ Warning: tripNum is empty');
+      // Don't block submission, as API might accept empty tripNum
+    }
+    
+    // Send data to API
+    this.sendTripDataToAPI(tripData);
+    
+    // Save trip data locally as well
+    const localTripData = {
+      truckBarcode: this.truckBarcode,
+      tripType: this.tripType,
+      odometerReading: this.odometerReading,
+      driverName: this.driverName,
+      notes: this.notes,
+      timestamp: new Date().toISOString(),
+      checklistData: this.tripType === 'OUT' ? localStorage.getItem('checklistData') : null
+    };
+    
+    console.log('💾 Saving local trip data:', localTripData);
+    
+    // Save to localStorage (in real app, would send to server)
+    const existingTrips = JSON.parse(localStorage.getItem('trips') || '[]');
+    existingTrips.push(localTripData);
+    localStorage.setItem('trips', JSON.stringify(existingTrips));
+    
+    console.log('🧹 Cleaning up localStorage...');
+    // Clean up temporary data
+    localStorage.removeItem('currentTruckBarcode');
+    localStorage.removeItem('tripType');
+    localStorage.removeItem('checklistData');
+    localStorage.removeItem('tripData');
+    localStorage.removeItem('tripNumber');
+    
+    console.log('🚀 Navigating to trip-complete page...');
+    this.router.navigate(['/trip-complete']);
   }
 
   // Function to send data to API
   sendTripDataToAPI(tripData: TripData) {
+    console.log('Sending trip data to API:', tripData);
+    
     this.apiService.sendTripData(tripData).subscribe({
       next: (response) => {
         console.log('API Response:', response);
         
-        // Check if response is empty object {} (success) or has content (error)
-        if (response && Object.keys(response).length === 0) {
-          // Empty object {} means success
-          console.log('Trip data submission successful!');
-          console.log('Data sent to server:', tripData);
-        } else if (response && Object.keys(response).length > 0) {
-          // Response has content, likely an error
-          console.error('❌ API returned error:', response);
-          alert('Error: ' + JSON.stringify(response));
+        // For this API, any successful response (even if it has content) is considered success
+        // The API might return error details in response body even for 200 status
+        if (response && response.error) {
+          console.error('API returned error in response body:', response);
+          alert('Error dari server: ' + (response.message || response.error || JSON.stringify(response)));
         } else {
-          // No response or null
-          console.log('Trip data submission successful! (no response body)');
+          console.log('Trip data submission successful!');
           console.log('Data sent to server:', tripData);
         }
       },
       error: (error) => {
-        console.error('❌ Error sending trip data:', error);
+        console.error('Error sending trip data:', error);
         
-        let errorMessage = 'Gagal mengirim data ke server.';
+        let errorMessage = 'Gagal mengirim data ke server';
         
         if (error.status === 0) {
-          errorMessage += ' Periksa koneksi internet Anda.';
+          errorMessage += ' - Periksa koneksi internet Anda.';
+        } else if (error.status === 400) {
+          errorMessage += ' - Data yang dikirim tidak valid (Bad Request).';
         } else if (error.status === 401) {
-          errorMessage += ' Authentication gagal.';
+          errorMessage += ' - Authentication gagal.';
         } else if (error.status === 403) {
-          errorMessage += ' Akses ditolak.';
+          errorMessage += ' - Akses ditolak.';
         } else if (error.status === 404) {
-          errorMessage += ' API endpoint tidak ditemukan.';
+          errorMessage += ' - API endpoint tidak ditemukan.';
+        } else if (error.status === 409) {
+          errorMessage += ' - Data konflik dengan server.';
         } else if (error.status >= 500) {
-          errorMessage += ' Server error.';
+          errorMessage += ' - Server error.';
         } else {
-          errorMessage += ` (HTTP ${error.status})`;
+          errorMessage += ` - HTTP ${error.status}: ${error.statusText}`;
         }
         
         alert(errorMessage + '\n\nData tetap tersimpan secara lokal.');
