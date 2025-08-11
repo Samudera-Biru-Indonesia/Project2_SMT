@@ -1,21 +1,22 @@
 .login-container {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f5f5f5;
   padding: 20px;
   margin: 0;
 }
 
 .login-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  padding: 32px;
   width: 100%;
-  max-width: 500px;
+  max-width: 400px;
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -25,28 +26,37 @@
   margin-bottom: 30px;
 }
 
+.company-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 15px;
+  border: 2px solid #e0e0e0;
+}
+
 .logo-section h1 {
   color: #333;
-  margin-bottom: 10px;
-  font-size: 28px;
+  margin-bottom: 8px;
+  font-size: 20px;
   font-weight: 600;
 }
 
 .logo-section p {
   color: #666;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .form-group label {
@@ -55,20 +65,18 @@
   font-size: 14px;
 }
 
-.form-group input,
-.form-group select {
-  padding: 12px 16px;
-  border: 2px solid #e1e5e9;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 0.3s ease;
+.form-group input {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
   background: white;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.form-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #007bff;
 }
 
 .form-group input.error {
@@ -76,198 +84,152 @@
   background-color: #fff5f5;
 }
 
-.form-group select {
-  cursor: pointer;
-}
-
 .login-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #007bff;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 12px;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: transform 0.2s ease;
-  margin-bottom: 10px;
+  transition: all 0.2s ease;
+  margin-top: 8px;
 }
 
-.login-btn:hover {
-  transform: translateY(-2px);
+.login-btn:hover:not(.disabled) {
+  background: #0056b3;
 }
 
-.login-btn:active {
-  transform: translateY(0);
+.login-btn:active:not(.disabled) {
+  background: #004085;
 }
 
-.location-check-btn {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+.login-btn.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Location Section */
+.location-section {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.location-section h4 {
+  margin: 0 0 12px 0;
+  color: #333;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Location Loading */
+.location-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  text-align: center;
+}
+
+.small-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.location-loading p {
+  margin: 0;
+  color: #666;
+  font-size: 13px;
+}
+
+/* Location Display */
+.location-display {
+  background: white;
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.location-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.location-item:last-child {
+  border-bottom: none;
+}
+
+.location-label {
+  font-weight: 500;
+  color: #555;
+  font-size: 13px;
+}
+
+.location-value {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #333;
+  background: #f8f9fa;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid #dee2e6;
+}
+
+/* Location Error */
+.location-error {
+  text-align: center;
+  padding: 16px;
+}
+
+.location-error p {
+  margin: 0 0 8px 0;
+  color: #dc3545;
+  font-size: 13px;
+}
+
+.refresh-btn {
+  background: #28a745;
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 10px;
-  font-size: 14px;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.location-check-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-}
-
-/* Location Section - Always Visible */
-.location-section {
-  margin-top: 20px;
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
-
-.location-section h4 {
-  margin: 0 0 16px 0;
-  color: #495057;
-  font-size: 16px;
-  text-align: center;
-}
-
-/* Coordinate Display (Single Row - Compact) */
-.coordinate-display-single {
-  margin-bottom: 16px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.coordinate-item-single {
-  background: white;
-  padding: 16px;
-  border-radius: 8px;
-  border: 2px solid #e1e5e9;
-  box-sizing: border-box;
-}
-
-.coordinate-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  width: 100%;
-}
-
-.coordinate-part {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  justify-content: center;
-}
-
-.coordinate-part label {
-  font-weight: 600;
-  color: #495057;
-  font-size: 14px;
-  min-width: 35px;
-  text-align: right;
-}
-
-.coord-value {
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-  color: #2c3e50;
-  background: #f8f9fa;
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid #dee2e6;
-  font-weight: 600;
-  min-width: 100px;
-  text-align: center;
-}
-
-.coordinate-separator {
-  color: #adb5bd;
-  font-weight: bold;
-  font-size: 16px;
-  margin: 0 4px;
-}
-
-/* Coordinate Inputs */
-.coordinate-inputs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 16px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.coordinate-inputs .form-group {
-  margin: 0;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-.coordinate-inputs .form-group input {
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-  width: 100%;
-  box-sizing: border-box;
-  min-width: 0;
-}
-
-.coordinate-info {
-  padding: 12px;
-  background: #e3f2fd;
-  border-radius: 6px;
-  border: 1px solid #bbdefb;
-  text-align: center;
-}
-
-.coord-display {
-  margin: 0;
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-  color: #1565c0;
-  font-weight: 600;
-}
-
-/* Error Alert */
-.error-alert {
-  background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-  border: 2px solid #dc3545;
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-  color: #721c24;
-  margin-top: 20px;
-}
-
-.error-alert h4 {
-  margin: 0 0 8px 0;
-  font-size: 18px;
-}
-
-.error-alert p {
-  margin: 0 0 16px 0;
-  font-size: 14px;
+.refresh-btn:hover {
+  background: #1e7e34;
 }
 
 /* Loading Section */
 .loading-section {
   text-align: center;
-  padding: 40px 20px;
+  padding: 32px 16px;
 }
 
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #007bff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: 0 auto 20px;
+  margin: 0 auto 16px;
 }
 
 @keyframes spin {
@@ -277,236 +239,32 @@
 
 .loading-text {
   color: #666;
-  font-size: 16px;
+  font-size: 14px;
   margin: 0;
 }
 
-/* Location Information */
-.location-info {
-  margin-top: 20px;
-  padding: 20px;
-  border-radius: 12px;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-}
-
-.location-status {
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.location-status.success {
-  background: linear-gradient(135deg, #d4edda, #c3e6cb);
-  border: 1px solid #28a745;
-  color: #155724;
-}
-
-.location-status.error {
-  background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-  border: 1px solid #dc3545;
-  color: #721c24;
-}
-
-.location-status h3 {
-  margin: 0 0 8px 0;
-  font-size: 18px;
-}
-
-.location-status p {
-  margin: 0;
-  font-size: 14px;
-}
-
-.location-details {
-  background: white;
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  border: 1px solid #e9ecef;
-}
-
-.location-details h4 {
-  color: #495057;
-  margin: 0 0 12px 0;
-  font-size: 16px;
-}
-
-.location-details p {
-  margin: 4px 0;
-  font-size: 14px;
-  color: #6c757d;
-  font-family: 'Courier New', monospace;
-}
-
-/* Coordinate Display Styling */
-.coordinate-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  margin-bottom: 8px;
-  background: #f8f9fa;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
-}
-
-.coordinate-item label {
-  font-weight: 600;
-  color: #495057;
-  font-size: 14px;
-  min-width: 80px;
-}
-
-.coordinate-value {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-}
-
-.coordinate-value span {
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-  color: #2c3e50;
-  background: white;
-  padding: 4px 8px;
+/* Error Alert */
+.error-alert {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
   border-radius: 4px;
-  border: 1px solid #dee2e6;
-  flex: 1;
-  text-align: center;
-}
-
-.copy-btn {
-  background: linear-gradient(135deg, #17a2b8, #138496);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.copy-btn:hover {
-  background: linear-gradient(135deg, #138496, #117a8b);
-  transform: scale(1.05);
-}
-
-.allowed-locations {
-  background: white;
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  border: 1px solid #e9ecef;
-}
-
-.allowed-locations h4 {
-  color: #495057;
-  margin: 0 0 16px 0;
-  font-size: 16px;
-}
-
-.location-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.location-item {
   padding: 12px;
-  background: #f8f9fa;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
-}
-
-.location-name {
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 4px;
-}
-
-.location-coords {
-  font-size: 13px;
-  color: #6c757d;
-  font-family: 'Courier New', monospace;
-  margin-bottom: 2px;
-}
-
-.location-radius {
-  font-size: 12px;
-  color: #868e96;
-}
-
-.location-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-
-.btn-retry {
-  background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-retry:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 10px rgba(255, 193, 7, 0.3);
-}
-
-.btn-close {
-  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-close:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 10px rgba(108, 117, 125, 0.3);
-}
-
-.success-message {
   text-align: center;
-  padding: 20px;
-  background: linear-gradient(135deg, #d4edda, #c3e6cb);
-  border: 2px solid #28a745;
-  border-radius: 12px;
-  color: #155724;
-  margin-top: 20px;
+  color: #721c24;
+  margin-top: 16px;
 }
 
-.success-message h3 {
-  margin: 0 0 8px 0;
-  font-size: 18px;
-}
-
-.success-message p {
+.error-alert p {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .login-container {
     padding: 10px;
+    align-items: flex-start;
+    padding-top: 20px;
   }
   
   .login-card {
@@ -516,214 +274,48 @@
   }
   
   .logo-section h1 {
-    font-size: 24px;
+    font-size: 20px;
   }
   
-  .location-actions {
-    flex-direction: column;
-  }
-  
-  .btn-retry, .btn-close {
-    width: 100%;
+  .company-logo {
+    width: 60px;
+    height: 60px;
   }
   
   .form-group input {
     font-size: 16px; /* Prevents zoom on iOS */
   }
-
-  /* Manual Location Responsive */
-  .coordinate-inputs {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  
-  .coordinate-inputs .form-group input {
-    font-size: 13px;
-    padding: 10px 8px;
-  }
-  
-  /* Coordinate Display Responsive */
-  .coordinate-display {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  
-  .coordinate-display .coordinate-item {
-    padding: 10px;
-  }
-  
-  .coordinate-value-readonly span {
-    font-size: 13px;
-    padding: 6px 8px;
-  }
-  
-  /* Compact Single Row Display */
-  .coordinate-item-single {
-    padding: 12px;
-  }
-  
-  .coordinate-row {
-    gap: 12px;
-  }
-  
-  .coordinate-part label {
-    font-size: 13px;
-    min-width: 30px;
-  }
-  
-  .coord-value {
-    font-size: 13px;
-    padding: 6px 10px;
-    min-width: 90px;
-  }
-  
-  .coordinate-separator {
-    font-size: 14px;
-  }
 }
 
 @media (max-width: 480px) {
+  .login-container {
+    align-items: flex-start;
+    padding-top: 15px;
+  }
+  
   .login-card {
     padding: 20px 15px;
     box-sizing: border-box;
   }
   
   .logo-section h1 {
-    font-size: 20px;
+    font-size: 18px;
   }
   
   .logo-section p {
     font-size: 14px;
   }
   
-  .location-info {
+  .location-section {
     padding: 15px;
   }
   
-  .location-details, .allowed-locations {
-    padding: 12px;
-  }
-  
-  /* Coordinate inputs for very small screens */
-  .coordinate-inputs {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  
-  .coordinate-inputs .form-group input {
-    font-size: 12px;
-    padding: 8px 6px;
-  }
-  
-  .coordinate-inputs .form-group label {
-    font-size: 12px;
-  }
-  
-  /* Coordinate Display for small screens */
-  .coordinate-display {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  
-  .coordinate-display .coordinate-item {
-    padding: 8px;
-  }
-  
-  .coordinate-display .coordinate-item label {
-    font-size: 11px;
-  }
-  
-  .coordinate-value-readonly span {
-    font-size: 12px;
-    padding: 6px 8px;
-  }
-  
-  /* Compact Single Row for Small Screens */
-  .coordinate-item-single {
-    padding: 10px;
-  }
-  
-  .coordinate-row {
-    gap: 8px;
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .coordinate-part {
-    justify-content: space-between;
-    flex: none;
-  }
-  
-  .coordinate-part label {
-    font-size: 12px;
-    min-width: auto;
-    text-align: left;
-  }
-  
-  .coord-value {
-    font-size: 12px;
-    padding: 6px 8px;
-    min-width: auto;
-    flex: 1;
-    margin-left: 8px;
-  }
-  
-  .coordinate-separator {
-    display: none;
+  .company-logo {
+    width: 50px;
+    height: 50px;
   }
 }
 
-/* For very small screens - stack vertically */
-@media (max-width: 360px) {
-  .coordinate-inputs {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  
-  .coordinate-inputs .form-group input {
-    font-size: 14px;
-    padding: 10px 12px;
-  }
-  
-  .coordinate-display {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  
-  .coordinate-display .coordinate-item {
-    padding: 10px;
-  }
-  
-  .coordinate-value-readonly span {
-    font-size: 14px;
-    padding: 8px 12px;
-  }
-  
-  /* Very small screen compact layout */
-  .coordinate-item-single {
-    padding: 12px;
-  }
-  
-  .coordinate-row {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .coordinate-part {
-    justify-content: space-between;
-  }
-  
-  .coordinate-part label {
-    font-size: 13px;
-  }
-  
-  .coord-value {
-    font-size: 13px;
-    padding: 8px 10px;
-  }
-}
-
-/* Ultra-compact for very short screens */
 @media (max-height: 600px) {
   .login-card {
     padding: 20px 15px;
@@ -735,7 +327,7 @@
   }
   
   .logo-section h1 {
-    font-size: 22px;
+    font-size: 18px;
     margin-bottom: 5px;
   }
   
@@ -744,36 +336,13 @@
   }
   
   .location-section {
-    padding: 12px;
+    padding: 15px;
     margin-top: 15px;
   }
   
-  .location-section h4 {
-    font-size: 15px;
+  .company-logo {
+    width: 40px;
+    height: 40px;
     margin-bottom: 10px;
-  }
-  
-  .location-section p {
-    font-size: 11px !important;
-    margin-bottom: 12px !important;
-  }
-  
-  .coordinate-item-single {
-    padding: 10px;
-  }
-  
-  .coordinate-part label {
-    font-size: 12px;
-  }
-  
-  .coord-value {
-    font-size: 12px;
-    padding: 6px 8px;
-  }
-  
-  .login-btn {
-    padding: 10px;
-    font-size: 15px;
-    margin-top: 15px;
   }
 }

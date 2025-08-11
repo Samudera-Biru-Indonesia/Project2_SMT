@@ -14,6 +14,8 @@ import { ApiService, TripData } from '../../services/api.service';
 export class OdometerComponent implements OnInit {
   truckBarcode: string = '';
   tripType: string = '';
+  tripNumber: string = '';
+  plateNumber: string = '';
   odometerReading: string = '';
   driverName: string = '';
   notes: string = '';
@@ -23,6 +25,21 @@ export class OdometerComponent implements OnInit {
   ngOnInit() {
     this.truckBarcode = localStorage.getItem('currentTruckBarcode') || '';
     this.tripType = localStorage.getItem('tripType') || '';
+    this.tripNumber = localStorage.getItem('tripNumber') || '';
+    
+    // Get plate number from trip data if available
+    const tripDataString = localStorage.getItem('currentTripData');
+    if (tripDataString) {
+      try {
+        const tripData = JSON.parse(tripDataString);
+        this.plateNumber = tripData?.truckPlate || 'N/A';
+      } catch (error) {
+        console.error('Error parsing trip data:', error);
+        this.plateNumber = 'N/A';
+      }
+    } else {
+      this.plateNumber = 'N/A';
+    }
     
     if (!this.truckBarcode || !this.tripType) {
       this.router.navigate(['/trip-selection']);

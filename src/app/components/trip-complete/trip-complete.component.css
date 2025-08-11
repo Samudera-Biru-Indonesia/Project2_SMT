@@ -1,11 +1,11 @@
 .complete-container {
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f5f5f5;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 20px;
+  padding: 40px 20px 20px 20px;
   margin: 0;
 }
 
@@ -16,39 +16,162 @@
 
 .complete-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  padding: 32px;
   text-align: center;
 }
 
+/* Trip Summary Info */
+.trip-summary-info {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.trip-summary-info h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 10px 12px;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.summary-label {
+  font-weight: 500;
+  color: #555;
+  font-size: 14px;
+}
+
+.summary-value {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #333;
+  font-size: 13px;
+  background: #f8f9fa;
+  padding: 3px 6px;
+  border-radius: 3px;
+}
+
+.summary-value.trip-type {
+  color: white;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.summary-value.trip-type.out {
+  background: #dc3545;
+}
+
+.summary-value.trip-type.in {
+  background: #28a745;
+}
+
 .success-section {
-  margin-bottom: 30px;
+  margin-bottom: 24px;
+  padding: 20px 0;
+  border-bottom: 1px solid #e9ecef;
 }
 
 .success-icon {
-  font-size: 64px;
-  margin-bottom: 20px;
-  animation: bounce 1s ease-in-out;
-}
-
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-10px);
-  }
-  60% {
-    transform: translateY(-5px);
-  }
+  font-size: 48px;
+  margin-bottom: 16px;
 }
 
 .success-section h1 {
   color: #333;
-  margin-bottom: 15px;
-  font-size: 28px;
+  margin-bottom: 12px;
+  font-size: 24px;
   font-weight: 600;
+}
+
+.success-section p {
+  color: #666;
+  font-size: 16px;
+  margin: 0;
+}
+
+.summary-section {
+  margin-bottom: 24px;
+}
+
+.summary-section h3 {
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.summary-section p {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.actions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.action-btn {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 14px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #333;
+}
+
+.action-btn:hover {
+  border-color: #999;
+  background: #f8f9fa;
+}
+
+.action-btn.primary {
+  background: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.action-btn.primary:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+.action-btn .icon {
+  font-size: 18px;
 }
 
 .success-section p {
@@ -118,6 +241,7 @@
 @media (max-width: 768px) {
   .complete-container {
     padding: 24px 16px;
+    padding-top: 30px;
   }
   
   .complete-card {
@@ -174,6 +298,7 @@
 @media (max-width: 480px) {
   .complete-container {
     padding: 20px 12px;
+    padding-top: 25px;
   }
   
   .complete-card {
