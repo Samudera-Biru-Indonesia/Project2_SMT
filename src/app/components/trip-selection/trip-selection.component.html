@@ -9,7 +9,7 @@
       <!-- Trip Header Info - Always Visible -->
       <div class="trip-header-info">
         <div class="trip-number-display">
-          <span class="trip-label">Trip Number:</span>
+          <span class="trip-label">Surat Jalan:</span>
           <span class="trip-value">{{ tripNumber }}</span>
         </div>
         <div class="plate-number-display">
@@ -18,10 +18,6 @@
         </div>
       </div>
 
-      <!-- Compact Vehicle Info -->
-      <div class="vehicle-info-compact">
-        <span class="vehicle-barcode">🚚 {{ truckBarcode }}</span>
-      </div>
 
       <!-- Compact Trip Data Display -->
       <div class="trip-data-compact" *ngIf="hasTripData && tripData">

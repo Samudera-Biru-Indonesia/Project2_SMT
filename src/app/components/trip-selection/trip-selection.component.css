@@ -185,16 +185,30 @@
 }
 
 .trip-option-modern:hover {
-  border-color: #999;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.trip-option-modern.out {
+  border-color: #dc3545;
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
 }
 
 .trip-option-modern.out:hover {
-  border-color: #dc3545;
+  border-color: #c82333;
+  background: linear-gradient(135deg, #fff0f0 0%, #ffdddd 100%);
+  box-shadow: 0 6px 16px rgba(220, 53, 69, 0.25);
+}
+
+.trip-option-modern.in {
+  border-color: #28a745;
+  background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e8 100%);
 }
 
 .trip-option-modern.in:hover {
-  border-color: #28a745;
+  border-color: #1e7e34;
+  background: linear-gradient(135deg, #edf7ed 0%, #e0f2e0 100%);
+  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.25);
 }
 
 .option-icon-modern {
@@ -205,16 +219,29 @@
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background: white;
+  border: 2px solid #e9ecef;
+  transition: all 0.2s ease;
 }
 
 .trip-option-modern.out .option-icon-modern {
   color: #dc3545;
+  border-color: #dc3545;
+}
+
+.trip-option-modern.out:hover .option-icon-modern {
+  background: #dc3545;
+  color: white;
 }
 
 .trip-option-modern.in .option-icon-modern {
   color: #28a745;
+  border-color: #28a745;
+}
+
+.trip-option-modern.in:hover .option-icon-modern {
+  background: #28a745;
+  color: white;
 }
 
 .option-text-modern {
@@ -230,10 +257,12 @@
 
 .trip-option-modern.out .option-text-modern h4 {
   color: #dc3545;
+  font-weight: 700;
 }
 
 .trip-option-modern.in .option-text-modern h4 {
   color: #28a745;
+  font-weight: 700;
 }
 
 .option-text-modern small {
@@ -639,6 +668,16 @@
     padding: 12px 8px;
   }
 
+  .trip-option-modern.out {
+    border-color: #dc3545;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+  }
+
+  .trip-option-modern.in {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e8 100%);
+  }
+
   .option-icon-modern {
     font-size: 28px;
     width: 48px;
@@ -746,6 +785,16 @@
   .trip-option-modern {
     padding: 10px 6px;
     min-width: 110px;
+  }
+
+  .trip-option-modern.out {
+    border-color: #dc3545;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+  }
+
+  .trip-option-modern.in {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e8 100%);
   }
 
   .option-icon-modern {

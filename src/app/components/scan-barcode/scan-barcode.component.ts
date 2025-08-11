@@ -21,8 +21,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   hasCamera: boolean = false;
   cameraError: string = '';
   isLoadingTripData: boolean = false;
-  tripDataError: string = '';
-  showManualInput: boolean = false; // Add this property to control manual input visibility
+  showManualInput: boolean = false;
   
   private codeReader: BrowserMultiFormatReader;
   private stream: MediaStream | null = null;
@@ -266,7 +265,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
    */
   getTripDataFromAPI(tripCode: string) {
     this.isLoadingTripData = true;
-    this.tripDataError = '';
 
     console.log('Getting trip data for:', tripCode);
 
@@ -287,35 +285,22 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
         console.error('Error getting trip data:', error);
         this.isLoadingTripData = false;
         
-        let errorMessage = 'Gagal mengambil data perjalanan.';
-        
-        if (error.status === 0) {
-          errorMessage += ' Periksa koneksi internet Anda.';
+        // Show alert for trip number not found and prevent continuation
+        if (error.status === 404) {
+          alert('Trip number tidak ditemukan. Silakan periksa kembali barcode kendaraan.');
+        } else if (error.status === 0) {
+          alert('Gagal mengambil data perjalanan. Periksa koneksi internet Anda.');
         } else if (error.status === 401) {
-          errorMessage += ' Autentikasi gagal.';
+          alert('Autentikasi gagal. Silakan login kembali.');
         } else if (error.status === 403) {
-          errorMessage += ' Akses ditolak.';
-        } else if (error.status === 404) {
-          errorMessage += ' Perjalanan tidak ditemukan atau API endpoint tidak tersedia.';
+          alert('Akses ditolak. Anda tidak memiliki izin untuk mengakses data ini.');
         } else if (error.status >= 500) {
-          errorMessage += ' Kesalahan server.';
+          alert('Kesalahan server. Silakan coba lagi nanti.');
         } else {
-          errorMessage += ` (HTTP ${error.status})`;
+          alert(`Trip number tidak valid atau tidak ditemukan (HTTP ${error.status}). Silakan periksa kembali barcode.`);
         }
         
-        this.tripDataError = errorMessage;
-        
-        // Show error but still allow manual proceed
-        const proceedManually = confirm(
-          `${errorMessage}\n\nApakah Anda ingin melanjutkan secara manual tanpa data perjalanan?`
-        );
-        
-        if (proceedManually) {
-          // Store barcode without trip data
-          localStorage.setItem('currentTruckBarcode', tripCode);
-          localStorage.removeItem('currentTripData'); // Clear any old trip data
-          this.router.navigate(['/trip-selection']);
-        }
+        // Do not allow user to continue - they must scan/enter a valid barcode
       }
     });
   }
@@ -342,7 +327,5 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
   toggleManualInput() {
     this.showManualInput = !this.showManualInput;
-    // Reset any existing error when toggling
-    this.tripDataError = '';
   }
 }

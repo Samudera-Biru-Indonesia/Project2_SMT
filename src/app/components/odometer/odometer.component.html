@@ -5,11 +5,11 @@
   </header>
 
   <main class="odometer-content">
-    <div class="odometer-card">
+    <div class="odometer-card" [class]="tripType.toLowerCase() + '-trip'">
       <!-- Trip Header Info -->
       <div class="trip-header-info">
         <div class="trip-number-display">
-          <span class="trip-label">Trip Number:</span>
+          <span class="trip-label">Surat Jalan:</span>
           <span class="trip-value">{{ tripNumber }}</span>
         </div>
         <div class="plate-number-display">
@@ -65,7 +65,9 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="complete-btn">
+          <button type="submit" 
+                  class="complete-btn"
+                  [ngStyle]="getButtonStyle()">
             Selesaikan Registrasi Perjalanan
           </button>
         </div>
