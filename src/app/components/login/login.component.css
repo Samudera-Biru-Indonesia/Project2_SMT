@@ -140,6 +140,10 @@
   margin-right: 8px;
 }
 
+.selected-text.placeholder {
+  color: #999;
+}
+
 .dropdown-arrow {
   font-size: 10px;
   color: #666;

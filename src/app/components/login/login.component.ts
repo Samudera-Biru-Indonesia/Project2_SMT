@@ -28,7 +28,7 @@ export class LoginComponent implements OnInit {
   
   // Custom dropdown properties
   dropdownOpen: boolean = false;
-  selectedPlantText: string = 'Pilih Site';
+  selectedPlantText: string = '';
 
   constructor(
     private router: Router,
@@ -273,7 +273,7 @@ export class LoginComponent implements OnInit {
   }
 
   getSelectedPlantText(): string {
-    return this.selectedPlantText;
+    return this.selectedPlantText || 'Pilih Site';
   }
 
   // Close dropdown when clicking outside
