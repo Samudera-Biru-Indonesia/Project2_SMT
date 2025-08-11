@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -25,6 +25,10 @@ export class LoginComponent implements OnInit {
   // Plant list properties
   plants: Plant[] = [];
   plantsLoading: boolean = false;
+  
+  // Custom dropdown properties
+  dropdownOpen: boolean = false;
+  selectedPlantText: string = 'Pilih Site';
 
   constructor(
     private router: Router,
@@ -257,30 +261,27 @@ export class LoginComponent implements OnInit {
     return coord.toFixed(6);
   }
 
-  /**
-   * Get suggested site based on current location
-   */
-  getSuggestedSite(): string {
-    if (!this.currentLocation) return '';
-    
-    // Simple logic to suggest site based on location
-    // You can enhance this with more sophisticated logic
-    const lat = this.currentLocation.latitude;
-    const lng = this.currentLocation.longitude;
-    
-    // Indonesia regions approximate coordinates
-    if (lat >= 0.5 && lat <= 2.0 && lng >= 103.0 && lng <= 105.0) {
-      return 'Batam area - try ACN033';
-    } else if (lat >= -8.0 && lat <= -6.0 && lng >= 112.0 && lng <= 114.0) {
-      return 'Surabaya area - try SGI002';
-    } else if (lat >= -7.0 && lat <= -5.0 && lng >= 106.0 && lng <= 107.0) {
-      return 'Jakarta area - try SGI001';
-    } else if (lat >= 2.0 && lat <= 4.0 && lng >= 98.0 && lng <= 99.0) {
-      return 'Medan area - try SGI003';
-    } else if (lat >= -6.0 && lat <= -4.0 && lng >= 119.0 && lng <= 120.0) {
-      return 'Makassar area - try SGI004';
+  // Custom dropdown methods
+  toggleDropdown() {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  selectSite(plantCode: string, displayText: string) {
+    this.site = plantCode;
+    this.selectedPlantText = displayText;
+    this.dropdownOpen = false;
+  }
+
+  getSelectedPlantText(): string {
+    return this.selectedPlantText;
+  }
+
+  // Close dropdown when clicking outside
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.custom-dropdown')) {
+      this.dropdownOpen = false;
     }
-    
-    return 'Check the site list for your area';
   }
 }

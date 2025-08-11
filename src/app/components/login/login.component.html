@@ -16,18 +16,26 @@
     <form (ngSubmit)="onLogin()" class="login-form" *ngIf="!isLoading">
       <div class="form-group">
         <label for="site">Kode Site</label>
-        <select
-          id="site"
-          [(ngModel)]="site"
-          name="site"
-          required
-          [class.error]="errorMessage"
-        >
-          <option value="">Pilih Site</option>
-          <option *ngFor="let plant of plants" [value]="plant.Plant">
-            {{ plant.Plant }} - {{ plant.Name }}
-          </option>
-        </select>
+        <div class="custom-dropdown" [class.open]="dropdownOpen">
+          <div class="dropdown-selected" (click)="toggleDropdown()" [class.error]="errorMessage">
+            <span class="selected-text">{{ getSelectedPlantText() }}</span>
+            <span class="dropdown-arrow">▼</span>
+          </div>
+          <div class="dropdown-options" *ngIf="dropdownOpen">
+            <div class="dropdown-option" 
+                 [class.selected]="site === ''"
+                 (click)="selectSite('', 'Pilih Site')">
+              Pilih Site
+            </div>
+            <div class="dropdown-option" 
+                 *ngFor="let plant of plants" 
+                 [class.selected]="site === plant.Plant"
+                 (click)="selectSite(plant.Plant, plant.Plant + ' - ' + plant.Name)">
+              <div class="option-code">{{ plant.Plant }}</div>
+              <div class="option-name">{{ plant.Name }}</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="form-group">

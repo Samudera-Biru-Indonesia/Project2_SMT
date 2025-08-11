@@ -238,6 +238,7 @@
   user-select: text;
   z-index: 10;
   position: relative;
+  margin-bottom: 24px; /* Added margin bottom for spacing */
 }
 
 .odometer-input:focus,
@@ -251,6 +252,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  margin-top: 32px; /* Added top margin for more space */
 }
 
 .summary-section {
