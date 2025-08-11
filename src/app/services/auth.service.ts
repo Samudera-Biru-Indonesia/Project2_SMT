@@ -166,17 +166,54 @@ export class AuthService {
 
     } catch (error: any) {
       console.error('Login error:', error);
+      console.error('Error details:', {
+        status: error.status,
+        statusText: error.statusText,
+        error: error.error,
+        message: error.message,
+        url: error.url
+      });
       
-      let errorMessage = 'Login failed. Please try again.';
+      let errorMessage = 'Login gagal. Silakan coba lagi.';
       
-      if (error.status === 401) {
-        errorMessage = 'Invalid credentials. Please check your employee code and site.';
+      // Check for location/site mismatch errors
+      if (this.isLocationMismatchError(error)) {
+        errorMessage = 'Lokasi tidak sesuai dengan site yang dipilih. Pastikan Anda berada di area yang sesuai dengan site.';
+      } else if (error.status === 400) {
+        // Bad Request - often indicates validation errors including location
+        if (error.error && typeof error.error === 'string') {
+          if (error.error.toLowerCase().includes('location') || 
+              error.error.toLowerCase().includes('coordinate') ||
+              error.error.toLowerCase().includes('site') ||
+              error.error.toLowerCase().includes('tidak sesuai')) {
+            errorMessage = 'Lokasi tidak sesuai dengan site yang dipilih.';
+          } else {
+            errorMessage = 'Data yang dikirim tidak valid. Periksa kembali informasi Anda.';
+          }
+        } else if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        } else {
+          errorMessage = 'Data yang dikirim tidak valid. Periksa kembali informasi Anda.';
+        }
+      } else if (error.status === 401) {
+        errorMessage = 'Kode karyawan atau site tidak valid. Periksa kembali data Anda.';
       } else if (error.status === 403) {
-        errorMessage = 'Access denied. You are not authorized to use this application.';
+        errorMessage = 'Akses ditolak. Anda tidak memiliki izin untuk menggunakan aplikasi ini.';
+      } else if (error.status === 422) {
+        // Unprocessable Entity - validation failed
+        errorMessage = 'Lokasi tidak sesuai dengan site yang dipilih.';
       } else if (error.status === 0) {
-        errorMessage = 'Network error. Please check your internet connection.';
+        errorMessage = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
+      } else if (error.status >= 500) {
+        errorMessage = 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
       } else if (error.error?.message || error.error?.Message) {
-        errorMessage = error.error.message || error.error.Message;
+        const apiMessage = error.error.message || error.error.Message;
+        // Check if API error message is related to location
+        if (this.isLocationRelatedMessage(apiMessage)) {
+          errorMessage = 'Lokasi tidak sesuai dengan site yang dipilih.';
+        } else {
+          errorMessage = apiMessage;
+        }
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -343,5 +380,49 @@ export class AuthService {
   getSite(): string | null {
     const user = this.getCurrentUser();
     return user ? user.site : null;
+  }
+
+  /**
+   * Check if error is related to location/site mismatch
+   */
+  private isLocationMismatchError(error: any): boolean {
+    // Check status codes that commonly indicate location/validation issues
+    if (error.status === 400 || error.status === 422) {
+      return true;
+    }
+
+    // Check error response body for location-related keywords
+    if (error.error) {
+      const errorStr = JSON.stringify(error.error).toLowerCase();
+      return errorStr.includes('location') || 
+             errorStr.includes('coordinate') || 
+             errorStr.includes('site') ||
+             errorStr.includes('tidak sesuai') ||
+             errorStr.includes('invalid location') ||
+             errorStr.includes('position') ||
+             errorStr.includes('latitude') ||
+             errorStr.includes('longitude');
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if message is related to location
+   */
+  private isLocationRelatedMessage(message: string): boolean {
+    if (!message) return false;
+    
+    const lowerMessage = message.toLowerCase();
+    return lowerMessage.includes('location') || 
+           lowerMessage.includes('coordinate') || 
+           lowerMessage.includes('site') ||
+           lowerMessage.includes('tidak sesuai') ||
+           lowerMessage.includes('invalid location') ||
+           lowerMessage.includes('position') ||
+           lowerMessage.includes('latitude') ||
+           lowerMessage.includes('longitude') ||
+           lowerMessage.includes('lokasi') ||
+           lowerMessage.includes('cabang');
   }
 }

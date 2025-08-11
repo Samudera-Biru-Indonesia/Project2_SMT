@@ -277,6 +277,29 @@
   font-size: 13px;
 }
 
+/* Location Suggestion in Error Alert */
+.location-suggestion {
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.location-suggestion hr {
+  border: none;
+  border-top: 1px solid #f5c6cb;
+  margin: 8px 0;
+}
+
+.suggestion-text {
+  margin: 0;
+  font-size: 12px;
+  color: #856404;
+  background-color: #fff3cd;
+  padding: 6px 8px;
+  border-radius: 3px;
+  border: 1px solid #ffeaa7;
+  text-align: left;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .login-container {

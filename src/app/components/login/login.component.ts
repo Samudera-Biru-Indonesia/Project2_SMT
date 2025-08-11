@@ -121,22 +121,41 @@ export class LoginComponent implements OnInit {
     this.isLoading = true;
 
     try {
+      console.log('🔐 Starting login process with:', {
+        empCode: this.empCode.trim(),
+        site: this.site.trim(),
+        location: this.currentLocation
+      });
+
       const result = await this.authService.loginWithLocation(
         this.empCode.trim(), 
         this.site.trim(),
         this.currentLocation
       );
       
+      console.log('🔐 Login result:', result);
+      
       if (result.success) {
+        console.log('✅ Login successful, redirecting to landing page');
         // Redirect ke landing page
         this.router.navigate(['/landing']);
       } else {
+        console.log('❌ Login failed:', result.message);
         this.errorMessage = result.message || 'Login gagal. Silakan coba lagi.';
+        
+        // Add specific styling for location-related errors
+        if (result.message && (
+          result.message.includes('Lokasi tidak sesuai') || 
+          result.message.includes('location') ||
+          result.message.includes('site')
+        )) {
+          console.log('🗺️ Location-related error detected');
+        }
       }
       
     } catch (error) {
+      console.error('💥 Unexpected login error:', error);
       this.errorMessage = 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.';
-      console.error('Login error:', error);
     } finally {
       this.isLoading = false;
     }
@@ -236,5 +255,32 @@ export class LoginComponent implements OnInit {
 
   formatCoordinate(coord: number): string {
     return coord.toFixed(6);
+  }
+
+  /**
+   * Get suggested site based on current location
+   */
+  getSuggestedSite(): string {
+    if (!this.currentLocation) return '';
+    
+    // Simple logic to suggest site based on location
+    // You can enhance this with more sophisticated logic
+    const lat = this.currentLocation.latitude;
+    const lng = this.currentLocation.longitude;
+    
+    // Indonesia regions approximate coordinates
+    if (lat >= 0.5 && lat <= 2.0 && lng >= 103.0 && lng <= 105.0) {
+      return 'Batam area - try ACN033';
+    } else if (lat >= -8.0 && lat <= -6.0 && lng >= 112.0 && lng <= 114.0) {
+      return 'Surabaya area - try SGI002';
+    } else if (lat >= -7.0 && lat <= -5.0 && lng >= 106.0 && lng <= 107.0) {
+      return 'Jakarta area - try SGI001';
+    } else if (lat >= 2.0 && lat <= 4.0 && lng >= 98.0 && lng <= 99.0) {
+      return 'Medan area - try SGI003';
+    } else if (lat >= -6.0 && lat <= -4.0 && lng >= 119.0 && lng <= 120.0) {
+      return 'Makassar area - try SGI004';
+    }
+    
+    return 'Check the site list for your area';
   }
 }
