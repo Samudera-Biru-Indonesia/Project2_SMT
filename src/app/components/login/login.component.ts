@@ -28,7 +28,7 @@ export class LoginComponent {
   
   // Custom dropdown properties
   dropdownOpen: boolean = false;
-  selectedPlantText: string = 'Pilih Site';
+  selectedPlantText: string = '';
 
   constructor(
     private router: Router,
@@ -125,22 +125,41 @@ export class LoginComponent {
     this.isLoading = true;
 
     try {
+      console.log('🔐 Starting login process with:', {
+        empCode: this.empCode.trim(),
+        site: this.site.trim(),
+        location: this.currentLocation
+      });
+
       const result = await this.authService.loginWithLocation(
         this.empCode.trim(), 
         this.site.trim(),
         this.currentLocation
       );
       
+      console.log('🔐 Login result:', result);
+      
       if (result.success) {
+        console.log('✅ Login successful, redirecting to landing page');
         // Redirect ke landing page
         this.router.navigate(['/landing']);
       } else {
+        console.log('❌ Login failed:', result.message);
         this.errorMessage = result.message || 'Login gagal. Silakan coba lagi.';
+        
+        // Add specific styling for location-related errors
+        if (result.message && (
+          result.message.includes('Lokasi tidak sesuai') || 
+          result.message.includes('location') ||
+          result.message.includes('site')
+        )) {
+          console.log('🗺️ Location-related error detected');
+        }
       }
       
     } catch (error) {
+      console.error('💥 Unexpected login error:', error);
       this.errorMessage = 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.';
-      console.error('Login error:', error);
     } finally {
       this.isLoading = false;
     }
@@ -254,7 +273,7 @@ export class LoginComponent {
   }
 
   getSelectedPlantText(): string {
-    return this.selectedPlantText;
+    return this.selectedPlantText || 'Pilih Site';
   }
 
   // Close dropdown when clicking outside

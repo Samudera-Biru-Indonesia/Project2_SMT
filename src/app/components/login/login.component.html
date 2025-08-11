@@ -17,16 +17,15 @@
       <div class="form-group">
         <label for="site">Kode Site</label>
         <div class="custom-dropdown" [class.open]="dropdownOpen">
-          <div class="dropdown-selected" (click)="toggleDropdown()" [class.error]="errorMessage">
-            <span class="selected-text">{{ getSelectedPlantText() }}</span>
+          <div class="dropdown-selected" 
+               (click)="toggleDropdown()" 
+               [class.error]="errorMessage"
+               [class.has-placeholder]="!site">
+            <span class="selected-text" 
+                  [class.placeholder]="!site">{{ getSelectedPlantText() }}</span>
             <span class="dropdown-arrow">▼</span>
           </div>
           <div class="dropdown-options" *ngIf="dropdownOpen">
-            <div class="dropdown-option" 
-                 [class.selected]="site === ''"
-                 (click)="selectSite('', 'Pilih Site')">
-              Pilih Site
-            </div>
             <div class="dropdown-option" 
                  *ngFor="let plant of plants" 
                  [class.selected]="site === plant.Plant"
