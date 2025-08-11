@@ -16,15 +16,18 @@
     <form (ngSubmit)="onLogin()" class="login-form" *ngIf="!isLoading">
       <div class="form-group">
         <label for="site">Kode Site</label>
-        <input
-          type="text"
+        <select
           id="site"
           [(ngModel)]="site"
           name="site"
-          placeholder="Masukkan kode site (contoh: SGI030)"
           required
           [class.error]="errorMessage"
-        />
+        >
+          <option value="">Pilih Site</option>
+          <option *ngFor="let plant of plants" [value]="plant.Plant">
+            {{ plant.Plant }} - {{ plant.Name }}
+          </option>
+        </select>
       </div>
 
       <div class="form-group">
