@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { GeolocationService, UserLocation } from './geolocation.service';
-import { SessionNotificationService } from './session-notification.service';
 import { environment } from '../../environments/environment';
 
 export interface AuthUser {
@@ -43,13 +42,11 @@ export class AuthService {
   private readonly API_KEY = environment.api.apiKey;
   
   // Session configuration
-  private readonly SESSION_DURATION_HOURS = 8;
-  private readonly SESSION_WARNING_MINUTES = 30; // Warn 30 minutes before expiry
+  private readonly SESSION_DURATION_HOURS = 8.5; // 8 hours 30 minutes
   private readonly ACTIVITY_CHECK_INTERVAL = 60000; // Check every minute
   
   // Timer untuk check session
   private sessionCheckTimer: any;
-  private sessionWarningShown = false;
   
   // Basic Auth credentials dari environment
   private readonly BASIC_AUTH_USERNAME = environment.api.basicAuth.username;
@@ -57,8 +54,7 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private geolocationService: GeolocationService,
-    private sessionNotificationService: SessionNotificationService
+    private geolocationService: GeolocationService
   ) {
     // Check if user is already logged in
     this.loadUserFromStorage();
@@ -156,7 +152,7 @@ export class AuthService {
       if (isLoginSuccessful) {
         // Login berhasil
         const now = new Date();
-        const sessionDurationHours = 8;
+        const sessionDurationHours = 8.5; // 8 hours 30 minutes
         const sessionExpiryTime = new Date(now.getTime() + (sessionDurationHours * 60 * 60 * 1000));
         
         const authUser: AuthUser = {
@@ -272,10 +268,13 @@ export class AuthService {
   logout(): void {
     this.currentUserSubject.next(null);
     localStorage.removeItem(this.STORAGE_KEY);
-    this.sessionWarningShown = false;
     this.stopSessionMonitoring();
-    this.sessionNotificationService.clearNotification();
     console.log('User logged out');
+    
+    // Redirect to login page
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
   }
 
   /**
@@ -512,38 +511,13 @@ export class AuthService {
 
     const now = new Date();
     const sessionExpiryTime = new Date(currentUser.sessionExpiryTime);
-    const warningTime = new Date(sessionExpiryTime.getTime() - (this.SESSION_WARNING_MINUTES * 60 * 1000));
 
     // Check if session has expired
     if (now >= sessionExpiryTime) {
       console.log('Session expired, logging out user');
-      this.sessionNotificationService.showSessionExpired();
       this.logout();
       return;
     }
-
-    // Show warning if approaching expiry and warning hasn't been shown yet
-    if (now >= warningTime && !this.sessionWarningShown) {
-      this.showSessionWarning();
-      this.sessionWarningShown = true;
-    }
-  }
-
-  /**
-   * Show session warning
-   */
-  private showSessionWarning(): void {
-    const currentUser = this.getCurrentUser();
-    if (!currentUser) return;
-
-    const expiryTime = new Date(currentUser.sessionExpiryTime);
-    const now = new Date();
-    const minutesLeft = Math.ceil((expiryTime.getTime() - now.getTime()) / (1000 * 60));
-
-    console.log(`Session warning: ${minutesLeft} minutes remaining`);
-    
-    // Use session notification service instead of alert
-    this.sessionNotificationService.showSessionWarning(minutesLeft);
   }
 
   /**
@@ -606,9 +580,6 @@ export class AuthService {
     this.setCurrentUser(updatedUser);
     this.saveUserToStorage(updatedUser);
     
-    // Reset warning flag when session is extended
-    this.sessionWarningShown = false;
-
     console.log('User activity detected, session extended until:', newExpiryTime);
   }
 
@@ -663,10 +634,6 @@ export class AuthService {
     this.setCurrentUser(updatedUser);
     this.saveUserToStorage(updatedUser);
     
-    // Reset warning flag when session is manually extended
-    this.sessionWarningShown = false;
-    
-    this.sessionNotificationService.showSessionExtended();
     console.log('Session manually extended until:', newExpiryTime);
     return true;
   }
