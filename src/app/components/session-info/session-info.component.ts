@@ -7,15 +7,7 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-session-info',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="session-info" *ngIf="sessionInfo && sessionInfo.isValid && isAuthenticated">
-      <div class="session-timer">
-        <span class="session-time" [class.warning]="sessionInfo.minutesRemaining <= 30">
-          ⏰ {{ formatTime(sessionInfo.minutesRemaining) }}
-        </span>
-      </div>
-    </div>
-  `,
+  template:``,
   styleUrls: ['./session-info.component.css']
 })
 export class SessionInfoComponent implements OnInit, OnDestroy {
