@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basic Auth Test</title>
+</head>
+<body>
+    <h1>Basic Auth Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        const username = 'truckapp';
+        const password = 'keBuH{5577\\cS%nH[uKT';
+        
+        const credentialsString = `${username}:${password}`;
+        const basicAuth = btoa(credentialsString);
+        
+        const results = document.getElementById('results');
+        results.innerHTML = `
+            <h2>Credentials Test</h2>
+            <p><strong>Username:</strong> ${username}</p>
+            <p><strong>Password:</strong> ${password}</p>
+            <p><strong>Credentials String:</strong> ${credentialsString}</p>
+            <p><strong>Basic Auth Encoded:</strong> ${basicAuth}</p>
+            <p><strong>Decoded Back:</strong> ${atob(basicAuth)}</p>
+            <p><strong>Length:</strong> ${basicAuth.length}</p>
+            
+            <h3>For Postman/API Test:</h3>
+            <p><strong>Authorization Header:</strong> Basic ${basicAuth}</p>
+            
+            <hr>
+            <button onclick="testAPI()">Test API Call</button>
+            <div id="apiResult"></div>
+        `;
+        
+        async function testAPI() {
+            const apiResult = document.getElementById('apiResult');
+            apiResult.innerHTML = 'Testing API...';
+            
+            try {
+                const response = await fetch('https://epicprodapp.samator.com/KineticPilot/api/v2/efx/SGI/SMTTruckCheckApp/GetListPlant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': 'Basic ' + basicAuth,
+                        'X-API-Key': 'IMjuJZsgH1Dlz781wJWSmmX4eXEg1KjhgaiE2eR1WCSwQ'
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                const data = await response.text();
+                
+                apiResult.innerHTML = `
+                    <h3>API Test Result:</h3>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Status Text:</strong> ${response.statusText}</p>
+                    <p><strong>Response:</strong></p>
+                    <pre>${data}</pre>
+                `;
+            } catch (error) {
+                apiResult.innerHTML = `
+                    <h3>API Test Error:</h3>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
