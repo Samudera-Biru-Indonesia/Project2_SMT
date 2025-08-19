@@ -4,7 +4,7 @@ export const environment = {
     baseUrl: 'https://epictestapp.samator.com/KineticTest2/api/v2/efx/SGI/SMTTruckCheckApp',
     endpoints: {
       login: '/AuthenticateLogon',
-      getTripData: '/GetTripData'
+      getTripData: '/GetTripData' 
     },
     apiKey: 'XEbogZ3f0YDe5fLyzq8CXhMmuksP3TpJufSp80gfb3SyD',
     basicAuth: {
