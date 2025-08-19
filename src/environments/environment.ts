@@ -1,15 +1,17 @@
 export const environment = {
-  production: false,
+  production: true,
   api: {
-    baseUrl: 'https://epictestapp.samator.com/KineticTest2/api/v2/efx/SGI/SMTTruckCheckApp',
+    baseUrl: 'https://epicprodapp.samator.com/KineticPilot/api/v2/efx/SGI/SMTTruckCheckApp',
     endpoints: {
       login: '/AuthenticateLogon',
-      getTripData: '/GetTripData' 
+      getTripData: '/GetTripData',
+      sendTripData: '/InsertStagingTable',
+      getPlantList: '/GetListPlant'
     },
-    apiKey: 'XEbogZ3f0YDe5fLyzq8CXhMmuksP3TpJufSp80gfb3SyD',
+    apiKey: 'IMjuJZsgH1Dlz781wJWSmmX4eXEg1KjhgaiE2eR1WCSwQ',
     basicAuth: {
-      username: 'christopher', // Ganti dengan username Epicor Anda
-      password: 'Chr15topherb@'  // Ganti dengan password Epicor Anda
+      username: 'truckapp', // Ganti dengan username Epicor Anda
+      password: 'keBuH{5577\\cS%nH[uKT'  // Escaped backslash untuk JavaScript
     }
   }
 };

@@ -50,9 +50,9 @@ export interface GetPlantListResponse {
   providedIn: 'root'
 })
 export class ApiService {
-  private sendTripDataUrl = 'https://epictestapp.samator.com/KineticTest2/api/v2/efx/SGI/SMTTruckCheckApp/InsertStagingTable';
+  private sendTripDataUrl = `${environment.api.baseUrl}${environment.api.endpoints.sendTripData}`;
   private getTripDataUrl = `${environment.api.baseUrl}${environment.api.endpoints.getTripData}`;
-  private getPlantListUrl = 'https://epictestapp.samator.com/KineticTest2/api/v2/efx/SGI/SMTTruckCheckApp/GetListPlant';
+  private getPlantListUrl = `${environment.api.baseUrl}${environment.api.endpoints.getPlantList}`;
 
   constructor(private http: HttpClient) {}
 
@@ -63,8 +63,8 @@ export class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'Company': 'test',
-      'X-API-Key': environment.api.apiKey
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey
     });
 
     // Ensure data is properly formatted
@@ -82,7 +82,7 @@ export class ApiService {
 
     console.log('🚀 Original data received:', data);
     console.log('🚀 Trip Data Request (formatted):', requestData);
-    console.log('� Request data types:', {
+    console.log('🚀 Request data types:', {
       odometer: typeof requestData.odometer,
       type: typeof requestData.type,
       chk1: typeof requestData.chk1,
@@ -93,12 +93,12 @@ export class ApiService {
       tripNum: typeof requestData.tripNum,
       note: typeof requestData.note
     });
-    console.log('�📡 Request Headers:', {
+    console.log('📡 Request Headers:', {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth.substring(0, 20)}...`,
-      'Company': 'test',
-      'X-API-Key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
     });
     console.log('🌐 API URL:', this.sendTripDataUrl);
     console.log('📤 Final JSON payload:', JSON.stringify(requestData, null, 2));
@@ -116,7 +116,8 @@ export class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'X-API-Key': environment.api.apiKey
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey
     });
 
     const requestBody: GetTripDataRequest = {
@@ -128,7 +129,8 @@ export class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'X-API-Key': environment.api.apiKey
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey
     });
     console.log('API URL:', this.getTripDataUrl);
 
@@ -145,7 +147,8 @@ export class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'X-API-Key': environment.api.apiKey
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey
     });
 
     // POST request with empty body (as per requirement)
@@ -156,7 +159,8 @@ export class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth.substring(0, 20)}...`,
-      'X-API-Key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
     });
     console.log('API URL:', this.getPlantListUrl);
 
