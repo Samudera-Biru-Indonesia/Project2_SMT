@@ -64,8 +64,8 @@ export class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'Company': 'test',
-      'X-API-Key': environment.api.apiKey
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey
     });
 
     // Ensure data is properly formatted
@@ -83,13 +83,7 @@ export class ApiService {
 
     console.log('🚀 Original data received:', data);
     console.log('🚀 Trip Data Request (formatted):', requestData);
-    console.log('🔗 API URL:', this.sendTripDataUrl);
-    console.log('📋 Full URL breakdown:', {
-      baseUrl: environment.api.baseUrl,
-      endpoint: environment.api.endpoints.sendTripData,
-      fullUrl: this.sendTripDataUrl
-    });
-    console.log('🔢 Request data types:', {
+    console.log('🚀 Request data types:', {
       odometer: typeof requestData.odometer,
       type: typeof requestData.type,
       chk1: typeof requestData.chk1,
@@ -104,8 +98,8 @@ export class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth.substring(0, 20)}...`,
-      'Company': 'test',
-      'X-API-Key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
     });
     console.log('📤 Final JSON payload:', JSON.stringify(requestData, null, 2));
 
@@ -122,7 +116,8 @@ export class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'X-API-Key': environment.api.apiKey
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey
     });
 
     const requestBody: GetTripDataRequest = {
@@ -134,7 +129,8 @@ export class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'X-API-Key': environment.api.apiKey
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey
     });
     console.log('API URL:', this.getTripDataUrl);
 
@@ -162,7 +158,8 @@ export class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'X-API-Key': environment.api.apiKey
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey
     });
 
     // POST request with empty body (as per requirement)
@@ -178,30 +175,12 @@ export class ApiService {
     console.log('📡 Request Headers:', {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'Authorization': `Basic ${basicAuth.substring(0, 30)}...`,
-      'X-API-Key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
+      'Authorization': `Basic ${basicAuth.substring(0, 20)}...`,
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
     });
     console.log('📦 Request Body:', emptyBody);
 
-    return this.http.post<any>(this.getPlantListUrl, emptyBody, { headers })
-      .pipe(
-        tap(response => {
-          console.log('✅ Plant List API Success:', response);
-        }),
-        catchError((error: HttpErrorResponse) => {
-          console.error('❌ Plant List API Error:', error);
-          console.error('❌ Error Status:', error.status);
-          console.error('❌ Error Message:', error.message);
-          console.error('❌ Error Body:', error.error);
-          
-          if (error.status === 401) {
-            console.error('🔐 401 Unauthorized - Check credentials!');
-            console.error('🔐 Current Basic Auth (first 30 chars):', basicAuth.substring(0, 30) + '...');
-            console.error('🔐 Decoded credentials:', atob(basicAuth));
-          }
-          
-          return throwError(() => error);
-        })
-      );
+    return this.http.post<any>(this.getPlantListUrl, emptyBody, { headers });
   }
 }

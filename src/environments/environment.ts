@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   api: {
     baseUrl: 'https://epicprodapp.samator.com/KineticPilot/api/v2/efx/SGI/SMTTruckCheckApp',
     endpoints: {

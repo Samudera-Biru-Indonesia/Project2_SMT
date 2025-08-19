@@ -118,13 +118,13 @@ export class AuthService {
       const headers = new HttpHeaders({
         'Content-Type': 'application/json',
         'Authorization': `Basic ${basicAuth}`,
-        'X-API-Key': this.API_KEY
+        'x-api-key': this.API_KEY
       });
 
       console.log('Request Headers:', {
         'Content-Type': 'application/json',
         'Authorization': `Basic ${basicAuth}`,
-        'X-API-Key': this.API_KEY
+        'x-api-key': this.API_KEY
       });
 
       console.log('API URL:', this.API_URL);
