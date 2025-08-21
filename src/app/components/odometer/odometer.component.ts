@@ -60,7 +60,7 @@ export class OdometerComponent implements OnInit {
     });
 
     if (!this.odometerReading || !this.driverName) {
-      alert('Silakan isi semua field yang wajib (Odometer dan Nama Driver)');
+      alert('Silakan isi semua field yang wajib');
       return;
     }
 
