@@ -24,6 +24,16 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "web.config",
+                "input": "./",
+                "output": "./"
+              },
+              {
+                "glob": ".htaccess",
+                "input": "./",
+                "output": "./"
               }
             ],
             "styles": [

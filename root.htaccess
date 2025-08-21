@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Handle requests to /truck/ subfolder
+RewriteCond %{REQUEST_URI} ^/truck/(.*)$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^truck/(.*)$ /truck/index.html [L]
+
+# Optional: Redirect root to truck if needed
+# RewriteRule ^$ /truck/ [R=301,L]
