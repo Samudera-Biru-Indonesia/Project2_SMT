@@ -1,6 +1,6 @@
 {
   "/api/*": {
-    "target": "https://epictestapp.samator.com",
+    "target": "https://epicprodapp.samator.com",
     "secure": true,
     "changeOrigin": true,
     "logLevel": "debug",
