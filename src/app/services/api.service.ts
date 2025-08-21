@@ -54,6 +54,7 @@ export class ApiService {
   private sendTripDataUrl = `${environment.api.baseUrl}${environment.api.endpoints.sendTripData}`;
   private getTripDataUrl = `${environment.api.baseUrl}${environment.api.endpoints.getTripData}`;
   private getPlantListUrl = `${environment.api.baseUrl}${environment.api.endpoints.getPlantList}`;
+  private processTripDataUrl = `${environment.api.baseUrl}${environment.api.endpoints.processTripData}`;
 
   constructor(private http: HttpClient) {}
 
@@ -182,5 +183,43 @@ export class ApiService {
     console.log('📦 Request Body:', emptyBody);
 
     return this.http.post<any>(this.getPlantListUrl, emptyBody, { headers });
+  }
+
+  /**
+   * Process trip data to Epicor after staging table insert
+   */
+  processTripData(tripNum: string): Observable<any> {
+    const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth}`,
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey
+    });
+
+    const requestBody = {
+      tripNum: tripNum
+    };
+
+    console.log('🔄 Process Trip Data Request:', requestBody);
+    console.log('📡 Request Headers:', {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth.substring(0, 20)}...`,
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
+    });
+    console.log('🔗 API URL:', this.processTripDataUrl);
+
+    return this.http.post<any>(this.processTripDataUrl, requestBody, { headers })
+      .pipe(
+        tap(response => console.log('✅ Process Trip Data Response:', response)),
+        catchError(error => {
+          console.error('❌ Process Trip Data Error:', error);
+          return throwError(() => error);
+        })
+      );
   }
 }

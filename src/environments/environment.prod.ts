@@ -6,7 +6,8 @@ export const environment = {
       login: '/AuthenticateLogon',
       getTripData: '/GetTripData',
       sendTripData: '/InsertStagingTable',
-      getPlantList: '/GetListPlant'
+      getPlantList: '/GetListPlant',
+      processTripData: '/ProcessTripTimeEntry'
     },
     apiKey: 'IMjuJZsgH1Dlz781wJWSmmX4eXEg1KjhgaiE2eR1WCSwQ',
     basicAuth: {
