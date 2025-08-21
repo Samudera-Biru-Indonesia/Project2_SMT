@@ -17,7 +17,6 @@ export class OdometerComponent implements OnInit {
   tripNumber: string = '';
   plateNumber: string = '';
   odometerReading: string = '';
-  driverName: string = '';
   notes: string = '';
 
   constructor(private router: Router, private apiService: ApiService) {}
@@ -53,14 +52,13 @@ export class OdometerComponent implements OnInit {
   onSubmit() {
     console.log('🔄 Form submitted with values:', {
       odometerReading: this.odometerReading,
-      driverName: this.driverName,
       notes: this.notes,
       truckBarcode: this.truckBarcode,
       tripType: this.tripType
     });
 
-    if (!this.odometerReading || !this.driverName) {
-      alert('Silakan isi semua field yang wajib (Odometer dan Nama Driver)');
+    if (!this.odometerReading) {
+      alert('Silakan isi semua field yang wajib');
       return;
     }
 
@@ -127,7 +125,6 @@ export class OdometerComponent implements OnInit {
       truckBarcode: this.truckBarcode,
       tripType: this.tripType,
       odometerReading: this.odometerReading,
-      driverName: this.driverName,
       notes: this.notes,
       timestamp: new Date().toISOString(),
       checklistData: this.tripType === 'OUT' ? localStorage.getItem('checklistData') : null

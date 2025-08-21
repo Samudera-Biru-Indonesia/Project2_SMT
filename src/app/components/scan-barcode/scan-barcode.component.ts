@@ -22,6 +22,8 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   cameraError: string = '';
   isLoadingTripData: boolean = false;
   showManualInput: boolean = false;
+  errorMessage: string = '';
+  errorTitle: string = '';
   
   private codeReader: BrowserMultiFormatReader;
   private stream: MediaStream | null = null;
@@ -62,13 +64,14 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
   async startScan() {
     if (!this.hasCamera) {
-      alert('Kamera tidak tersedia. Silakan gunakan input manual.');
+      this.showError('Kamera Tidak Tersedia', 'Kamera tidak tersedia. Silakan gunakan input manual.');
       return;
     }
 
     try {
       this.isScanning = true;
       this.cameraError = '';
+      this.clearError(); // Clear any previous errors
       
       // Reset tracking for new scan session
       this.scanAttemptCount = 0;
@@ -265,6 +268,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
    */
   getTripDataFromAPI(tripCode: string) {
     this.isLoadingTripData = true;
+    this.clearError(); // Clear any previous errors
 
     console.log('Getting trip data for:', tripCode);
 
@@ -285,24 +289,47 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
         console.error('Error getting trip data:', error);
         this.isLoadingTripData = false;
         
-        // Show alert for trip number not found and prevent continuation
-        if (error.status === 404) {
-          alert('Trip number tidak ditemukan. Silakan periksa kembali barcode kendaraan.');
-        } else if (error.status === 0) {
-          alert('Gagal mengambil data perjalanan. Periksa koneksi internet Anda.');
-        } else if (error.status === 401) {
-          alert('Autentikasi gagal. Silakan login kembali.');
-        } else if (error.status === 403) {
-          alert('Akses ditolak. Anda tidak memiliki izin untuk mengakses data ini.');
-        } else if (error.status >= 500) {
-          alert('Kesalahan server. Silakan coba lagi nanti.');
-        } else {
-          alert(`Trip number tidak valid atau tidak ditemukan (HTTP ${error.status}). Silakan periksa kembali barcode.`);
-        }
-        
-        // Do not allow user to continue - they must scan/enter a valid barcode
+        // Show user-friendly error messages based on error type
+        this.handleApiError(error);
       }
     });
+  }
+
+  /**
+   * Handle API errors with user-friendly messages
+   */
+  handleApiError(error: any) {
+    if (error.status === 400) {
+      this.showError('Nomor SPK Tidak Valid', 'Nomor SPK yang dimasukkan tidak valid atau tidak ditemukan. Silakan periksa kembali barcode kendaraan.');
+    } else if (error.status === 404) {
+      this.showError('Nomor SPK Tidak Ditemukan', 'Nomor SPK tidak ditemukan dalam sistem. Pastikan barcode yang Anda scan atau input sudah benar.');
+    } else if (error.status === 0) {
+      this.showError('Koneksi Bermasalah', 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda dan coba lagi.');
+    } else if (error.status === 401) {
+      this.showError('Autentikasi Gagal', 'Sesi Anda telah berakhir. Silakan login kembali.');
+    } else if (error.status === 403) {
+      this.showError('Akses Ditolak', 'Anda tidak memiliki izin untuk mengakses data ini. Hubungi administrator.');
+    } else if (error.status >= 500) {
+      this.showError('Kesalahan Server', 'Terjadi kesalahan pada server. Silakan coba lagi dalam beberapa saat.');
+    } else {
+      this.showError('Nomor SPK Tidak Ditemukan', `Nomor SPK tidak ditemukan atau tidak valid. Silakan periksa kembali barcode kendaraan.`);
+    }
+  }
+
+  /**
+   * Show error message to user
+   */
+  showError(title: string, message: string) {
+    this.errorTitle = title;
+    this.errorMessage = message;
+  }
+
+  /**
+   * Clear error message
+   */
+  clearError() {
+    this.errorMessage = '';
+    this.errorTitle = '';
   }
 
   goBack() {
@@ -311,11 +338,14 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   }
 
   onBarcodeInputChange() {
-    // Clean input as user types for better validation
+    // Clear input as user types for better validation
     if (this.barcodeInput) {
       // Remove any unwanted characters and normalize
       this.barcodeInput = this.barcodeInput.trim().toUpperCase();
     }
+    
+    // Clear any error messages when user starts typing
+    this.clearError();
   }
 
   isValidBarcodeInput(): boolean {

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface TripData {
@@ -50,9 +51,9 @@ export interface GetPlantListResponse {
   providedIn: 'root'
 })
 export class ApiService {
-  private sendTripDataUrl = 'https://epictestapp.samator.com/KineticTest2/api/v2/efx/SGI/SMTTruckCheckApp/InsertStagingTable';
+  private sendTripDataUrl = `${environment.api.baseUrl}${environment.api.endpoints.sendTripData}`;
   private getTripDataUrl = `${environment.api.baseUrl}${environment.api.endpoints.getTripData}`;
-  private getPlantListUrl = 'https://epictestapp.samator.com/KineticTest2/api/v2/efx/SGI/SMTTruckCheckApp/GetListPlant';
+  private getPlantListUrl = `${environment.api.baseUrl}${environment.api.endpoints.getPlantList}`;
 
   constructor(private http: HttpClient) {}
 
@@ -63,8 +64,8 @@ export class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'Company': 'test',
-      'X-API-Key': environment.api.apiKey
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey
     });
 
     // Ensure data is properly formatted
@@ -82,7 +83,7 @@ export class ApiService {
 
     console.log('🚀 Original data received:', data);
     console.log('🚀 Trip Data Request (formatted):', requestData);
-    console.log('� Request data types:', {
+    console.log('🚀 Request data types:', {
       odometer: typeof requestData.odometer,
       type: typeof requestData.type,
       chk1: typeof requestData.chk1,
@@ -93,14 +94,13 @@ export class ApiService {
       tripNum: typeof requestData.tripNum,
       note: typeof requestData.note
     });
-    console.log('�📡 Request Headers:', {
+    console.log('📡 Request Headers:', {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth.substring(0, 20)}...`,
-      'Company': 'test',
-      'X-API-Key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
     });
-    console.log('🌐 API URL:', this.sendTripDataUrl);
     console.log('📤 Final JSON payload:', JSON.stringify(requestData, null, 2));
 
     return this.http.post(this.sendTripDataUrl, requestData, { headers });
@@ -116,7 +116,8 @@ export class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'X-API-Key': environment.api.apiKey
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey
     });
 
     const requestBody: GetTripDataRequest = {
@@ -128,7 +129,8 @@ export class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'X-API-Key': environment.api.apiKey
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey
     });
     console.log('API URL:', this.getTripDataUrl);
 
@@ -139,26 +141,45 @@ export class ApiService {
    * Get list of plants
    */
   getPlantList(): Observable<any> {
-    const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    // Debug Basic Auth encoding
+    console.log('🔐 Raw credentials:', {
+      username: environment.api.basicAuth.username,
+      password: environment.api.basicAuth.password.substring(0, 5) + '...' + environment.api.basicAuth.password.slice(-3)
+    });
+    
+    const credentialsString = `${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`;
+    console.log('🔗 Credentials string (first 20 chars):', credentialsString.substring(0, 20) + '...');
+    
+    const basicAuth = btoa(credentialsString);
+    console.log('🔑 Basic Auth encoded (first 30 chars):', basicAuth.substring(0, 30) + '...');
+    console.log('🔑 Basic Auth length:', basicAuth.length);
     
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'X-API-Key': environment.api.apiKey
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey
     });
 
     // POST request with empty body (as per requirement)
     const emptyBody = {};
 
-    console.log('Get Plant List Request');
-    console.log('Request Headers:', {
+    console.log('🌱 Get Plant List Request');
+    console.log('🔗 API URL:', this.getPlantListUrl);
+    console.log('📋 Full URL breakdown:', {
+      baseUrl: environment.api.baseUrl,
+      endpoint: environment.api.endpoints.getPlantList,
+      fullUrl: this.getPlantListUrl
+    });
+    console.log('📡 Request Headers:', {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth.substring(0, 20)}...`,
-      'X-API-Key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
+      'Company': 'SGI',
+      'x-api-key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
     });
-    console.log('API URL:', this.getPlantListUrl);
+    console.log('📦 Request Body:', emptyBody);
 
     return this.http.post<any>(this.getPlantListUrl, emptyBody, { headers });
   }

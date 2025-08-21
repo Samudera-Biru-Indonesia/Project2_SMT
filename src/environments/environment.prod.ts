@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   api: {
     baseUrl: 'https://epicprodapp.samator.com/KineticPilot/api/v2/efx/SGI/SMTTruckCheckApp',
     endpoints: {
@@ -11,7 +11,7 @@ export const environment = {
     apiKey: 'IMjuJZsgH1Dlz781wJWSmmX4eXEg1KjhgaiE2eR1WCSwQ',
     basicAuth: {
       username: 'truckapp', // Ganti dengan username Epicor Anda
-      password: 'keBuH{5577\cS%nH[uKT'  // Ganti dengan password Epicor Anda
+      password: 'keBuH{5577\\cS%nH[uKT'  // Escaped backslash untuk JavaScript
     }
   }
 };

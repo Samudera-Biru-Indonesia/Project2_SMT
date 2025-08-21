@@ -80,7 +80,7 @@
       </div>
 
       <div class="manual-input-section" *ngIf="showManualInput">
-        <h3>Masukkan Barcode Manual</h3>
+        <h3>Masukkan SPK Manual</h3>
         <form (ngSubmit)="onSubmit()">
           <div class="input-group">
             <input
@@ -110,6 +110,18 @@
           <div class="loading-section" *ngIf="isLoadingTripData">
             <div class="loading-spinner"></div>
             <p class="loading-text">Mengambil data perjalanan...</p>
+          </div>
+          
+          <!-- Error Message -->
+          <div class="error-alert" *ngIf="errorMessage">
+            <div class="error-content">
+              <span class="error-icon">❌</span>
+              <div class="error-text">
+                <h4>{{ errorTitle }}</h4>
+                <p>{{ errorMessage }}</p>
+              </div>
+              <button class="error-close" (click)="clearError()">×</button>
+            </div>
           </div>
           
           <button 
