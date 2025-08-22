@@ -9,7 +9,7 @@ export const environment = {
       getPlantList: '/GetListPlant',
       processTripData: '/ProcessTripTimeEntry'
     },
-    apiKey: 'IMjuJZsgH1Dlz781wJWSmmX4eXEg1KjhgaiE2eR1WCSwQ',
+    apiKey: 'W5hczOaOGdc68PcfchvZSvhUmWOf9AX3P6Zhfm0cghdPu',
     basicAuth: {
       username: 'truckapp', // Ganti dengan username Epicor Anda
       password: 'keBuH{5577\cS%nH[uKT'  // Ganti dengan password Epicor Anda

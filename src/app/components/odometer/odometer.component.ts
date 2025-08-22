@@ -184,7 +184,7 @@ export class OdometerComponent implements OnInit {
           console.log('Data sent to server:', tripData);
           
           // After successful insert to staging table, process the trip data to Epicor
-          this.processDataToEpicor(tripData.tripNum);
+          // this.processDataToEpicor(tripData.tripNum);
         }
       },
       error: (error) => {
@@ -216,35 +216,35 @@ export class OdometerComponent implements OnInit {
   }
 
   // Function to process trip data to Epicor
-  processDataToEpicor(tripNum: string) {
-    console.log('Processing trip data to Epicor for trip:', tripNum);
+  // processDataToEpicor(tripNum: string) {
+  //   console.log('Processing trip data to Epicor for trip:', tripNum);
     
-    this.apiService.processTripData(tripNum).subscribe({
-      next: (response) => {
-        console.log('✅ Process to Epicor successful:', response);
-        alert('Data berhasil diproses ke sistem Epicor!');
-      },
-      error: (error) => {
-        console.error('❌ Error processing to Epicor:', error);
+  //   this.apiService.processTripData(tripNum).subscribe({
+  //     next: (response) => {
+  //       console.log('✅ Process to Epicor successful:', response);
+  //       alert('Data berhasil diproses ke sistem Epicor!');
+  //     },
+  //     error: (error) => {
+  //       console.error('❌ Error processing to Epicor:', error);
         
-        let errorMessage = 'Gagal memproses data ke sistem Epicor';
+  //       let errorMessage = 'Gagal memproses data ke sistem Epicor';
         
-        if (error.status === 0) {
-          errorMessage += ' - Periksa koneksi internet.';
-        } else if (error.status === 400) {
-          errorMessage += ' - Data tidak valid untuk proses Epicor.';
-        } else if (error.status === 401) {
-          errorMessage += ' - Authentication gagal.';
-        } else if (error.status === 500) {
-          errorMessage += ' - Server error saat proses ke Epicor.';
-        } else {
-          errorMessage += ` - HTTP ${error.status}: ${error.statusText}`;
-        }
+  //       if (error.status === 0) {
+  //         errorMessage += ' - Periksa koneksi internet.';
+  //       } else if (error.status === 400) {
+  //         errorMessage += ' - Data tidak valid untuk proses Epicor.';
+  //       } else if (error.status === 401) {
+  //         errorMessage += ' - Authentication gagal.';
+  //       } else if (error.status === 500) {
+  //         errorMessage += ' - Server error saat proses ke Epicor.';
+  //       } else {
+  //         errorMessage += ` - HTTP ${error.status}: ${error.statusText}`;
+  //       }
         
-        alert(errorMessage + '\n\nData sudah tersimpan di staging table, tapi gagal diproses ke Epicor.');
-      }
-    });
-  }
+  //       alert(errorMessage + '\n\nData sudah tersimpan di staging table, tapi gagal diproses ke Epicor.');
+  //     }
+  //   });
+  // }
 
   goBack() {
     if (this.tripType === 'OUT') {
