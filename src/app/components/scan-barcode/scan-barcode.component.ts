@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { BrowserMultiFormatReader, Result } from '@zxing/library';
 import { BarcodeService } from '../../services/barcode.service';
 import { ApiService, TripInfo } from '../../services/api.service';
+import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
 
 @Component({
   selector: 'app-scan-barcode',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EnvironmentIndicatorComponent],
   templateUrl: './scan-barcode.component.html',
   styleUrls: ['./scan-barcode.component.css']
 })

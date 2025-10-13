@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, EnvironmentIndicatorComponent],
   templateUrl: './landing.component.html',
   styleUrls: ['./landing.component.css']
 })

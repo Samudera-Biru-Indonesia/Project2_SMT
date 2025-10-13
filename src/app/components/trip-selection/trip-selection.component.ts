@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TripInfo } from '../../services/api.service';
+import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
 
 @Component({
   selector: 'app-trip-selection',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, EnvironmentIndicatorComponent],
   templateUrl: './trip-selection.component.html',
   styleUrls: ['./trip-selection.component.css']
 })

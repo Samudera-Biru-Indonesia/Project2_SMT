@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { EnvironmentService } from './environment.service';
 
 export interface TripData {
   odometer: number;
@@ -51,22 +52,30 @@ export interface GetPlantListResponse {
   providedIn: 'root'
 })
 export class ApiService {
-  private sendTripDataUrl = `${environment.api.baseUrl}${environment.api.endpoints.sendTripData}`;
-  private getTripDataUrl = `${environment.api.baseUrl}${environment.api.endpoints.getTripData}`;
-  private getPlantListUrl = `${environment.api.baseUrl}${environment.api.endpoints.getPlantList}`;
-  private processTripDataUrl = `${environment.api.baseUrl}${environment.api.endpoints.processTripData}`;
+  private endpoints = {
+    sendTripData: '/InsertStagingTable',
+    getTripData: '/GetTripData',
+    getPlantList: '/GetListPlant',
+    processTripData: '/ProcessTripTimeEntry',
+    login: '/AuthenticateLogon'
+  };
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private environmentService: EnvironmentService
+  ) {}
 
   sendTripData(data: TripData): Observable<any> {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
     const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    const url = currentEnv.baseUrl + this.endpoints.sendTripData;
     
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
       'Company': 'SGI',
-      'x-api-key': environment.api.apiKey
+      'x-api-key': currentEnv.apiKey
     });
 
     // Ensure data is properly formatted
@@ -84,6 +93,8 @@ export class ApiService {
 
     console.log('🚀 Original data received:', data);
     console.log('🚀 Trip Data Request (formatted):', requestData);
+    console.log('🚀 Using environment:', currentEnv.displayName);
+    console.log('🚀 API URL:', url);
     console.log('🚀 Request data types:', {
       odometer: typeof requestData.odometer,
       type: typeof requestData.type,
@@ -100,25 +111,27 @@ export class ApiService {
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth.substring(0, 20)}...`,
       'Company': 'SGI',
-      'x-api-key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
+      'x-api-key': currentEnv.apiKey ? `${currentEnv.apiKey.substring(0, 10)}...` : 'Not set'
     });
     console.log('📤 Final JSON payload:', JSON.stringify(requestData, null, 2));
 
-    return this.http.post(this.sendTripDataUrl, requestData, { headers });
+    return this.http.post(url, requestData, { headers });
   }
 
   /**
    * Get trip data by trip number
    */
   getTripData(tripNum: string): Observable<TripInfo> {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
     const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    const url = currentEnv.baseUrl + this.endpoints.getTripData;
     
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
       'Company': 'SGI',
-      'x-api-key': environment.api.apiKey
+      'x-api-key': currentEnv.apiKey
     });
 
     const requestBody: GetTripDataRequest = {
@@ -126,22 +139,26 @@ export class ApiService {
     };
 
     console.log('Get Trip Data Request:', requestBody);
+    console.log('Using environment:', currentEnv.displayName);
     console.log('Request Headers:', {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
       'Company': 'SGI',
-      'x-api-key': environment.api.apiKey
+      'x-api-key': currentEnv.apiKey
     });
-    console.log('API URL:', this.getTripDataUrl);
+    console.log('API URL:', url);
 
-    return this.http.post<TripInfo>(this.getTripDataUrl, requestBody, { headers });
+    return this.http.post<TripInfo>(url, requestBody, { headers });
   }
 
   /**
    * Get list of plants
    */
   getPlantList(): Observable<any> {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
+    const url = currentEnv.baseUrl + this.endpoints.getPlantList;
+    
     // Debug Basic Auth encoding
     console.log('🔐 Raw credentials:', {
       username: environment.api.basicAuth.username,
@@ -160,43 +177,46 @@ export class ApiService {
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
       'Company': 'SGI',
-      'x-api-key': environment.api.apiKey
+      'x-api-key': currentEnv.apiKey
     });
 
     // POST request with empty body (as per requirement)
     const emptyBody = {};
 
     console.log('🌱 Get Plant List Request');
-    console.log('🔗 API URL:', this.getPlantListUrl);
+    console.log('🌍 Using environment:', currentEnv.displayName);
+    console.log('🔗 API URL:', url);
     console.log('📋 Full URL breakdown:', {
-      baseUrl: environment.api.baseUrl,
-      endpoint: environment.api.endpoints.getPlantList,
-      fullUrl: this.getPlantListUrl
+      baseUrl: currentEnv.baseUrl,
+      endpoint: this.endpoints.getPlantList,
+      fullUrl: url
     });
     console.log('📡 Request Headers:', {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth.substring(0, 20)}...`,
       'Company': 'SGI',
-      'x-api-key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
+      'x-api-key': currentEnv.apiKey ? `${currentEnv.apiKey.substring(0, 10)}...` : 'Not set'
     });
     console.log('📦 Request Body:', emptyBody);
 
-    return this.http.post<any>(this.getPlantListUrl, emptyBody, { headers });
+    return this.http.post<any>(url, emptyBody, { headers });
   }
 
   /**
    * Process trip data to Epicor after staging table insert
    */
   processTripData(tripNum: string): Observable<any> {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
     const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    const url = currentEnv.baseUrl + this.endpoints.processTripData;
     
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
       'Company': 'SGI',
-      'x-api-key': environment.api.apiKey
+      'x-api-key': currentEnv.apiKey
     });
 
     const requestBody = {
@@ -204,16 +224,17 @@ export class ApiService {
     };
 
     console.log('🔄 Process Trip Data Request:', requestBody);
+    console.log('🌍 Using environment:', currentEnv.displayName);
     console.log('📡 Request Headers:', {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Basic ${basicAuth.substring(0, 20)}...`,
       'Company': 'SGI',
-      'x-api-key': environment.api.apiKey ? `${environment.api.apiKey.substring(0, 10)}...` : 'Not set'
+      'x-api-key': currentEnv.apiKey ? `${currentEnv.apiKey.substring(0, 10)}...` : 'Not set'
     });
-    console.log('🔗 API URL:', this.processTripDataUrl);
+    console.log('🔗 API URL:', url);
 
-    return this.http.post<any>(this.processTripDataUrl, requestBody, { headers })
+    return this.http.post<any>(url, requestBody, { headers })
       .pipe(
         tap(response => console.log('✅ Process Trip Data Response:', response)),
         catchError(error => {

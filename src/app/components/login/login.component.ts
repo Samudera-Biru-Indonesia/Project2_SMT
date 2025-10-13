@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { GeolocationService, UserLocation } from '../../services/geolocation.service';
 import { ApiService, Plant } from '../../services/api.service';
+import { EnvironmentService, ApiEnvironment } from '../../services/environment.service';
 
 @Component({
   selector: 'app-login',
@@ -30,15 +31,32 @@ export class LoginComponent {
   dropdownOpen: boolean = false;
   selectedPlantText: string = '';
 
+  // Environment selection properties
+  environments: ApiEnvironment[] = [];
+  selectedEnvironment: string = 'live';
+  showSettings: boolean = false;
+
   constructor(
     private router: Router,
     private authService: AuthService,
     private geolocationService: GeolocationService,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private environmentService: EnvironmentService
   ) {}
 
   ngOnInit() {
     console.log('🚀 LoginComponent ngOnInit started');
+    
+    // Initialize environments and ALWAYS set to LIVE by default
+    this.environments = this.environmentService.getEnvironments();
+    
+    // Force set to LIVE environment on every login page load
+    this.environmentService.setEnvironment('live');
+    this.selectedEnvironment = 'live';
+    
+    console.log('🌍 Environment forced to LIVE on login');
+    console.log('🌍 Available environments:', this.environments);
+    
     this.getCurrentLocation();
     console.log('🏭 About to call loadPlantList()');
     this.loadPlantList();
@@ -268,6 +286,27 @@ export class LoginComponent {
 
   getSelectedPlantText(): string {
     return this.selectedPlantText || 'Pilih Site';
+  }
+
+  // Settings toggle method  
+  toggleSettings() {
+    this.showSettings = !this.showSettings;
+  }
+
+  // Environment selection method
+  selectEnvironment(envName: string) {
+    console.log('🌍 Switching environment to:', envName);
+    this.selectedEnvironment = envName;
+    this.environmentService.setEnvironment(envName);
+    
+    // Reload plant list with new environment
+    this.plants = [];
+    this.site = '';
+    this.selectedPlantText = '';
+    this.loadPlantList();
+    
+    // Hide settings after selection
+    this.showSettings = false;
   }
 
   // Close dropdown when clicking outside

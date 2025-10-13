@@ -1,11 +1,11 @@
 <div class="login-container">
   <div class="login-card">
     <div class="logo-section">
-      <img src="/truck/assets/images/samator.jpg" alt="Samator Logo" class="company-logo" />
+      <img src="assets/images/samator.jpg" alt="Samator Logo" class="company-logo" />
       <h1>Sistem Manajemen Truk</h1>
       <p>Silakan login untuk melanjutkan</p>
     </div>
-    
+
     <!-- Loading State -->
     <div class="loading-section" *ngIf="isLoading"> 
       <div class="loading-spinner"></div>
@@ -66,6 +66,31 @@
         🚀 Login
       </button>
     </form>
+
+    <!-- Settings Button -->
+    <div class="settings-section" *ngIf="!isLoading">
+      <button type="button" class="settings-btn" (click)="toggleSettings()">
+        ⚙️ Settings
+      </button>
+    </div>
+
+    <!-- Environment Selector (Hidden by default) -->
+    <div class="environment-section" *ngIf="!isLoading && showSettings">
+      <h4>Environment Selection</h4>
+      <div class="env-toggle">
+        <button 
+          type="button"
+          *ngFor="let env of environments" 
+          class="env-btn"
+          [class.active]="selectedEnvironment === env.name"
+          [class.test]="env.name === 'test'"
+          [class.pilot]="env.name === 'pilot'"
+          [class.live]="env.name === 'live'"
+          (click)="selectEnvironment(env.name)">
+          {{ env.displayName }}
+        </button>
+      </div>
+    </div>
 
     <!-- Error Message -->
     <div class="error-alert" *ngIf="errorMessage">

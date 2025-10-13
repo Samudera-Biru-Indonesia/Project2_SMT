@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, TripData } from '../../services/api.service';
+import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
 
 interface ChecklistItem {
   id: string;
@@ -14,7 +15,7 @@ interface ChecklistItem {
 @Component({
   selector: 'app-checklist',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EnvironmentIndicatorComponent],
   templateUrl: './checklist.component.html',
   styleUrls: ['./checklist.component.css']
 })

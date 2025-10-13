@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { GeolocationService, UserLocation } from './geolocation.service';
 import { environment } from '../../environments/environment';
+import { EnvironmentService } from './environment.service';
 
 export interface AuthUser {
   username: string;
@@ -54,7 +55,8 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private geolocationService: GeolocationService
+    private geolocationService: GeolocationService,
+    private environmentService: EnvironmentService
   ) {
     // Check if user is already logged in
     this.loadUserFromStorage();
@@ -269,7 +271,10 @@ export class AuthService {
     this.currentUserSubject.next(null);
     localStorage.removeItem(this.STORAGE_KEY);
     this.stopSessionMonitoring();
-    console.log('User logged out');
+    
+    // Reset environment to LIVE on logout
+    this.environmentService.setEnvironment('live');
+    console.log('User logged out and environment reset to LIVE');
     
     // Redirect to login page
     if (typeof window !== 'undefined') {
