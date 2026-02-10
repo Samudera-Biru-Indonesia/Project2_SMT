@@ -39,8 +39,7 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   private readonly STORAGE_KEY = 'smt_auth_user';
-  private readonly API_URL = `${environment.api.baseUrl}${environment.api.endpoints.login}`;
-  private readonly API_KEY = environment.api.apiKey;
+  private readonly LOGIN_ENDPOINT = '/AuthenticateLogon';
   
   // Session configuration
   private readonly SESSION_DURATION_HOURS = 8.5; // 8 hours 30 minutes
@@ -115,25 +114,30 @@ export class AuthService {
 
       console.log('Login Request:', loginRequest);
 
+      // Get current environment dynamically
+      const currentEnv = this.environmentService.getCurrentEnvironment();
+      const apiUrl = currentEnv.baseUrl + this.LOGIN_ENDPOINT;
+
       // Prepare headers dengan Basic Auth dan API Key
       const basicAuth = btoa(`${this.BASIC_AUTH_USERNAME}:${this.BASIC_AUTH_PASSWORD}`);
       const headers = new HttpHeaders({
         'Content-Type': 'application/json',
         'Authorization': `Basic ${basicAuth}`,
-        'x-api-key': this.API_KEY
+        'x-api-key': currentEnv.apiKey
       });
 
       console.log('Request Headers:', {
         'Content-Type': 'application/json',
         'Authorization': `Basic ${basicAuth}`,
-        'x-api-key': this.API_KEY
+        'x-api-key': currentEnv.apiKey
       });
 
-      console.log('API URL:', this.API_URL);
+      console.log('🌍 Using environment:', currentEnv.displayName);
+      console.log('API URL:', apiUrl);
 
       // Make API call
       const response = await firstValueFrom(
-        this.http.post<any>(this.API_URL, loginRequest, { headers })
+        this.http.post<any>(apiUrl, loginRequest, { headers })
       );
 
       console.log('API Response:', response);

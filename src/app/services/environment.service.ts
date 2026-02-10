@@ -16,8 +16,8 @@ export class EnvironmentService {
     test: {
       name: 'test',
       displayName: 'Test',
-      baseUrl: 'https://epicprodapp.samator.com/KineticTest2/api/v2/efx/SGI/SMTTruckCheckApp',
-      apiKey: 'Q3v4EYrkFzk8tNxd1exxpmCHVX48SQZKvSqyRxEpV77dS'
+      baseUrl: 'https://epictestapp.samator.com/KineticTest2/api/v2/efx/SGI/SMTTruckCheckApp',
+      apiKey: 'W5hczOaOGdc68PcfchvZSvhUmWOf9AX3P6Zhfm0cghdPu'
     },
     pilot: {
       name: 'pilot',

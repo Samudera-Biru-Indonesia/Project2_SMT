@@ -1,12 +1,20 @@
 {
-  "/api/*": {
+  "/KineticTest2/*": {
     "target": "https://epicprodapp.samator.com",
     "secure": true,
     "changeOrigin": true,
-    "logLevel": "debug",
-    "headers": {
-      "Accept": "application/json",
-      "Content-Type": "application/json"
-    }
+    "logLevel": "debug"
+  },
+  "/KineticPilot/*": {
+    "target": "https://epicprodapp.samator.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/Kinetic/*": {
+    "target": "https://epicprodapp.samator.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
   }
 }
