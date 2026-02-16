@@ -1,12 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { UserLocation } from '@shared/dto/location.dto';
 
-export interface UserLocation {
-  latitude: number;
-  longitude: number;
-  accuracy?: number;
-  timestamp?: number;
-}
+export type { UserLocation } from '@shared/dto/location.dto';
 
 @Injectable({
   providedIn: 'root'

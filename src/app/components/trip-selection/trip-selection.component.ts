@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { TripInfo } from '../../services/api.service';
+import { TripInfo } from '@shared/dto/trip.dto';
 import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
 
 @Component({

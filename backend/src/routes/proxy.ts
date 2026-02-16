@@ -1,4 +1,7 @@
 import { FastifyInstance } from 'fastify';
+import { LoginRequestDto } from '@shared/dto/login.dto';
+import { GetTripDataDto, SendTripDataDto, ProcessTripDataDto } from '@shared/dto/trip.dto';
+import { GetPlantListDto } from '@shared/dto/plant.dto';
 
 // Helper: ambil Epicor URL berdasarkan environment
 function getEpicorUrl(env: string): string {
@@ -28,7 +31,7 @@ export async function proxyRoutes(app: FastifyInstance) {
   const basicAuth = Buffer.from(`${username}:${password}`).toString('base64');
 
   // POST /api/login call Epicor /AuthenticateLogon
-  app.post<{ Body: { logonSite: string; logonEMP: string; curLatitude: number; curLongitude: number; env?: string } }>(
+  app.post<{ Body: LoginRequestDto }>(
     '/login',
     async (request, reply) => {
       const { logonSite, logonEMP, curLatitude, curLongitude, env = 'live' } = request.body;
@@ -46,7 +49,7 @@ export async function proxyRoutes(app: FastifyInstance) {
   );
 
   // POST /api/get-trip-data call Epicor /GetTripData
-  app.post<{ Body: { tripNum: string; env?: string } }>(
+  app.post<{ Body: GetTripDataDto }>(
     '/get-trip-data',
     async (request, reply) => {
       const { tripNum, env = 'live' } = request.body;
@@ -64,7 +67,7 @@ export async function proxyRoutes(app: FastifyInstance) {
   );
 
   // POST /api/send-trip-data call Epicor /InsertStagingTable
-  app.post<{ Body: { odometer: number; type: string; chk1: boolean; chk2: boolean; chk3: boolean; chk4: boolean; chk5: boolean; tripNum: string; note: string; env?: string } }>(
+  app.post<{ Body: SendTripDataDto }>(
     '/send-trip-data',
     async (request, reply) => {
       const { env = 'live', ...tripData } = request.body;
@@ -82,7 +85,7 @@ export async function proxyRoutes(app: FastifyInstance) {
   );
 
   // POST /api/get-plant-list call Epicor /GetListPlant
-  app.post<{ Body: { env?: string } }>(
+  app.post<{ Body: GetPlantListDto }>(
     '/get-plant-list',
     async (request, reply) => {
       const { env = 'live' } = request.body || {};
@@ -100,7 +103,7 @@ export async function proxyRoutes(app: FastifyInstance) {
   );
 
   // POST /api/process-trip-data call Epicor /ProcessTripTimeEntry
-  app.post<{ Body: { tripNum: string; env?: string } }>(
+  app.post<{ Body: ProcessTripDataDto }>(
     '/process-trip-data',
     async (request, reply) => {
       const { tripNum, env = 'live' } = request.body;

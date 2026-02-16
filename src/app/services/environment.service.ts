@@ -4,32 +4,26 @@ import { BehaviorSubject } from 'rxjs';
 export interface ApiEnvironment {
   name: string;
   displayName: string;
-  baseUrl: string;
-  apiKey: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class EnvironmentService {
+  private readonly proxyUrl = 'http://localhost:3000/api';
+
   private environments: { [key: string]: ApiEnvironment } = {
     test: {
       name: 'test',
       displayName: 'Test',
-      baseUrl: 'https://epictestapp.samator.com/KineticTest2/api/v2/efx/SGI/SMTTruckCheckApp',
-      apiKey: 'W5hczOaOGdc68PcfchvZSvhUmWOf9AX3P6Zhfm0cghdPu'
     },
     pilot: {
       name: 'pilot',
       displayName: 'Pilot',
-      baseUrl: 'https://epicprodapp.samator.com/KineticPilot/api/v2/efx/SGI/SMTTruckCheckApp',
-      apiKey: 'W5hczOaOGdc68PcfchvZSvhUmWOf9AX3P6Zhfm0cghdPu'
     },
     live: {
       name: 'live',
       displayName: 'Live',
-      baseUrl: 'https://epicprodapp.samator.com/Kinetic/api/v2/efx/SGI/SMTTruckCheckApp',
-      apiKey: 'W5hczOaOGdc68PcfchvZSvhUmWOf9AX3P6Zhfm0cghdPu'
     }
   };
 
@@ -37,10 +31,13 @@ export class EnvironmentService {
   public currentEnvironment$ = this.currentEnvironmentSubject.asObservable();
 
   constructor() {
-    // Always start with LIVE environment (ignore localStorage on fresh login)
-    // This ensures every login session starts with LIVE
-    this.currentEnvironmentSubject.next(this.environments['live']);
-    localStorage.setItem('selectedEnvironment', 'live');
+    const savedEnv = localStorage.getItem('selectedEnvironment') || 'live';
+    const env = this.environments[savedEnv] || this.environments['live'];
+    this.currentEnvironmentSubject.next(env);
+  }
+
+  getProxyUrl(): string {
+    return this.proxyUrl;
   }
 
   setEnvironment(envName: string): void {

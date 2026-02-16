@@ -4,8 +4,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
-import { GeolocationService, UserLocation } from '../../services/geolocation.service';
-import { ApiService, Plant } from '../../services/api.service';
+import { GeolocationService } from '../../services/geolocation.service';
+import { ApiService } from '../../services/api.service';
+import { UserLocation } from '@shared/dto/location.dto';
+import { Plant } from '@shared/dto/plant.dto';
 import { EnvironmentService, ApiEnvironment } from '../../services/environment.service';
 
 @Component({
@@ -47,14 +49,14 @@ export class LoginComponent {
   ngOnInit() {
     console.log('🚀 LoginComponent ngOnInit started');
     
-    // Initialize environments and ALWAYS set to LIVE by default
+    // Initialize environments, pakai yang tersimpan atau default live
     this.environments = this.environmentService.getEnvironments();
-    
-    // Force set to LIVE environment on every login page load
-    this.environmentService.setEnvironment('live');
-    this.selectedEnvironment = 'live';
-    
-    console.log('🌍 Environment forced to LIVE on login');
+
+    const savedEnv = localStorage.getItem('selectedEnvironment') || 'live';
+    this.environmentService.setEnvironment(savedEnv);
+    this.selectedEnvironment = savedEnv;
+
+    console.log('🌍 Environment set to:', savedEnv);
     console.log('🌍 Available environments:', this.environments);
     
     this.getCurrentLocation();

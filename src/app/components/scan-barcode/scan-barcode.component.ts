@@ -4,7 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BrowserMultiFormatReader, Result } from '@zxing/library';
 import { BarcodeService } from '../../services/barcode.service';
-import { ApiService, TripInfo } from '../../services/api.service';
+import { ApiService } from '../../services/api.service';
+import { TripInfo } from '@shared/dto/trip.dto';
 import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
 
 @Component({

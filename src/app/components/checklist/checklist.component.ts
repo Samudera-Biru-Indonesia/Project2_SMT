@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService, TripData } from '../../services/api.service';
+import { ApiService } from '../../services/api.service';
+import { TripData } from '@shared/dto/trip.dto';
 import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
 
 interface ChecklistItem {

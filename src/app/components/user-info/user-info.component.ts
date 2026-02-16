@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService, AuthUser } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
+import { AuthUser } from '@shared/dto/auth.dto';
 import { GeolocationService } from '../../services/geolocation.service';
 
 @Component({
