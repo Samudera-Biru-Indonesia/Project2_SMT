@@ -46,7 +46,4 @@ Thumbs.db
 /src/environments/environment.development.ts
 /src/environments/environment.template.ts
 
-# Backend environment
-backend/.env
-backend/dist
-backend/node_modules
+.env
