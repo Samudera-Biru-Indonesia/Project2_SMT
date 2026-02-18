@@ -34,6 +34,7 @@
             </div>
           </div>
         </div>
+        <p class="site-warning" *ngIf="siteWarning">{{ siteWarning }}</p>
       </div>
 
       <div class="form-group">
@@ -63,20 +64,20 @@
         [disabled]="!empCode.trim() || !site.trim() || !currentLocation"
         [class.disabled]="!empCode.trim() || !site.trim() || !currentLocation"
       >
-        🚀 Login
+        Login
       </button>
     </form>
 
     <!-- Settings Button -->
     <div class="settings-section" *ngIf="!isLoading">
       <button type="button" class="settings-btn" (click)="toggleSettings()">
-        ⚙️ Settings
+        ⚙️ Pengaturan
       </button>
     </div>
 
     <!-- Environment Selector (Hidden by default) -->
     <div class="environment-section" *ngIf="!isLoading && showSettings">
-      <h4>Environment Selection</h4>
+      <h4>Pilihan Lingkungan</h4>
       <div class="env-toggle">
         <button 
           type="button"
@@ -94,7 +95,7 @@
 
     <!-- Error Message -->
     <div class="error-alert" *ngIf="errorMessage">
-      <p>⚠️ {{ errorMessage }}</p>
+      <p>{{ errorMessage }}</p>
     </div>
   </div>
 </div>

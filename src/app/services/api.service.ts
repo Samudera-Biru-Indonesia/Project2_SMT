@@ -10,9 +10,6 @@ export interface TripData {
   type: string;
   chk1: boolean;
   chk2: boolean;
-  chk3: boolean;
-  chk4: boolean;
-  chk5: boolean;
   tripNum: string;
   note: string;
 }
@@ -39,6 +36,8 @@ export interface GetTripDataResponse {
 export interface Plant {
   Plant: string;  // Plant code like "SGI053"
   Name: string;   // Plant name like "SGI YOGYAKARTA"
+  Lat: number;
+  Long: number;
 }
 
 export interface GetPlantListResponse {
@@ -83,9 +82,6 @@ export class ApiService {
       type: String(data.type || ''),
       chk1: Boolean(data.chk1),
       chk2: Boolean(data.chk2),
-      chk3: Boolean(data.chk3),
-      chk4: Boolean(data.chk4),
-      chk5: Boolean(data.chk5),
       tripNum: String(data.tripNum || ''),
       note: String(data.note || '')
     };
@@ -99,9 +95,6 @@ export class ApiService {
       type: typeof requestData.type,
       chk1: typeof requestData.chk1,
       chk2: typeof requestData.chk2,
-      chk3: typeof requestData.chk3,
-      chk4: typeof requestData.chk4,
-      chk5: typeof requestData.chk5,
       tripNum: typeof requestData.tripNum,
       note: typeof requestData.note
     });
@@ -241,5 +234,19 @@ export class ApiService {
           return throwError(() => error);
         })
       );
+  }
+
+  uploadPhotos(tripNum: string, odometerPhoto: string, cargoPhoto: string): Observable<any> {
+    const url = 'http://localhost:3000/api/upload-photos';
+
+    const body = {
+      tripNum,
+      odometerPhoto,
+      cargoPhoto
+    };
+
+    console.log('📸 Uploading photos for trip:', tripNum);
+
+    return this.http.post<any>(url, body);
   }
 }

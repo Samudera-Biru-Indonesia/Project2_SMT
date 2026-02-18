@@ -30,6 +30,7 @@ export class LoginComponent {
   // Custom dropdown properties
   dropdownOpen: boolean = false;
   selectedPlantText: string = '';
+  siteWarning: string = '';
 
   // Environment selection properties
   environments: ApiEnvironment[] = [];
@@ -102,16 +103,18 @@ export class LoginComponent {
       }
 
       this.currentLocation = bestLocation;
-      
+
       // Final result log
       console.log('🎯 FINAL Location selected:', {
         latitude: this.currentLocation.latitude,
         longitude: this.currentLocation.longitude,
         accuracy: this.currentLocation.accuracy,
-        accuracyLevel: this.currentLocation.accuracy! > 1000 ? 'VERY LOW' : 
-                      this.currentLocation.accuracy! > 100 ? 'LOW' : 
+        accuracyLevel: this.currentLocation.accuracy! > 1000 ? 'VERY LOW' :
+                      this.currentLocation.accuracy! > 100 ? 'LOW' :
                       this.currentLocation.accuracy! > 50 ? 'MEDIUM' : 'HIGH'
       });
+
+      this.autoSelectSite();
 
     } catch (error) {
       console.error('Error getting location:', error);
@@ -193,21 +196,8 @@ export class LoginComponent {
     
     try {
       console.log('🏭 Loading plant list...');
-      console.log('🏭 Calling API service getPlantList()');
       
       const response = await firstValueFrom(this.apiService.getPlantList());
-      
-      console.log('🏭 Plant list response received:', response);
-      console.log('🏭 Response type:', typeof response);
-      console.log('🏭 Response is array?:', Array.isArray(response));
-      
-      // Log the Result object if it exists
-      if (response && response.Result) {
-        console.log('🏭 Response.Result:', response.Result);
-        console.log('🏭 Response.Result type:', typeof response.Result);
-        console.log('🏭 Response.Result is array?:', Array.isArray(response.Result));
-        console.log('🏭 Response.Result keys:', Object.keys(response.Result));
-      }
       
       // Handle different response structures
       if (response) {
@@ -216,57 +206,88 @@ export class LoginComponent {
             // Sort by Name alphabetically (ascending)
             return a.Name.localeCompare(b.Name);
           });
-          console.log('🏭 Using response.Result.Plant array (sorted by name)');
-        } else if (Array.isArray(response)) {
-          this.plants = response.sort((a: Plant, b: Plant) => {
-            // Sort by Name alphabetically (ascending)
-            return a.Name.localeCompare(b.Name);
-          });
-          console.log('🏭 Using response directly as array (sorted by name)');
-        } else if (response.Result && Array.isArray(response.Result)) {
-          this.plants = response.Result.sort((a: Plant, b: Plant) => {
-            // Sort by Name alphabetically (ascending)
-            return a.Name.localeCompare(b.Name);
-          });
-          console.log('🏭 Using response.Result array (sorted by name)');
-        } else if (response.plants && Array.isArray(response.plants)) {
-          this.plants = response.plants.sort((a: Plant, b: Plant) => {
-            // Sort by Name alphabetically (ascending)
-            return a.Name.localeCompare(b.Name);
-          });
-          console.log('🏭 Using response.plants array (sorted by name)');
-        } else if (response.data && Array.isArray(response.data)) {
-          this.plants = response.data.sort((a: Plant, b: Plant) => {
-            // Sort by Name alphabetically (ascending)
-            return a.Name.localeCompare(b.Name);
-          });
-          console.log('🏭 Using response.data array (sorted by name)');
         } else {
-          console.log('🏭 Unexpected plant list response structure:', response);
           this.plants = [];
         }
         
         console.log('🏭 Plants loaded count:', this.plants.length);
         console.log('🏭 Plants data:', this.plants);
+
+        this.autoSelectSite();
       } else {
         console.log('🏭 No response received');
         this.plants = [];
       }
       
     } catch (error) {
-      console.error('❌ Error loading plant list:', error);
-      console.error('❌ Error details:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        status: (error as any)?.status,
-        statusText: (error as any)?.statusText,
-        url: (error as any)?.url
-      });
       this.plants = [];
-      // Don't show error to user for plant list, keep text input as fallback
     } finally {
       this.plantsLoading = false;
       console.log('🏭 loadPlantList() completed, plantsLoading set to false');
     }
+  }
+
+  autoSelectSite() {
+    console.log('📍 autoSelectSite() called', {
+      hasLocation: !!this.currentLocation,
+      plantsCount: this.plants.length,
+      currentSite: this.site
+    });
+
+    if (!this.currentLocation || this.plants.length === 0) {
+      console.log('📍 Skipped: waiting for data');
+      return;
+    }
+
+    if (this.site) {
+      console.log('📍 Skipped: site already selected');
+      return;
+    }
+
+    // Log first plant to check field names
+    if (this.plants.length > 0) {
+      console.log('📍 Sample plant data:', JSON.stringify(this.plants[0]));
+    }
+
+    let closestPlant: Plant | null = null;
+    let closestDistance = Infinity;
+
+    for (const plant of this.plants) {
+      if (plant.Lat == null || plant.Long == null) continue;
+      const dist = this.calculateDistance(
+        this.currentLocation.latitude,
+        this.currentLocation.longitude,
+        plant.Lat,
+        plant.Long
+      );
+      if (dist < closestDistance) {
+        closestDistance = dist;
+        closestPlant = plant;
+      }
+    }
+
+    if (closestPlant && closestDistance <= 1) {
+      console.log(`📍 Auto-selecting site: ${closestPlant.Name} (${closestDistance.toFixed(2)} km)`);
+      this.siteWarning = '';
+      this.selectSite(closestPlant.Plant, `${closestPlant.Plant} - ${closestPlant.Name}`);
+    } else {
+      console.log(`📍 No site within 1 km. Closest: ${closestDistance.toFixed(2)} km`);
+      this.siteWarning = closestPlant
+        ? `Tidak ada site dalam radius 1 km. Site terdekat: ${closestPlant.Name} (${closestDistance.toFixed(1)} km)`
+        : 'Tidak ada data koordinat site yang tersedia';
+    }
+  }
+
+  calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
   }
 
   formatCoordinate(coord: number): string {
