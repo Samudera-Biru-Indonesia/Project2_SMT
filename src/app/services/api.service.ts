@@ -21,7 +21,6 @@ export interface TripInfo {
   driver: string;
   codriver: string;
   truckPlate: string;
-  routeID: string;
   plant: string;
   ETADate: string;
   truckDesc: string;
