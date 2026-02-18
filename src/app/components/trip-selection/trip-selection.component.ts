@@ -12,7 +12,7 @@ import { EnvironmentIndicatorComponent } from '../environment-indicator/environm
   styleUrls: ['./trip-selection.component.css']
 })
 export class TripSelectionComponent implements OnInit {
-  truckBarcode: string = '';
+  // truckBarcode: string = '';
   tripData: TripInfo | null = null;
   hasTripData: boolean = false;
   tripNumber: string = '';
@@ -21,15 +21,18 @@ export class TripSelectionComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit() {
-    this.truckBarcode = localStorage.getItem('currentTruckBarcode') || '';
-    if (!this.truckBarcode) {
-      this.router.navigate(['/scan-barcode']);
-      return;
-    }
+    console.log('localStorage items:', Object.keys(localStorage));
+    // this.truckBarcode = localStorage.getItem('currentTruckBarcode') || '';
+    localStorage.removeItem('tripType'); // supaya g ngebug waktu bolak balik halaman. better setiap kali masuk ke halaman ini jadi ke-reset aja.
+
+    // if (!this.truckBarcode) {
+    //   this.router.navigate(['/scan-barcode']);
+    //   return;
+    // }
 
     // Use the truck barcode as trip number (surat jalan) instead of generating new one
-    this.tripNumber = this.truckBarcode;
-    localStorage.setItem('tripNumber', this.tripNumber);
+    // this.tripNumber = this.truckBarcode;
+    // localStorage.setItem('tripNumber', this.tripNumber);
 
     // Check if we have trip data from API
     const tripDataString = localStorage.getItem('currentTripData');
@@ -57,16 +60,10 @@ export class TripSelectionComponent implements OnInit {
     // Trip number already set in ngOnInit (using truck barcode)
     localStorage.setItem('tripNumber', this.tripNumber);
     
-    if (type === 'OUT') {
-      // For OUT trips, go to checklist first
-      this.router.navigate(['/checklist']);
-    } else {
-      // For IN trips, go directly to odometer
-      this.router.navigate(['/odometer']);
-    }
-  }
-
-  goBack() {
     this.router.navigate(['/scan-barcode']);
   }
+
+  // goBack() {
+  //   this.router.navigate(['/landing']);
+  // }
 }

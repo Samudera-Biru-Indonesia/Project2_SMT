@@ -24,6 +24,7 @@ export class ChecklistComponent implements OnInit {
   tripType: string = '';
   tripNumber: string = '';
   plateNumber: string = '';
+  tripDriver: string = '';
   
   checklistItems: ChecklistItem[] = [
     { id: 'chk1', label: 'Engine Oil Level', checked: false, required: true },
@@ -46,12 +47,15 @@ export class ChecklistComponent implements OnInit {
       try {
         const tripData = JSON.parse(tripDataString);
         this.plateNumber = tripData?.truckPlate || 'N/A';
+        this.tripDriver = tripData?.driver || 'N/A';
       } catch (error) {
         console.error('Error parsing trip data:', error);
         this.plateNumber = 'N/A';
+        this.tripDriver = 'N/A';
       }
     } else {
       this.plateNumber = 'N/A';
+      this.tripDriver = 'N/A';
     }
     
     if (!this.truckBarcode || this.tripType !== 'OUT') {
@@ -87,7 +91,8 @@ export class ChecklistComponent implements OnInit {
         chk4: this.checklistItems.find(item => item.id === 'chk4')?.checked || false,
         chk5: this.checklistItems.find(item => item.id === 'chk5')?.checked || false,
         tripNum: localStorage.getItem('tripNumber') || '',
-        note: '' // Will be filled in odometer component
+        note: '', // Will be filled in odometer component
+        tripDriver: localStorage.getItem('tripDriver') || ''
       };
       
       // Save trip data for later use in odometer component
@@ -100,6 +105,6 @@ export class ChecklistComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/trip-selection']);
+    this.router.navigate(['/scan-barcode']);
   }
 }

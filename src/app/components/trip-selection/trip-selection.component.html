@@ -1,14 +1,14 @@
 <div class="trip-container">
   <app-environment-indicator></app-environment-indicator>
   <header class="header">
-    <button class="back-btn" (click)="goBack()">← Kembali</button>
+    <!-- <button class="back-btn" (click)="goBack()">← Kembali</button> -->
     <h1>Pilih Jenis Perjalanan</h1>
   </header>
 
   <main class="trip-content">
     <div class="trip-card">
       <!-- Trip Header Info - Always Visible -->
-      <div class="trip-header-info">
+      <!-- <div class="trip-header-info">
         <div class="trip-number-display">
           <span class="trip-label">Nomor SPK:</span>
           <span class="trip-value">{{ tripNumber }}</span>
@@ -18,16 +18,13 @@
           <span class="plate-value">{{ plateNumber }}</span>
         </div>
         <div class="driver-display" *ngIf="hasTripData && tripData">
-          <span class="plate-label">Driver:</span>
-          <span class="plate-value">{{ tripData.driver || '-' }}</span>
+          <span class="driver-label">Driver:</span>
+          <span class="driver-value">{{ tripData.driver || '-' }}</span>
         </div>
-      </div>
+      </div> -->
 
 
-      <!-- Compact No Trip Data Message -->
-      <div class="no-data-compact" *ngIf="!hasTripData">
-        <span class="info-compact">ℹ️ Mode manual</span>
-      </div>
+      <!-- Compact No Trip Data Message -->      
 
       <!-- Main Selection Buttons -->
       <div class="selection-section">

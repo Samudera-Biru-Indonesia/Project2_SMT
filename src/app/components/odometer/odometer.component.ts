@@ -18,6 +18,7 @@ export class OdometerComponent implements OnInit {
   plateNumber: string = '';
   odometerReading: string = '';
   notes: string = '';
+  tripDriver: string = '';
 
   constructor(private router: Router, private apiService: ApiService) {}
 
@@ -25,6 +26,7 @@ export class OdometerComponent implements OnInit {
     this.truckBarcode = localStorage.getItem('currentTruckBarcode') || '';
     this.tripType = localStorage.getItem('tripType') || '';
     this.tripNumber = localStorage.getItem('tripNumber') || '';
+    this.tripDriver = localStorage.getItem('tripDriver') || '';
     
     console.log('Odometer Component - Trip Type:', this.tripType);
     console.log('Odometer Component - Trip Type Class:', this.tripType.toLowerCase() + '-trip');
@@ -36,12 +38,15 @@ export class OdometerComponent implements OnInit {
       try {
         const tripData = JSON.parse(tripDataString);
         this.plateNumber = tripData?.truckPlate || 'N/A';
+        this.tripDriver = tripData?.driver || 'N/A';
       } catch (error) {
         console.error('Error parsing trip data:', error);
         this.plateNumber = 'N/A';
+        this.tripDriver = 'N/A';
       }
     } else {
       this.plateNumber = 'N/A';
+      this.tripDriver = 'N/A';
     }
     
     if (!this.truckBarcode || !this.tripType) {
@@ -104,7 +109,8 @@ export class OdometerComponent implements OnInit {
         chk4: false,
         chk5: false,
         tripNum: tripNumber,
-        note: this.notes || ''
+        note: this.notes || '',
+        tripDriver: this.tripDriver || ''
       };
       console.log('✅ Created new trip data for IN trip or missing checklist data');
     }
@@ -247,10 +253,11 @@ export class OdometerComponent implements OnInit {
   // }
 
   goBack() {
-    if (this.tripType === 'OUT') {
-      this.router.navigate(['/checklist']);
-    } else {
-      this.router.navigate(['/trip-selection']);
-    }
+    // if (this.tripType === 'OUT') {
+    //   this.router.navigate(['/checklist']);
+    // } else {
+    //   this.router.navigate(['/trip-selection']);
+    // }
+    this.router.navigate(['/scan-barcode']);
   }
 }

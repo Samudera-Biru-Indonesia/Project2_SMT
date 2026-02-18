@@ -158,9 +158,9 @@ export class LoginComponent {
       console.log('🔐 Login result:', result);
       
       if (result.success) {
-        console.log('✅ Login successful, redirecting to landing page');
-        // Redirect ke landing page
-        this.router.navigate(['/landing']);
+        console.log('✅ Login successful, redirecting to trip selection page');
+        // Redirect ke trip selection page
+        this.router.navigate(['/trip-selection']);
       } else {
         console.log('❌ Login failed:', result.message);
         this.errorMessage = result.message || 'Login gagal. Silakan coba lagi.';

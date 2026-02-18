@@ -15,6 +15,7 @@ export interface TripData {
   chk5: boolean;
   tripNum: string;
   note: string;
+  tripDriver: string;
 }
 
 export interface TripInfo {

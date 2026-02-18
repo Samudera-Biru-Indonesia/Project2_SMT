@@ -80,7 +80,7 @@
   margin-bottom: 20px;
 }
 
-.trip-number-display, .plate-number-display {
+.trip-number-display, .plate-number-display, .driver-display {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -88,17 +88,17 @@
   border-bottom: 1px solid #e9ecef;
 }
 
-.trip-number-display:last-child, .plate-number-display:last-child {
+.trip-number-display:last-child, .plate-number-display:last-child, .driver-display:last-child {
   border-bottom: none;
 }
 
-.trip-label, .plate-label {
+.trip-label, .plate-label, .driver-label {
   font-weight: 500;
   color: #555;
   font-size: 14px;
 }
 
-.trip-value, .plate-value {
+.trip-value, .plate-value, .driver-value {
   font-family: 'Courier New', monospace;
   font-weight: 600;
   font-size: 14px;

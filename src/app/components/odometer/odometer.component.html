@@ -16,6 +16,10 @@
           <span class="plate-label">Plat Nomor:</span>
           <span class="plate-value">{{ plateNumber }}</span>
         </div>
+        <div class="driver-display">
+          <span class="driver-label">Driver:</span>
+          <span class="driver-value">{{ tripDriver || '-' }}</span>
+        </div>
       </div>
 
       <form (ngSubmit)="onSubmit()" class="odometer-form">

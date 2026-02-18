@@ -49,6 +49,6 @@ export class TripCompleteComponent implements OnInit {
   }
 
   goToLanding() {
-    this.router.navigate(['/landing']);
+    this.router.navigate(['/trip-selection']);
   }
 }
