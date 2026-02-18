@@ -279,12 +279,22 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
         
         // Store trip data and barcode in localStorage
         localStorage.setItem('currentTruckBarcode', tripCode);
+        // FYI INI CATETAN DARI VERSI SEBELUMNYA IDK: Use the truck barcode as trip number (surat jalan) instead of generating new one
+        localStorage.setItem('tripNumber', tripCode);
         localStorage.setItem('currentTripData', JSON.stringify(tripData));
         
         this.isLoadingTripData = false;
         
         // Navigate to trip selection page with trip data
-        this.router.navigate(['/trip-selection']);
+        const type = localStorage.getItem('tripType');
+
+        if (type === 'OUT') {
+          // For OUT trips, go to checklist
+          this.router.navigate(['/checklist']);
+        } else {
+          // For IN trips, go directly to odometer
+          this.router.navigate(['/odometer']);
+        }
       },
       error: (error) => {
         console.error('Error getting trip data:', error);
@@ -335,7 +345,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
   goBack() {
     this.stopScanning();
-    this.router.navigate(['/landing']);
+    this.router.navigate(['/trip-selection']);
   }
 
   onBarcodeInputChange() {

@@ -263,7 +263,8 @@ export class AuthService {
    */
   logout(): void {
     this.currentUserSubject.next(null);
-    localStorage.removeItem(this.STORAGE_KEY);
+    // localStorage.removeItem(this.STORAGE_KEY);
+    localStorage.clear();
     this.stopSessionMonitoring();
     
     // Reset environment to LIVE on logout
