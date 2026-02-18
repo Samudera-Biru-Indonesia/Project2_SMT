@@ -28,6 +28,12 @@ export interface GetTripDataRequest {
   tripNum: string;
 }
 
+export interface GetAllTripDataRequest {
+  nopol: string;
+  company: string;
+  plant: string;
+}
+
 export interface GetTripDataResponse {
   success: boolean;
   data: TripInfo;
@@ -56,7 +62,9 @@ export class ApiService {
     getTripData: '/GetTripData',
     getPlantList: '/GetListPlant',
     processTripData: '/ProcessTripTimeEntry',
-    login: '/AuthenticateLogon'
+    login: '/AuthenticateLogon',
+    getAllTripData: '/GetAllTripData',
+    GetTotalFromTripNumber: "/getTotalFromTripNumber"
   };
 
   constructor(
@@ -143,6 +151,39 @@ export class ApiService {
     console.log('API URL:', url);
 
     return this.http.post<TripInfo>(url, requestBody, { headers });
+  }
+
+  getAllTripData(nopol: string): Observable<any> {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
+    const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    const url = currentEnv.baseUrl + this.endpoints.getAllTripData;
+    
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth}`,
+      'Company': 'SGI',
+      'x-api-key': currentEnv.apiKey
+    });
+
+    const requestBody: GetAllTripDataRequest = {
+      nopol: nopol,
+      company: localStorage.getItem('currentCompany') || '',
+      plant: localStorage.getItem('currentPlant') || ''
+    };
+
+    console.log('Get Trip Data Request:', requestBody);
+    console.log('Using environment:', currentEnv.displayName);
+    console.log('Request Headers:', {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth}`,
+      'Company': 'SGI',
+      'x-api-key': currentEnv.apiKey
+    });
+    console.log('API URL:', url);
+
+    return this.http.post<any>(url, requestBody, { headers });
   }
 
   /**

@@ -1,7 +1,9 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { BrowserMultiFormatReader, Result } from '@zxing/library';
 import { BarcodeService } from '../../services/barcode.service';
 import { ApiService, TripInfo } from '../../services/api.service';
@@ -18,6 +20,11 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   @ViewChild('videoElement', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
   
   barcodeInput: string = '';
+  manualTruckPlate: string = '';
+  spkOptions: string[] = [];
+  spkDropdownOpen: boolean = false;
+  spkSearchQuery: string = '';
+  isLoadingSpk: boolean = false;
   isScanning: boolean = false;
   hasCamera: boolean = false;
   cameraError: string = '';
@@ -25,7 +32,8 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   showManualInput: boolean = false;
   errorMessage: string = '';
   errorTitle: string = '';
-  
+
+  private nopolSubject = new Subject<string>();
   private codeReader: BrowserMultiFormatReader;
   private stream: MediaStream | null = null;
   private scanAttemptCount: number = 0;
@@ -42,10 +50,24 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.checkCameraAvailability();
+
+    // Debounce nopol input — tunggu 600ms setelah berhenti ketik baru panggil API
+    this.nopolSubject.pipe(
+      debounceTime(600),
+      distinctUntilChanged()
+    ).subscribe(nopol => {
+      if (nopol.length >= 4) {
+        this.getAllTripDataFromAPI(nopol);
+      } else {
+        this.spkOptions = [];
+        this.barcodeInput = '';
+      }
+    });
   }
 
   ngOnDestroy() {
     this.stopScanning();
+    this.nopolSubject.complete();
   }
 
   async checkCameraAvailability() {
@@ -269,14 +291,19 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
    */
   getTripDataFromAPI(tripCode: string) {
     this.isLoadingTripData = true;
-    this.clearError(); // Clear any previous errors
+    this.clearError(); 
 
     console.log('Getting trip data for:', tripCode);
 
     this.apiService.getTripData(tripCode).subscribe({
       next: (tripData: TripInfo) => {
         console.log('Trip data received:', tripData);
-        
+
+        // Override truckPlate with manual input if provided
+        if (this.manualTruckPlate.trim()) {
+          tripData = { ...tripData, truckPlate: this.manualTruckPlate.trim().toUpperCase() };
+        }
+
         // Store trip data and barcode in localStorage
         localStorage.setItem('currentTruckBarcode', tripCode);
         // FYI INI CATETAN DARI VERSI SEBELUMNYA IDK: Use the truck barcode as trip number (surat jalan) instead of generating new one
@@ -305,6 +332,45 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  onNopolChange(value: string) {
+    this.manualTruckPlate = value.toUpperCase();
+    this.nopolSubject.next(this.manualTruckPlate);
+  }
+
+  getAllTripDataFromAPI(nopol: string) {
+    this.isLoadingSpk = true;
+    this.spkOptions = [];
+    this.barcodeInput = '';
+    this.clearError();
+
+    this.apiService.getAllTripData(nopol).subscribe({
+      next: (response: any) => {
+        console.log('getAllTripData response:', response);
+
+        // Response: { TripData: { Result: [ { tripNumber: "..." }, ... ] } }
+        const trips: any[] = response?.TripData?.Result ?? [];
+
+        this.spkOptions = trips
+          .map((t: any) => t.tripNumber ?? '')
+          .filter((s: string) => s.length > 0);
+
+        if (this.spkOptions.length === 1) {
+          this.barcodeInput = this.spkOptions[0];
+        } else {
+          this.barcodeInput = '';
+        }
+
+        this.isLoadingSpk = false;
+      },
+      error: (error) => {
+        console.error('getAllTripData error:', error);
+        this.isLoadingSpk = false;
+        this.handleApiError(error);
+      }
+    });
+  }
+
 
   /**
    * Handle API errors with user-friendly messages
@@ -368,5 +434,31 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
   toggleManualInput() {
     this.showManualInput = !this.showManualInput;
+  }
+
+  get filteredSpkOptions(): string[] {
+    if (!this.spkSearchQuery.trim()) return this.spkOptions;
+    const q = this.spkSearchQuery.trim().toUpperCase();
+    return this.spkOptions.filter(s => s.toUpperCase().includes(q));
+  }
+
+  toggleSpkDropdown() {
+    this.spkDropdownOpen = !this.spkDropdownOpen;
+    if (this.spkDropdownOpen) this.spkSearchQuery = '';
+  }
+
+  selectSpk(spk: string) {
+    this.barcodeInput = spk;
+    this.spkDropdownOpen = false;
+    this.spkSearchQuery = '';
+    this.clearError();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.spk-custom-dropdown')) {
+      this.spkDropdownOpen = false;
+    }
   }
 }

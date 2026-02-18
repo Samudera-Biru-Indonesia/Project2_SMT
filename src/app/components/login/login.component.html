@@ -25,7 +25,7 @@
                   [class.placeholder]="!site">{{ getSelectedPlantText() }}</span>
             <span class="dropdown-arrow">▼</span>
           </div>
-          <div class="dropdown-options" *ngIf="dropdownOpen">
+          <div class="dropdown-options" [hidden]="!dropdownOpen">
             <div class="dropdown-option" 
                  *ngFor="let plant of plants" 
                  [class.selected]="site === plant.Plant"

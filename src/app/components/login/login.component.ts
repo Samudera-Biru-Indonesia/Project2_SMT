@@ -68,52 +68,15 @@ export class LoginComponent {
     this.errorMessage = '';
 
     try {
-      // Try multiple attempts to get better accuracy
-      let bestLocation = await this.geolocationService.getCurrentLocation();
-      console.log('🗺️ GPS Location attempt 1:', {
-        latitude: bestLocation.latitude,
-        longitude: bestLocation.longitude,
-        accuracy: bestLocation.accuracy,
-        timestamp: new Date(bestLocation.timestamp || Date.now())
+      const location = await this.geolocationService.getCurrentLocation();
+      console.log('🗺️ GPS Location:', {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        accuracy: location.accuracy,
+        timestamp: new Date(location.timestamp || Date.now())
       });
 
-      // If accuracy is poor (> 100m), try again
-      if (bestLocation.accuracy && bestLocation.accuracy > 100) {
-        console.log('🔄 Accuracy poor (' + bestLocation.accuracy + 'm), trying again...');
-        
-        try {
-          const secondAttempt = await this.geolocationService.getCurrentLocation();
-          console.log('🗺️ GPS Location attempt 2:', {
-            latitude: secondAttempt.latitude,
-            longitude: secondAttempt.longitude,
-            accuracy: secondAttempt.accuracy,
-            timestamp: new Date(secondAttempt.timestamp || Date.now())
-          });
-
-          // Use better accuracy result
-          if (secondAttempt.accuracy && secondAttempt.accuracy < bestLocation.accuracy!) {
-            console.log('✅ Second attempt better, using that');
-            bestLocation = secondAttempt;
-          } else {
-            console.log('⚠️ First attempt still better');
-          }
-        } catch (error) {
-          console.log('❌ Second attempt failed, using first result');
-        }
-      }
-
-      this.currentLocation = bestLocation;
-
-      // Final result log
-      console.log('🎯 FINAL Location selected:', {
-        latitude: this.currentLocation.latitude,
-        longitude: this.currentLocation.longitude,
-        accuracy: this.currentLocation.accuracy,
-        accuracyLevel: this.currentLocation.accuracy! > 1000 ? 'VERY LOW' :
-                      this.currentLocation.accuracy! > 100 ? 'LOW' :
-                      this.currentLocation.accuracy! > 50 ? 'MEDIUM' : 'HIGH'
-      });
-
+      this.currentLocation = location;
       this.autoSelectSite();
 
     } catch (error) {
@@ -161,9 +124,14 @@ export class LoginComponent {
       console.log('🔐 Login result:', result);
       
       if (result.success) {
-        console.log('✅ Login successful, redirecting to trip selection page');
-        // Redirect ke trip selection page
-        this.router.navigate(['/trip-selection']);
+        console.log('✅ Login successful, redirecting to landing page');
+        // Simpan plant dan company ke localStorage
+        const plant = this.site.trim().toUpperCase();
+        const company = plant.substring(0, 3);
+        localStorage.setItem('currentPlant', plant);
+        localStorage.setItem('currentCompany', company);
+        // Redirect ke landing page
+        this.router.navigate(['/landing']);
       } else {
         console.log('❌ Login failed:', result.message);
         this.errorMessage = result.message || 'Login gagal. Silakan coba lagi.';

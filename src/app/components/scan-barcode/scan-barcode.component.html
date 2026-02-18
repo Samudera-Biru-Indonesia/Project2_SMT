@@ -81,28 +81,75 @@
       </div>
 
       <div class="manual-input-section" *ngIf="showManualInput">
-        <h3>Masukkan SPK Manual</h3>
-        <form (ngSubmit)="onSubmit()">
-          <div class="input-group">
+
+        <div class="input-group">
+            <label class="input-label">Nopol Truck</label>
             <input
               type="text"
-              [(ngModel)]="barcodeInput"
-              name="barcode"
-              placeholder="Masukkan barcode kendaraan"
+              [(ngModel)]="manualTruckPlate"
+              name="truckPlate"
+              placeholder="Contoh: KT8655UP"
               class="barcode-input"
-              [disabled]="isLoadingTripData"
-              (input)="onBarcodeInputChange()"
+              [disabled]="isLoadingTripData || isLoadingSpk"
+              (ngModelChange)="onNopolChange($event)"
             />
+            <div class="spk-loading" *ngIf="isLoadingSpk">
+              <span class="loading-dot"></span> Mencari nomor SPK...
+            </div>
+          </div>
+
+        <form (ngSubmit)="onSubmit()">
+          <div class="input-group">
+            <label class="input-label">Nomor SPK</label>
+
+            <!-- Custom dropdown dengan search -->
+            <div class="spk-custom-dropdown">
+              <div class="spk-dropdown-selected"
+                   [class.open]="spkDropdownOpen"
+                   [class.disabled]="isLoadingTripData || isLoadingSpk"
+                   (click)="!(isLoadingTripData || isLoadingSpk) && toggleSpkDropdown()">
+                <span [class.placeholder]="!barcodeInput">
+                  {{ barcodeInput || '-- Pilih Nomor SPK --' }}
+                </span>
+                <span class="spk-dropdown-arrow">▼</span>
+              </div>
+              <div class="spk-dropdown-panel" [hidden]="!spkDropdownOpen">
+                <div class="spk-search-wrapper">
+                  <input
+                    type="text"
+                    [(ngModel)]="spkSearchQuery"
+                    name="spkSearch"
+                    placeholder="Cari nomor SPK..."
+                    class="spk-search-input"
+                    (click)="$event.stopPropagation()"
+                  />
+                </div>
+                <div class="spk-options-list">
+                  <div
+                    *ngFor="let spk of filteredSpkOptions"
+                    class="spk-option"
+                    [class.selected]="barcodeInput === spk"
+                    (click)="selectSpk(spk)"
+                  >
+                    {{ spk }}
+                  </div>
+                  <div class="spk-no-result" *ngIf="filteredSpkOptions.length === 0">
+                    {{ spkOptions.length === 0 ? 'Isi nopol truck terlebih dahulu' : 'Tidak ditemukan' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="input-validation" *ngIf="barcodeInput.trim()">
-              <span 
-                class="validation-icon" 
+              <span
+                class="validation-icon"
                 [class.valid]="isValidBarcodeInput()"
                 [class.invalid]="!isValidBarcodeInput()"
               >
                 {{ isValidBarcodeInput() ? '✅' : '❌' }}
               </span>
               <span class="validation-text">
-                {{ isValidBarcodeInput() ? 'Format valid' : 'Format barcode tidak valid'  }}
+                {{ isValidBarcodeInput() ? 'Format valid' : 'Format tidak valid'  }}
               </span>
             </div>
           </div>

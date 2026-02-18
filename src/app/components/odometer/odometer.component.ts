@@ -17,6 +17,7 @@ export class OdometerComponent implements OnInit {
   tripNumber: string = '';
   plateNumber: string = '';
   odometerReading: string = '';
+  jumlahMuatan: string = '';
   notes: string = '';
   odometerPhoto: string = '';
   cargoPhoto: string = '';
@@ -112,10 +113,12 @@ export class OdometerComponent implements OnInit {
   onSubmit() {
     console.log('Form submitted with values:', {
       odometerReading: this.odometerReading,
+      jumlahMuatan: this.jumlahMuatan,
       notes: this.notes,
       truckBarcode: this.truckBarcode,
       tripType: this.tripType
     });
+
 
     if (!this.odometerReading) {
       alert('Silakan isi pembacaan odometer');
@@ -127,10 +130,21 @@ export class OdometerComponent implements OnInit {
       return;
     }
 
+    if (!this.jumlahMuatan) {
+      alert('Silakan isi jumlah muatan');
+      return;
+    }
+
     // Validate odometer reading
     const odometerValue = parseFloat(this.odometerReading);
     if (isNaN(odometerValue) || odometerValue < 0) {
       alert('Pembacaan odometer harus berupa angka yang valid dan tidak negatif');
+      return;
+    }
+
+    const jumlahMuatanValue = parseFloat(this.jumlahMuatan);
+    if (isNaN(jumlahMuatanValue) || jumlahMuatanValue < 0) {
+      alert('Jumlah muatan harus berupa angka yang valid dan tidak negatif');
       return;
     }
 
