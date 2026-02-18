@@ -45,10 +45,10 @@ export class TripCompleteComponent implements OnInit {
     localStorage.removeItem('currentTripData');
     localStorage.removeItem('tripData');
     
-    this.router.navigate(['/scan-barcode']);
-  }
-
-  goToLanding() {
     this.router.navigate(['/trip-selection']);
   }
+
+  // goToLanding() {
+  //   this.router.navigate(['/trip-selection']);
+  // }
 }
