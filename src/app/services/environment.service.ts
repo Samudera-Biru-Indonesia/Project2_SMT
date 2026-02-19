@@ -37,10 +37,9 @@ export class EnvironmentService {
   public currentEnvironment$ = this.currentEnvironmentSubject.asObservable();
 
   constructor() {
-    // Always start with LIVE environment (ignore localStorage on fresh login)
-    // This ensures every login session starts with LIVE
-    this.currentEnvironmentSubject.next(this.environments['live']);
-    localStorage.setItem('selectedEnvironment', 'live');
+    const saved = localStorage.getItem('selectedEnvironment');
+    const initial = (saved && this.environments[saved]) ? this.environments[saved] : this.environments['live'];
+    this.currentEnvironmentSubject.next(initial);
   }
 
   setEnvironment(envName: string): void {

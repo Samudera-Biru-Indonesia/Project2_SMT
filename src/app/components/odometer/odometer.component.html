@@ -40,6 +40,52 @@
             />
           </div>
 
+          <!-- Foto Odometer -->
+          <div class="form-group">
+            <label class="required">Foto Odometer</label>
+            <div class="photo-section">
+              <div class="photo-actions">
+                <label class="photo-btn camera-btn" style="color: white;">
+                  Kamera
+                  <input type="file" accept="image/*" capture="environment" (change)="onPhotoSelected($event, 'odometer')" hidden />
+                </label>
+                <button *ngIf="odometerPhoto" type="button" class="remove-photo-btn" (click)="removePhoto('odometer')">Hapus</button>
+              </div>
+              <img *ngIf="odometerPhoto" [src]="odometerPhoto" class="photo-preview" />
+            </div>
+          </div>
+
+          <!-- Foto Muatan -->
+          <div class="form-group">
+            <label class="required">Foto Muatan</label>
+            <div class="photo-section">
+              <div class="photo-actions">
+                <label class="photo-btn camera-btn" style="color: white;">
+                  Kamera
+                  <input type="file" accept="image/*" capture="environment" (change)="onPhotoSelected($event, 'cargo')" hidden />
+                </label>
+                <button *ngIf="cargoPhoto" type="button" class="remove-photo-btn" (click)="removePhoto('cargo')">Hapus</button>
+              </div>
+              <img *ngIf="cargoPhoto" [src]="cargoPhoto" class="photo-preview" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="jumlah-muatan" class="required">Jumlah Muatan:</label>
+            <input
+              type="number"
+              id="jumlah-muatan"
+              [(ngModel)]="jumlahMuatan"
+              name="odometerReading"
+              placeholder="Masukkan hasil perhitungan jumlah muatan"
+              class="odometer-input"
+              min="0"
+              step="0.1"
+              required
+              autocomplete="off"
+            />
+          </div>
+
           <div class="form-group">
             <label for="notes">Catatan Tambahan (Opsional)</label>
             <textarea
@@ -55,7 +101,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" 
+          <button type="submit"
                   class="complete-btn"
                   [ngStyle]="getButtonStyle()">
             Selesaikan Registrasi Perjalanan

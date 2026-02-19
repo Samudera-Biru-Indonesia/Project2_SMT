@@ -380,6 +380,74 @@
   transform: translateY(-2px) !important;
 }
 
+/* Photo Upload Sections */
+.photo-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.photo-actions {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.photo-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.2s ease;
+  pointer-events: auto;
+}
+
+.photo-btn:hover {
+  transform: translateY(-1px);
+}
+
+.form-group label.photo-btn.camera-btn {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  pointer-events: auto;
+  margin: 0;
+}
+
+.remove-photo-btn {
+  flex: 1;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.remove-photo-btn:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+.photo-preview {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 8px;
+  border: 2px solid #e1e5e9;
+  object-fit: cover;
+}
+
+
 /* Enhanced Mobile Responsiveness */
 @media (max-width: 768px) {
   .header {

@@ -27,11 +27,8 @@ export class ChecklistComponent implements OnInit {
   tripDriver: string = '';
   
   checklistItems: ChecklistItem[] = [
-    { id: 'chk1', label: 'Engine Oil Level', checked: false, required: true },
-    { id: 'chk2', label: 'Tire Condition', checked: false, required: true },
-    { id: 'chk3', label: 'Brake System', checked: false, required: true },
-    { id: 'chk4', label: 'Lights (Headlights, Taillights)', checked: false, required: true },
-    { id: 'chk5', label: 'Side Mirrors', checked: false, required: true }
+    { id: 'chk1', label: 'Surat Jalan', checked: false, required: true },
+    { id: 'chk2', label: 'APD', checked: false, required: true }
   ];
 
   constructor(private router: Router, private apiService: ApiService) {}
@@ -87,9 +84,6 @@ export class ChecklistComponent implements OnInit {
         type: this.tripType, // 'OUT' or 'IN'
         chk1: this.checklistItems.find(item => item.id === 'chk1')?.checked || false,
         chk2: this.checklistItems.find(item => item.id === 'chk2')?.checked || false,
-        chk3: this.checklistItems.find(item => item.id === 'chk3')?.checked || false,
-        chk4: this.checklistItems.find(item => item.id === 'chk4')?.checked || false,
-        chk5: this.checklistItems.find(item => item.id === 'chk5')?.checked || false,
         tripNum: localStorage.getItem('tripNumber') || '',
         note: '', // Will be filled in odometer component
         tripDriver: localStorage.getItem('tripDriver') || ''

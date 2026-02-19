@@ -749,6 +749,154 @@
   }
 }
 
+/* SPK Loading Indicator */
+.spk-loading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #667eea;
+}
+
+.loading-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border: 2px solid #667eea;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* SPK Custom Dropdown */
+.spk-custom-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.spk-dropdown-selected {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: monospace;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.spk-dropdown-selected:hover:not(.disabled) {
+  border-color: #667eea;
+}
+
+.spk-dropdown-selected.open {
+  border-color: #667eea;
+  border-radius: 8px 8px 0 0;
+}
+
+.spk-dropdown-selected.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spk-dropdown-selected .placeholder {
+  color: #adb5bd;
+}
+
+.spk-dropdown-arrow {
+  font-size: 10px;
+  color: #6c757d;
+  transition: transform 0.2s ease;
+}
+
+.spk-dropdown-selected.open .spk-dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.spk-dropdown-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #667eea;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.spk-search-wrapper {
+  padding: 8px;
+  border-bottom: 1px solid #e1e5e9;
+}
+
+.spk-search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.spk-search-input:focus {
+  border-color: #667eea;
+}
+
+.spk-options-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.spk-option {
+  padding: 10px 16px;
+  font-size: 14px;
+  font-family: monospace;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.spk-option:hover {
+  background: #f0f2ff;
+}
+
+.spk-option.selected {
+  background: #e8ecff;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.spk-no-result {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #adb5bd;
+  text-align: center;
+}
+
+/* Input Label */
+.input-label {
+  display: block;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 6px;
+}
+
+.input-optional {
+  font-weight: 400;
+  color: #6c757d;
+  font-size: 12px;
+}
+
 /* Input Validation */
 .input-validation {
   display: flex;

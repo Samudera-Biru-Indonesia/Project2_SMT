@@ -26,7 +26,7 @@ export class GeolocationService {
       
       if (!navigator.geolocation) {
         console.error('❌ Geolocation not supported');
-        reject(new Error('Geolocation is not supported by this browser.'));
+        reject(new Error('Geolokasi tidak didukung oleh browser ini.'));
         return;
       }
 
@@ -89,19 +89,19 @@ export class GeolocationService {
           const endTime = Date.now();
           const responseTime = endTime - startTime;
           
-          let errorMessage = 'Unknown error occurred';
-          
+          let errorMessage = 'Terjadi kesalahan yang tidak diketahui';
+
           switch (error.code) {
             case error.PERMISSION_DENIED:
-              errorMessage = 'User denied the request for Geolocation.';
+              errorMessage = 'Pengguna menolak permintaan akses lokasi.';
               console.error('❌ PERMISSION_DENIED:', errorMessage);
               break;
             case error.POSITION_UNAVAILABLE:
-              errorMessage = 'Location information is unavailable.';
+              errorMessage = 'Informasi lokasi tidak tersedia.';
               console.error('❌ POSITION_UNAVAILABLE:', errorMessage);
               break;
             case error.TIMEOUT:
-              errorMessage = 'The request to get user location timed out.';
+              errorMessage = 'Permintaan lokasi pengguna telah habis waktu.';
               console.error('❌ TIMEOUT:', errorMessage);
               break;
             default:
@@ -127,7 +127,7 @@ export class GeolocationService {
   watchPosition(): Observable<UserLocation> {
     return new Observable(observer => {
       if (!navigator.geolocation) {
-        observer.error('Geolocation is not supported by this browser.');
+        observer.error('Geolokasi tidak didukung oleh browser ini.');
         return;
       }
 

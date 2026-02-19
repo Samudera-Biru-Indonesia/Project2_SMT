@@ -18,7 +18,7 @@ import { GeolocationService } from '../../services/geolocation.service';
           <div class="user-name">{{ currentUser.username }}</div>
           <div class="user-role">{{ currentUser.role | titlecase }}</div>
         </div>
-        <button class="logout-btn" (click)="logout()" title="Logout">
+        <button class="logout-btn" (click)="logout()" title="Keluar">
           🚪
         </button>
       </div>
@@ -34,7 +34,7 @@ import { GeolocationService } from '../../services/geolocation.service';
       
       <div class="actions">
         <button class="validate-btn" (click)="revalidateLocation()" [disabled]="isValidating">
-          {{ isValidating ? '⏳' : '🔄' }} Validate Location
+          {{ isValidating ? '⏳' : '🔄' }} Validasi Lokasi
         </button>
       </div>
       
@@ -246,7 +246,7 @@ export class UserInfoComponent implements OnInit {
         }, 3000);
       }
     } catch (error) {
-      this.validationMessage = 'Error validating location';
+      this.validationMessage = 'Gagal memvalidasi lokasi';
       this.validationSuccess = false;
     } finally {
       this.isValidating = false;

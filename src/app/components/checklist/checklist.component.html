@@ -27,13 +27,13 @@
         <h2>🚚 Checklist Sebelum Berangkat</h2>
         <div class="info-grid aligned">
           <span class="label">Jenis:</span>
-          <span class="value out-badge type-value">{{ tripType }}</span>
+          <span class="value out-badge type-value">{{ tripType === 'OUT' ? 'Keluar' : 'Masuk' }}</span>
         </div>
       </div>
 
       <div class="progress-section">
         <div class="progress-header">
-          <h3>Progress Checklist</h3>
+          <h3>Progres Checklist</h3>
           <span class="progress-text">{{ completedCount }} / {{ totalCount }} selesai</span>
         </div>
         <div class="progress-bar">

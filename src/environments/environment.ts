@@ -11,7 +11,7 @@ export const environment = {
     },
     apiKey: 'W5hczOaOGdc68PcfchvZSvhUmWOf9AX3P6Zhfm0cghdPu',
     basicAuth: {
-      username: 'truckapp', // Ganti dengan username Epicor Anda
+      username: 'truckapp',
       password: 'truckapp123.'
     }
   }

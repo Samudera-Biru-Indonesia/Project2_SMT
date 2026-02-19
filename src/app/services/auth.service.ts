@@ -83,14 +83,14 @@ export class AuthService {
       if (!empCode.trim()) {
         return {
           success: false,
-          message: 'Employee code is required'
+          message: 'Kode karyawan wajib diisi'
         };
       }
 
       if (!site.trim()) {
         return {
           success: false,
-          message: 'Site code is required'
+          message: 'Kode site wajib diisi'
         };
       }
 
@@ -98,7 +98,7 @@ export class AuthService {
       if (!customLocation) {
         return {
           success: false,
-          message: 'Location coordinates are required'
+          message: 'Koordinat lokasi wajib diisi'
         };
       }
 
@@ -181,14 +181,14 @@ export class AuthService {
 
         return {
           success: true,
-          message: 'Login successful!',
+          message: 'Login berhasil!',
           user: authUser
         };
       } else {
         console.log('Login failed. Response does not indicate success:', response);
         return {
           success: false,
-          message: response?.message || response?.Message || response?.error || 'Login failed. Please check your credentials.'
+          message: response?.message || response?.Message || response?.error || 'Login gagal. Silakan periksa kredensial Anda.'
         };
       }
 
@@ -203,47 +203,37 @@ export class AuthService {
       });
       
       let errorMessage = 'Login gagal. Silakan coba lagi.';
-      
-      // Check for location/site mismatch errors
-      if (this.isLocationMismatchError(error)) {
-        errorMessage = 'Lokasi tidak sesuai dengan site yang dipilih. Pastikan Anda berada di area yang sesuai dengan site.';
-      } else if (error.status === 400) {
-        // Bad Request - often indicates validation errors including location
-        if (error.error && typeof error.error === 'string') {
-          if (error.error.toLowerCase().includes('location') || 
-              error.error.toLowerCase().includes('coordinate') ||
-              error.error.toLowerCase().includes('site') ||
-              error.error.toLowerCase().includes('tidak sesuai')) {
-            errorMessage = 'Lokasi tidak sesuai dengan site yang dipilih.';
-          } else {
-            errorMessage = 'Data yang dikirim tidak valid. Periksa kembali informasi Anda.';
-          }
-        } else if (error.error && error.error.message) {
-          errorMessage = error.error.message;
-        } else {
-          errorMessage = 'Data yang dikirim tidak valid. Periksa kembali informasi Anda.';
-        }
+
+      // Parse API ErrorMessage from response body
+      const apiErrorMsg: string = error.error?.ErrorMessage || error.error?.message || error.error?.Message || '';
+
+      if (error.status === 0) {
+        errorMessage = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
+      } else if (error.status >= 500) {
+        errorMessage = 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
       } else if (error.status === 401) {
         errorMessage = 'Kode karyawan atau site tidak valid. Periksa kembali data Anda.';
       } else if (error.status === 403) {
         errorMessage = 'Akses ditolak. Anda tidak memiliki izin untuk menggunakan aplikasi ini.';
-      } else if (error.status === 422) {
-        // Unprocessable Entity - validation failed
-        errorMessage = 'Lokasi tidak sesuai dengan site yang dipilih.';
-      } else if (error.status === 0) {
-        errorMessage = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
-      } else if (error.status >= 500) {
-        errorMessage = 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
-      } else if (error.error?.message || error.error?.Message) {
-        const apiMessage = error.error.message || error.error.Message;
-        // Check if API error message is related to location
-        if (this.isLocationRelatedMessage(apiMessage)) {
+      } else if (apiErrorMsg) {
+        // Map specific API errors to user-friendly Indonesian messages
+        const msg = apiErrorMsg.toLowerCase();
+        if (msg.includes('not active') || msg.includes('does not exist')) {
+          errorMessage = 'Karyawan tidak aktif atau tidak ditemukan. Periksa kembali kode karyawan Anda.';
+        } else if (msg.includes('too far')) {
+          // Extract distance from message like "Distance: 1337.92 km"
+          const distMatch = apiErrorMsg.match(/Distance:\s*([\d.]+)\s*km/i);
+          const dist = distMatch ? distMatch[1] : null;
+          errorMessage = dist
+            ? `Lokasi Anda terlalu jauh dari site yang dipilih (${dist} km). Pastikan Anda berada di area site.`
+            : 'Lokasi Anda terlalu jauh dari site yang dipilih. Pastikan Anda berada di area site.';
+        } else if (msg.includes('location') || msg.includes('coordinate') || msg.includes('latitude') || msg.includes('longitude')) {
           errorMessage = 'Lokasi tidak sesuai dengan site yang dipilih.';
         } else {
-          errorMessage = apiMessage;
+          errorMessage = apiErrorMsg.split('\n')[0]; // Take first line only
         }
-      } else if (error.message) {
-        errorMessage = error.message;
+      } else if (error.status === 400 || error.status === 422) {
+        errorMessage = 'Data yang dikirim tidak valid. Periksa kembali informasi Anda.';
       }
 
       return {
@@ -309,7 +299,7 @@ export class AuthService {
     if (!currentUser) {
       return {
         success: false,
-        message: 'No user logged in'
+        message: 'Tidak ada pengguna yang login'
       };
     }
 
@@ -327,12 +317,12 @@ export class AuthService {
       
       return {
         success: true,
-        message: 'Location updated successfully'
+        message: 'Lokasi berhasil diperbarui'
       };
     } catch (error) {
       return {
         success: false,
-        message: `Location validation error: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `Gagal validasi lokasi: ${error instanceof Error ? error.message : 'Kesalahan tidak diketahui'}`
       };
     }
   }
@@ -447,50 +437,6 @@ export class AuthService {
   getSite(): string | null {
     const user = this.getCurrentUser();
     return user ? user.site : null;
-  }
-
-  /**
-   * Check if error is related to location/site mismatch
-   */
-  private isLocationMismatchError(error: any): boolean {
-    // Check status codes that commonly indicate location/validation issues
-    if (error.status === 400 || error.status === 422) {
-      return true;
-    }
-
-    // Check error response body for location-related keywords
-    if (error.error) {
-      const errorStr = JSON.stringify(error.error).toLowerCase();
-      return errorStr.includes('location') || 
-             errorStr.includes('coordinate') || 
-             errorStr.includes('site') ||
-             errorStr.includes('tidak sesuai') ||
-             errorStr.includes('invalid location') ||
-             errorStr.includes('position') ||
-             errorStr.includes('latitude') ||
-             errorStr.includes('longitude');
-    }
-
-    return false;
-  }
-
-  /**
-   * Check if message is related to location
-   */
-  private isLocationRelatedMessage(message: string): boolean {
-    if (!message) return false;
-    
-    const lowerMessage = message.toLowerCase();
-    return lowerMessage.includes('location') || 
-           lowerMessage.includes('coordinate') || 
-           lowerMessage.includes('site') ||
-           lowerMessage.includes('tidak sesuai') ||
-           lowerMessage.includes('invalid location') ||
-           lowerMessage.includes('position') ||
-           lowerMessage.includes('latitude') ||
-           lowerMessage.includes('longitude') ||
-           lowerMessage.includes('lokasi') ||
-           lowerMessage.includes('cabang');
   }
 
   /**

@@ -10,9 +10,6 @@ export interface TripData {
   type: string;
   chk1: boolean;
   chk2: boolean;
-  chk3: boolean;
-  chk4: boolean;
-  chk5: boolean;
   tripNum: string;
   note: string;
   tripDriver: string;
@@ -31,6 +28,12 @@ export interface GetTripDataRequest {
   tripNum: string;
 }
 
+export interface GetAllTripDataRequest {
+  nopol: string;
+  company: string;
+  plant: string;
+}
+
 export interface GetTripDataResponse {
   success: boolean;
   data: TripInfo;
@@ -40,6 +43,37 @@ export interface GetTripDataResponse {
 export interface Plant {
   Plant: string;  // Plant code like "SGI053"
   Name: string;   // Plant name like "SGI YOGYAKARTA"
+  Lat: number;
+  Long: number;
+}
+
+export interface GetTotalFromTripNumberResponse {
+  total: number;
+}
+
+export interface OutTruckCheck {
+  Company: string;
+  TripNum: string;
+  Odometer: number;
+}
+
+export interface GetOutTruckCheckResponse {
+  TruckCheckData: {
+    Result: OutTruckCheck[];
+  };
+}
+
+export interface Truck {
+  truckID: string;
+  truckPlate: string;
+  truckDesc: string;
+  plantList: string;
+}
+
+export interface GetTruckListResponse {
+  TruckData: {
+    Result: Truck[];
+  };
 }
 
 export interface GetPlantListResponse {
@@ -57,7 +91,11 @@ export class ApiService {
     getTripData: '/GetTripData',
     getPlantList: '/GetListPlant',
     processTripData: '/ProcessTripTimeEntry',
-    login: '/AuthenticateLogon'
+    login: '/AuthenticateLogon',
+    getAllTripData: '/GetAllTripData',
+    GetTotalFromTripNumber: "/getTotalFromTripNumber",
+    getTruckList: '/GetTruckList',
+    getOutTruckCheck: '/getOutTruckCheck'
   };
 
   constructor(
@@ -84,9 +122,6 @@ export class ApiService {
       type: String(data.type || ''),
       chk1: Boolean(data.chk1),
       chk2: Boolean(data.chk2),
-      chk3: Boolean(data.chk3),
-      chk4: Boolean(data.chk4),
-      chk5: Boolean(data.chk5),
       tripNum: String(data.tripNum || ''),
       note: String(data.note || '')
     };
@@ -100,9 +135,6 @@ export class ApiService {
       type: typeof requestData.type,
       chk1: typeof requestData.chk1,
       chk2: typeof requestData.chk2,
-      chk3: typeof requestData.chk3,
-      chk4: typeof requestData.chk4,
-      chk5: typeof requestData.chk5,
       tripNum: typeof requestData.tripNum,
       note: typeof requestData.note
     });
@@ -150,6 +182,39 @@ export class ApiService {
     console.log('API URL:', url);
 
     return this.http.post<TripInfo>(url, requestBody, { headers });
+  }
+
+  getAllTripData(nopol: string): Observable<any> {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
+    const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    const url = currentEnv.baseUrl + this.endpoints.getAllTripData;
+    
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth}`,
+      'Company': 'SGI',
+      'x-api-key': currentEnv.apiKey
+    });
+
+    const requestBody: GetAllTripDataRequest = {
+      nopol: nopol,
+      company: localStorage.getItem('currentCompany') || '',
+      plant: localStorage.getItem('currentPlant') || ''
+    };
+
+    console.log('Get Trip Data Request:', requestBody);
+    console.log('Using environment:', currentEnv.displayName);
+    console.log('Request Headers:', {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth}`,
+      'Company': 'SGI',
+      'x-api-key': currentEnv.apiKey
+    });
+    console.log('API URL:', url);
+
+    return this.http.post<any>(url, requestBody, { headers });
   }
 
   /**
@@ -242,5 +307,77 @@ export class ApiService {
           return throwError(() => error);
         })
       );
+  }
+
+  getOutTruckCheck(): Observable<GetOutTruckCheckResponse> {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
+    const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    const url = currentEnv.baseUrl + this.endpoints.getOutTruckCheck;
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth}`,
+      'Company': 'SGI',
+      'x-api-key': currentEnv.apiKey
+    });
+
+    const body = {
+      Company: localStorage.getItem('currentCompany') || '',
+      Plant: localStorage.getItem('currentPlant') || ''
+    };
+
+    return this.http.post<GetOutTruckCheckResponse>(url, body, { headers });
+  }
+
+  getTruckList(): Observable<GetTruckListResponse> {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
+    const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    const url = currentEnv.baseUrl + this.endpoints.getTruckList;
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth}`,
+      'Company': 'SGI',
+      'x-api-key': currentEnv.apiKey
+    });
+
+    const body = {
+      Company: localStorage.getItem('currentCompany') || '',
+      Plant: localStorage.getItem('currentPlant') || ''
+    };
+
+    return this.http.post<GetTruckListResponse>(url, body, { headers });
+  }
+
+  getTotalFromTripNumber(tripNumber: string): Observable<GetTotalFromTripNumberResponse> {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
+    const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    const url = currentEnv.baseUrl + this.endpoints.GetTotalFromTripNumber;
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth}`,
+      'Company': 'SGI',
+      'x-api-key': currentEnv.apiKey
+    });
+
+    return this.http.post<GetTotalFromTripNumberResponse>(url, { tripNumber }, { headers });
+  }
+
+  uploadPhotos(tripNum: string, odometerPhoto: string, cargoPhoto: string): Observable<any> {
+    const url = 'http://localhost:3000/api/upload-photos';
+
+    const body = {
+      tripNum,
+      odometerPhoto,
+      cargoPhoto
+    };
+
+    console.log('📸 Uploading photos for trip:', tripNum);
+
+    return this.http.post<any>(url, body);
   }
 }

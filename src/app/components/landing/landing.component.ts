@@ -13,7 +13,7 @@ import { EnvironmentIndicatorComponent } from '../environment-indicator/environm
 })
 export class LandingComponent implements OnInit {
   currentTime: string = '';
-  currentUser: string = 'User';
+  currentUser: string = 'Pengguna';
 
   constructor(
     private router: Router,
