@@ -3,11 +3,12 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, TripData } from '../../services/api.service';
+import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
 
 @Component({
   selector: 'app-odometer',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EnvironmentIndicatorComponent],
   templateUrl: './odometer.component.html',
   styleUrls: ['./odometer.component.css']
 })
@@ -188,6 +189,7 @@ export class OdometerComponent implements OnInit {
         } else {
           console.log('Trip data submission successful!');
           console.log('Data sent to server:', tripData);
+          alert('Data trip berhasil dikirim ke server!');
           
           // After successful insert to staging table, process the trip data to Epicor
           // this.processDataToEpicor(tripData.tripNum);
