@@ -777,6 +777,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  text-align: left;
   transition: border-color 0.3s ease;
   box-sizing: border-box;
 }
@@ -851,6 +852,7 @@
   font-size: 14px;
   font-family: monospace;
   cursor: pointer;
+  text-align: left;
   transition: background 0.15s ease;
 }
 
@@ -869,6 +871,22 @@
   font-size: 14px;
   color: #adb5bd;
   text-align: center;
+}
+
+/* Nopol Custom Dropdown */
+.nopol-custom-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.truck-plate {
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.truck-desc {
+  font-size: 12px;
+  color: #6c757d;
 }
 
 /* Input Label */

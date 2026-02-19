@@ -6,7 +6,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { BrowserMultiFormatReader, Result } from '@zxing/library';
 import { BarcodeService } from '../../services/barcode.service';
-import { ApiService, TripInfo } from '../../services/api.service';
+import { ApiService, TripInfo, Truck } from '../../services/api.service';
 import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
 
 @Component({
@@ -25,6 +25,12 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   spkDropdownOpen: boolean = false;
   spkSearchQuery: string = '';
   isLoadingSpk: boolean = false;
+
+  // Truck dropdown properties
+  trucks: Truck[] = [];
+  truckDropdownOpen: boolean = false;
+  truckSearchQuery: string = '';
+  trucksLoading: boolean = false;
   isScanning: boolean = false;
   hasCamera: boolean = false;
   cameraError: string = '';
@@ -50,6 +56,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.checkCameraAvailability();
+    this.loadTruckList();
 
     // Debounce nopol input — tunggu 600ms setelah berhenti ketik baru panggil API
     this.nopolSubject.pipe(
@@ -454,11 +461,49 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
     this.clearError();
   }
 
+  loadTruckList() {
+    this.trucksLoading = true;
+    this.apiService.getTruckList().subscribe({
+      next: (response) => {
+        this.trucks = response.TruckData?.Result ?? [];
+        this.trucksLoading = false;
+      },
+      error: () => {
+        this.trucks = [];
+        this.trucksLoading = false;
+      }
+    });
+  }
+
+  get filteredTruckOptions(): Truck[] {
+    if (!this.truckSearchQuery.trim()) return this.trucks;
+    const q = this.truckSearchQuery.trim().toUpperCase();
+    return this.trucks.filter(t =>
+      t.truckPlate.toUpperCase().includes(q) ||
+      (t.truckDesc && t.truckDesc.toUpperCase().includes(q))
+    );
+  }
+
+  toggleTruckDropdown() {
+    this.truckDropdownOpen = !this.truckDropdownOpen;
+    if (this.truckDropdownOpen) this.truckSearchQuery = '';
+  }
+
+  selectTruck(truck: Truck) {
+    this.manualTruckPlate = truck.truckPlate;
+    this.truckDropdownOpen = false;
+    this.truckSearchQuery = '';
+    this.onNopolChange(truck.truckPlate);
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {
     const target = event.target as HTMLElement;
     if (!target.closest('.spk-custom-dropdown')) {
       this.spkDropdownOpen = false;
+    }
+    if (!target.closest('.nopol-custom-dropdown')) {
+      this.truckDropdownOpen = false;
     }
   }
 }

@@ -94,7 +94,7 @@ export class ApiService {
     login: '/AuthenticateLogon',
     getAllTripData: '/GetAllTripData',
     GetTotalFromTripNumber: "/getTotalFromTripNumber",
-    getTruckList: '/GetTruckList',
+    getTruckList: '/getTruckByAuthSite',
     getOutTruckCheck: '/getOutTruckCheck'
   };
 
@@ -369,15 +369,7 @@ export class ApiService {
 
   uploadPhotos(tripNum: string, odometerPhoto: string, cargoPhoto: string): Observable<any> {
     const url = 'http://localhost:3000/api/upload-photos';
-
-    const body = {
-      tripNum,
-      odometerPhoto,
-      cargoPhoto
-    };
-
-    console.log('📸 Uploading photos for trip:', tripNum);
-
-    return this.http.post<any>(url, body);
+    return this.http.post<any>(url, { tripNum, odometerPhoto, cargoPhoto });
   }
+
 }

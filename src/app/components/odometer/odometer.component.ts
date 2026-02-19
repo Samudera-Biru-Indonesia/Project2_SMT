@@ -194,15 +194,11 @@ export class OdometerComponent implements OnInit {
       // Don't block submission, as API might accept empty tripNum
     }
     
-    // Upload photos to Go backend (if running)
+    // Upload foto ke Google Drive via Go backend
     const tripNum = tripData.tripNum || 'unknown';
     this.apiService.uploadPhotos(tripNum, this.odometerPhoto, this.cargoPhoto).subscribe({
-      next: (res) => {
-        console.log('Photos uploaded to backend:', res);
-      },
-      error: (err) => {
-        console.warn('Photo upload to backend failed (server mungkin belum jalan), foto tetap tersimpan lokal:', err.message);
-      }
+      next: (res) => console.log('📸 Photos uploaded to Drive:', res.fileIds),
+      error: (err) => console.warn('📸 Photo upload failed:', err.message)
     });
 
     // Send data to API
