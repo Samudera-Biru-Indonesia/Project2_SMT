@@ -3,7 +3,7 @@
   width: 100%;
   background: #f5f5f5;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   padding: 40px 20px 20px 20px;
   margin: 0;
@@ -128,22 +128,6 @@
   margin: 0;
 }
 
-.summary-section {
-  margin-bottom: 24px;
-}
-
-.summary-section h3 {
-  color: #333;
-  margin-bottom: 8px;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.summary-section p {
-  color: #666;
-  font-size: 14px;
-  margin: 0;
-}
 
 .actions-section {
   display: flex;
@@ -211,25 +195,6 @@
 }
 
 .success-section p {
-  color: #666;
-  font-size: 16px;
-  margin: 0;
-}
-
-.summary-section {
-  margin-bottom: 30px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
-}
-
-.summary-section h3 {
-  color: #333;
-  margin-bottom: 10px;
-  font-size: 20px;
-}
-
-.summary-section p {
   color: #666;
   font-size: 16px;
   margin: 0;
@@ -303,20 +268,6 @@
     font-size: 15px;
   }
   
-  .summary-section {
-    margin-bottom: 24px;
-    padding: 16px;
-  }
-  
-  .summary-section h3 {
-    font-size: 18px;
-    margin-bottom: 8px;
-  }
-  
-  .summary-section p {
-    font-size: 15px;
-  }
-  
   .actions-section {
     gap: 12px;
   }
@@ -357,20 +308,6 @@
   }
   
   .success-section p {
-    font-size: 14px;
-  }
-  
-  .summary-section {
-    margin-bottom: 20px;
-    padding: 14px;
-  }
-  
-  .summary-section h3 {
-    font-size: 16px;
-    margin-bottom: 6px;
-  }
-  
-  .summary-section p {
     font-size: 14px;
   }
   
