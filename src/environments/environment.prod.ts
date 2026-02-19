@@ -12,7 +12,7 @@ export const environment = {
     apiKey: 'W5hczOaOGdc68PcfchvZSvhUmWOf9AX3P6Zhfm0cghdPu',
     basicAuth: {
       username: 'truckapp', 
-      password: 'truckapp123.'
+      password: 'keBuH{5577\\cS%nH[uKT'
     }
   }
 };

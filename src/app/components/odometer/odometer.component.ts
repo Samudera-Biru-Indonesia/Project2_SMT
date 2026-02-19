@@ -40,6 +40,12 @@ export class OdometerComponent implements OnInit {
   productType: string = '';
 
   isLoading: boolean = false;
+  showOdometerWarning: boolean = false;
+  odometerWarningShown: boolean = false;
+  showMuatanLowWarning: boolean = false;
+  muatanLowWarningShown: boolean = false;
+  showMuatanHighWarning: boolean = false;
+  muatanHighWarningShown: boolean = false;
 
   constructor(private router: Router, private apiService: ApiService, private authService: AuthService) {}
 
@@ -152,6 +158,48 @@ export class OdometerComponent implements OnInit {
       });
   }
 
+  onOdometerChange() {
+    this.showOdometerWarning = false;
+    this.odometerWarningShown = false;
+  }
+
+  onMuatanChange() {
+    this.showMuatanLowWarning = false;
+    this.muatanLowWarningShown = false;
+    this.showMuatanHighWarning = false;
+    this.muatanHighWarningShown = false;
+  }
+
+  confirmOdometerWarning() {
+    this.showOdometerWarning = false;
+    this.onSubmit();
+  }
+
+  dismissOdometerWarning() {
+    this.showOdometerWarning = false;
+    this.odometerWarningShown = false;
+  }
+
+  confirmMuatanWarning() {
+    this.showMuatanLowWarning = false;
+    this.onSubmit();
+  }
+
+  dismissMuatanWarning() {
+    this.showMuatanLowWarning = false;
+    this.muatanLowWarningShown = false;
+  }
+
+  confirmMuatanHighWarning() {
+    this.showMuatanHighWarning = false;
+    this.onSubmit();
+  }
+
+  dismissMuatanHighWarning() {
+    this.showMuatanHighWarning = false;
+    this.muatanHighWarningShown = false;
+  }
+
   onPhotoSelected(event: Event, type: 'odometer' | 'cargo') {
     const input = event.target as HTMLInputElement;
     if (!input.files || !input.files[0]) return;
@@ -242,6 +290,26 @@ export class OdometerComponent implements OnInit {
       return;
     }
 
+    // Validasi muatan: jika input < sistem, tampilkan warning dulu
+    if (this.muatanType === 'CYLINDER' && this.expectedMuatan !== null && jumlahMuatanValue < this.expectedMuatan) {
+      if (!this.muatanLowWarningShown) {
+        this.showMuatanLowWarning = true;
+        this.muatanLowWarningShown = true;
+        return;
+      }
+      this.showMuatanLowWarning = false;
+    } else if (this.muatanType === 'CYLINDER' && this.expectedMuatan !== null && jumlahMuatanValue > this.expectedMuatan) {
+      if (!this.muatanHighWarningShown) {
+        this.showMuatanHighWarning = true;
+        this.muatanHighWarningShown = true;
+        return;
+      }
+      this.showMuatanHighWarning = false;
+    } else {
+      this.showMuatanLowWarning = false;
+      this.showMuatanHighWarning = false;
+    }
+
     // Get trip data from localStorage (set by checklist component for OUT trips)
     const savedTripData = localStorage.getItem('tripData');
     const tripNumber = localStorage.getItem('tripNumber') || '';
@@ -267,13 +335,17 @@ export class OdometerComponent implements OnInit {
         return;
       }
     } else {
-      // odometer input harus <= odometer dari DB
-      if (this.odometerFromDb) {
-        const odometerFromDbValue = this.odometerFromDb;
-        if (odometerValue < odometerFromDbValue) {
-          alert(`Data odometer yang Anda masukkan (${odometerValue}) kurang dari pembacaan odometer terakhir yang tercatat di sistem (${odometerFromDbValue}). Silakan periksa kembali pembacaan odometer Anda.`);
+      // odometer input harus >= odometer dari DB
+      if (this.odometerFromDb !== null && odometerValue < this.odometerFromDb) {
+        if (!this.odometerWarningShown) {
+          this.showOdometerWarning = true;
+          this.odometerWarningShown = true;
           return;
         }
+        // Submit kedua: lanjut meski ada ketidaksesuaian
+        this.showOdometerWarning = false;
+      } else {
+        this.showOdometerWarning = false;
       }
       // For IN trips or if no saved data, create new trip data
       tripData = {

@@ -29,7 +29,8 @@ export class ChecklistComponent implements OnInit {
   
   checklistItems: ChecklistItem[] = [
     { id: 'chk1', label: 'Surat Jalan', checked: false, required: true },
-    { id: 'chk2', label: 'APD', checked: false, required: true }
+    { id: 'chk2', label: 'APD', checked: false, required: true },
+    { id: 'chk3', label: 'Kendaraan Layak Jalan', checked: false, required: true }
   ];
 
   constructor(private router: Router, private apiService: ApiService, private authService: AuthService) {}

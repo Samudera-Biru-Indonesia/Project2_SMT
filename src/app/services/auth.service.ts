@@ -273,7 +273,8 @@ export class AuthService {
     
     // Redirect to login page
     if (typeof window !== 'undefined') {
-      window.location.href = '/login';
+      const currentEnv = this.environmentService.getCurrentEnvironment();
+      window.location.href = currentEnv.name === 'live' ? '/truck/login' : '/login';
     }
   }
 
