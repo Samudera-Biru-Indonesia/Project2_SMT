@@ -131,7 +131,7 @@ export class LoginComponent {
         localStorage.setItem('currentPlant', plant);
         localStorage.setItem('currentCompany', company);
         // Redirect ke landing page
-        this.router.navigate(['/landing']);
+        this.router.navigate(['/trip-selection']);
       } else {
         console.log('❌ Login failed:', result.message);
         this.errorMessage = result.message || 'Login gagal. Silakan coba lagi.';

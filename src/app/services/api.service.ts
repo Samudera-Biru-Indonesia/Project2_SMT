@@ -47,6 +47,35 @@ export interface Plant {
   Long: number;
 }
 
+export interface GetTotalFromTripNumberResponse {
+  total: number;
+}
+
+export interface OutTruckCheck {
+  Company: string;
+  TripNum: string;
+  Odometer: number;
+}
+
+export interface GetOutTruckCheckResponse {
+  TruckCheckData: {
+    Result: OutTruckCheck[];
+  };
+}
+
+export interface Truck {
+  truckID: string;
+  truckPlate: string;
+  truckDesc: string;
+  plantList: string;
+}
+
+export interface GetTruckListResponse {
+  TruckData: {
+    Result: Truck[];
+  };
+}
+
 export interface GetPlantListResponse {
   plants?: Plant[];
   data?: Plant[];
@@ -64,7 +93,9 @@ export class ApiService {
     processTripData: '/ProcessTripTimeEntry',
     login: '/AuthenticateLogon',
     getAllTripData: '/GetAllTripData',
-    GetTotalFromTripNumber: "/getTotalFromTripNumber"
+    GetTotalFromTripNumber: "/getTotalFromTripNumber",
+    getTruckList: '/GetTruckList',
+    getOutTruckCheck: '/getOutTruckCheck'
   };
 
   constructor(
@@ -276,6 +307,64 @@ export class ApiService {
           return throwError(() => error);
         })
       );
+  }
+
+  getOutTruckCheck(): Observable<GetOutTruckCheckResponse> {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
+    const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    const url = currentEnv.baseUrl + this.endpoints.getOutTruckCheck;
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth}`,
+      'Company': 'SGI',
+      'x-api-key': currentEnv.apiKey
+    });
+
+    const body = {
+      Company: localStorage.getItem('currentCompany') || '',
+      Plant: localStorage.getItem('currentPlant') || ''
+    };
+
+    return this.http.post<GetOutTruckCheckResponse>(url, body, { headers });
+  }
+
+  getTruckList(): Observable<GetTruckListResponse> {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
+    const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    const url = currentEnv.baseUrl + this.endpoints.getTruckList;
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth}`,
+      'Company': 'SGI',
+      'x-api-key': currentEnv.apiKey
+    });
+
+    const body = {
+      Company: localStorage.getItem('currentCompany') || '',
+      Plant: localStorage.getItem('currentPlant') || ''
+    };
+
+    return this.http.post<GetTruckListResponse>(url, body, { headers });
+  }
+
+  getTotalFromTripNumber(tripNumber: string): Observable<GetTotalFromTripNumberResponse> {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
+    const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    const url = currentEnv.baseUrl + this.endpoints.GetTotalFromTripNumber;
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth}`,
+      'Company': 'SGI',
+      'x-api-key': currentEnv.apiKey
+    });
+
+    return this.http.post<GetTotalFromTripNumberResponse>(url, { tripNumber }, { headers });
   }
 
   uploadPhotos(tripNum: string, odometerPhoto: string, cargoPhoto: string): Observable<any> {
