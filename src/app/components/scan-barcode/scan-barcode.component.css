@@ -4,15 +4,25 @@
   background: #ffffff;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
-  background: #ffffff;
-  border-bottom: 1px solid #e9ecef;
-  padding: 20px;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 12px 16px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
+  border-bottom: 1px solid #e0e0e0;
+  /* spy g take up space */
+  position: fixed;
+  top: 0;
+  width: 100%;
 }
 
 .back-btn {
@@ -32,9 +42,9 @@
 }
 
 .header h1 {
-  color: #212529;
+  color: #333;
   margin: 0;
-  font-size: 28px;
+  font-size: 18px;
   font-weight: 600;
 }
 
@@ -42,6 +52,8 @@
   padding: 40px 20px;
   display: flex;
   justify-content: center;
+  align-items: center;
+  flex: 1;
 }
 
 .scan-card {
@@ -593,13 +605,11 @@
   }
   
   .header {
-    padding: 16px;
-    background: #ffffff;
-    border-bottom: 1px solid #e9ecef;
+    padding: 12px 14px;
   }
   
   .header h1 {
-    font-size: 22px;
+    font-size: 18px;
   }
   
   .back-btn {
@@ -677,13 +687,13 @@
 
 @media (max-width: 480px) {
   .header {
-    padding: 12px;
-    flex-wrap: wrap;
+    padding: 10px 8px;
+    flex-wrap: nowrap;
+    gap: 8px;
   }
   
   .header h1 {
-    font-size: 20px;
-    margin-top: 8px;
+    font-size: 16px;
   }
   
   .scan-content {
