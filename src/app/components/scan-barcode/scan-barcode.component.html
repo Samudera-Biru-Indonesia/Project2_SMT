@@ -13,20 +13,48 @@
       <div class="manual-input-section">
 
         <div class="input-group">
-            <label class="input-label">Nopol Truck</label>
-            <input
-              type="text"
-              [(ngModel)]="manualTruckPlate"
-              name="truckPlate"
-              placeholder="Contoh: KT8655UP"
-              class="barcode-input"
-              [disabled]="isLoadingTripData || isLoadingSpk"
-              (ngModelChange)="onNopolChange($event)"
-            />
-            <div class="spk-loading" *ngIf="isLoadingSpk">
-              <span class="loading-dot"></span> Mencari nomor SPK...
+          <label class="input-label">Nopol Truck</label>
+          <div class="nopol-custom-dropdown">
+            <div class="spk-dropdown-selected"
+                 [class.open]="truckDropdownOpen"
+                 [class.disabled]="isLoadingTripData || isLoadingSpk || trucksLoading"
+                 (click)="!(isLoadingTripData || isLoadingSpk || trucksLoading) && toggleTruckDropdown()">
+              <span [class.placeholder]="!manualTruckPlate">
+                {{ manualTruckPlate || (trucksLoading ? 'Memuat data truck...' : '-- Pilih Nopol Truck --') }}
+              </span>
+              <span class="spk-dropdown-arrow">▼</span>
+            </div>
+            <div class="spk-dropdown-panel" [hidden]="!truckDropdownOpen">
+              <div class="spk-search-wrapper">
+                <input
+                  type="text"
+                  [(ngModel)]="truckSearchQuery"
+                  name="truckSearch"
+                  placeholder="Cari nopol atau nama truck..."
+                  class="spk-search-input"
+                  (click)="$event.stopPropagation()"
+                />
+              </div>
+              <div class="spk-options-list">
+                <div
+                  *ngFor="let truck of filteredTruckOptions"
+                  class="spk-option"
+                  [class.selected]="manualTruckPlate === truck.truckPlate"
+                  (click)="selectTruck(truck)"
+                >
+                  <span class="truck-plate">{{ truck.truckPlate }}</span>
+                  <span class="truck-desc" *ngIf="truck.truckDesc"> — {{ truck.truckDesc }}</span>
+                </div>
+                <div class="spk-no-result" *ngIf="filteredTruckOptions.length === 0">
+                  {{ trucks.length === 0 ? 'Tidak ada data truck' : 'Tidak ditemukan' }}
+                </div>
+              </div>
             </div>
           </div>
+          <div class="spk-loading" *ngIf="isLoadingSpk">
+            <span class="loading-dot"></span> Mencari nomor SPK...
+          </div>
+        </div>
 
         <form (ngSubmit)="onSubmit()">
           <div class="input-group">

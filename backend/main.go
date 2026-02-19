@@ -1,14 +1,20 @@
 package main
 
 import (
+	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
+
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/drive/v3"
+	"google.golang.org/api/option"
+	"github.com/joho/godotenv"
 )
 
 type UploadRequest struct {
@@ -19,8 +25,10 @@ type UploadRequest struct {
 
 type UploadResponse struct {
 	Success bool     `json:"success"`
-	Paths   []string `json:"paths"`
+	FileIDs []string `json:"fileIds"`
 }
+
+var driveService *drive.Service
 
 func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -37,8 +45,54 @@ func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func initDriveService() error {
+	ctx := context.Background()
+
+	credPath := ""
+	if credPath == "" {
+		credPath = `.\credentials\ascendant-epoch-465502-n6-169af5e4409a_epicor.admin.sgi.gdrive.account.json`
+	}
+
+	b, err := os.ReadFile(credPath)
+	if err != nil {
+		return fmt.Errorf("failed to read service account credentials: %w", err)
+	}
+
+	creds, err := google.CredentialsFromJSON(ctx, b, drive.DriveScope)
+	if err != nil {
+		return fmt.Errorf("failed to parse credentials: %w", err)
+	}
+
+	svc, err := drive.NewService(ctx, option.WithCredentials(creds))
+	if err != nil {
+		return fmt.Errorf("failed to create Drive service: %w", err)
+	}
+
+	driveService = svc
+	log.Println("Google Drive service initialized successfully")
+	return nil
+}
+
+
+
+
+func uploadFileToDrive(filename string, data []byte, parentID string) (string, error) {
+	f := &drive.File{
+		Name:    filename,
+		Parents: []string{parentID},
+	}
+	created, err := driveService.Files.Create(f).
+		Media(bytes.NewReader(data)).
+		SupportsAllDrives(true).
+		Do()
+	if err != nil {
+		return "", fmt.Errorf("failed to upload file: %w", err)
+	}
+	return created.Id, nil
+}
+
 func decodeBase64Image(data string) ([]byte, error) {
-	// Remove data URI prefix if present (e.g., "data:image/jpeg;base64,")
+	// Buang prefix "data:image/jpeg;base64," kalau ada
 	if idx := strings.Index(data, ","); idx != -1 {
 		data = data[idx+1:]
 	}
@@ -51,8 +105,7 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Limit request body to 20MB
-	r.Body = http.MaxBytesReader(w, r.Body, 20<<20)
+	r.Body = http.MaxBytesReader(w, r.Body, 20<<20) // limit 20MB
 
 	var req UploadRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -65,76 +118,68 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Sanitize tripNum to prevent path traversal
-	safeTripNum := filepath.Base(req.TripNum)
-	uploadDir := filepath.Join("uploads", safeTripNum)
-
-	if err := os.MkdirAll(uploadDir, 0755); err != nil {
-		http.Error(w, "Failed to create upload directory", http.StatusInternalServerError)
+	rootFolderID := os.Getenv("DRIVE_FOLDER_ID")
+	if rootFolderID == "" {
+		http.Error(w, "DRIVE_FOLDER_ID environment variable not set", http.StatusInternalServerError)
 		return
 	}
 
-	var paths []string
+	var fileIDs []string
 
-	// Save odometer photo
 	if req.OdometerPhoto != "" {
 		imgBytes, err := decodeBase64Image(req.OdometerPhoto)
 		if err != nil {
 			http.Error(w, "Failed to decode odometer photo: "+err.Error(), http.StatusBadRequest)
 			return
 		}
-		odometerPath := filepath.Join(uploadDir, "odometer.jpg")
-		if err := os.WriteFile(odometerPath, imgBytes, 0644); err != nil {
-			http.Error(w, "Failed to save odometer photo", http.StatusInternalServerError)
+		filename := req.TripNum + "_odometer.jpg"
+		id, err := uploadFileToDrive(filename, imgBytes, rootFolderID)
+		if err != nil {
+			log.Printf("Failed to upload odometer photo: %v", err)
+			http.Error(w, "Failed to upload odometer photo to Drive", http.StatusInternalServerError)
 			return
 		}
-		paths = append(paths, odometerPath)
-		log.Printf("Saved odometer photo: %s (%d bytes)", odometerPath, len(imgBytes))
+		fileIDs = append(fileIDs, id)
+		log.Printf("Uploaded %s — Drive ID: %s", filename, id)
 	}
 
-	// Save cargo photo
 	if req.CargoPhoto != "" {
 		imgBytes, err := decodeBase64Image(req.CargoPhoto)
 		if err != nil {
 			http.Error(w, "Failed to decode cargo photo: "+err.Error(), http.StatusBadRequest)
 			return
 		}
-		cargoPath := filepath.Join(uploadDir, "cargo.jpg")
-		if err := os.WriteFile(cargoPath, imgBytes, 0644); err != nil {
-			http.Error(w, "Failed to save cargo photo", http.StatusInternalServerError)
+		filename := req.TripNum + "_cargo.jpg"
+		id, err := uploadFileToDrive(filename, imgBytes, rootFolderID)
+		if err != nil {
+			log.Printf("Failed to upload cargo photo: %v", err)
+			http.Error(w, "Failed to upload cargo photo to Drive", http.StatusInternalServerError)
 			return
 		}
-		paths = append(paths, cargoPath)
-		log.Printf("Saved cargo photo: %s (%d bytes)", cargoPath, len(imgBytes))
+		fileIDs = append(fileIDs, id)
+		log.Printf("Uploaded %s — Drive ID: %s", filename, id)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(UploadResponse{
 		Success: true,
-		Paths:   paths,
+		FileIDs: fileIDs,
 	})
 }
 
-func servePhotoHandler(w http.ResponseWriter, r *http.Request) {
-	// URL: /api/photos/{tripNum}/{filename}
-	parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/api/photos/"), "/")
-	if len(parts) != 2 {
-		http.Error(w, "Invalid path", http.StatusBadRequest)
-		return
+func main() {
+	godotenv.Load()
+	
+	if err := initDriveService(); err != nil {
+		log.Fatalf("Failed to initialize Drive service: %v", err)
 	}
 
-	tripNum := filepath.Base(parts[0])
-	filename := filepath.Base(parts[1])
-
-	filePath := filepath.Join("uploads", tripNum, filename)
-	http.ServeFile(w, r, filePath)
-}
-
-func main() {
 	http.HandleFunc("/api/upload-photos", corsMiddleware(uploadPhotosHandler))
-	http.HandleFunc("/api/photos/", corsMiddleware(servePhotoHandler))
 
-	port := "3000"
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
 	fmt.Printf("Photo upload server running on http://localhost:%s\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
