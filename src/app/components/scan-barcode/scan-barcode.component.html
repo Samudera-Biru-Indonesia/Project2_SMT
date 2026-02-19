@@ -7,81 +7,10 @@
 
   <main class="scan-content">
     <div class="scan-card">
-      <div class="scanner-section">
-        <div class="scanner-frame" [class.scanning]="isScanning">
-          <!-- Camera Video Element -->
-          <video 
-            #videoElement 
-            *ngIf="isScanning && hasCamera" 
-            autoplay 
-            playsinline
-            class="scanner-video">
-          </video>
-          
-          <!-- Scanner Overlay -->
-          <div class="scanner-line" *ngIf="isScanning"></div>
-          <div class="scanner-corners">
-            <div class="corner top-left"></div>
-            <div class="corner top-right"></div>
-            <div class="corner bottom-left"></div>
-            <div class="corner bottom-right"></div>
-          </div>
-          
-          <!-- Scanner Content (when not scanning) -->
-          <div class="scanner-content" *ngIf="!isScanning">
-            <span class="scanner-icon">📱</span>
-            <p *ngIf="!hasCamera" class="camera-error">{{ cameraError }}</p>
-          </div>
-          
-          <!-- Scanning Status -->
-          <div class="scanner-status" *ngIf="isScanning">
-            <span class="scanning-text">🔍 Mencari barcode...</span>
-            <p class="scan-instruction">Arahkan kamera ke barcode</p>
-          </div>
-        </div>
-        
-        <div class="scanner-controls">
-          <button 
-            class="scan-btn" 
-            (click)="startScan()"
-            [disabled]="isScanning || !hasCamera"
-            *ngIf="!isScanning"
-          >
-            {{ hasCamera ? 'Mulai Scan Kamera' : 'Kamera Tidak Tersedia' }}
-          </button>
-          
-          <button 
-            class="stop-btn" 
-            (click)="stopScanning()"
-            *ngIf="isScanning"
-          >
-            Berhenti Scan
-          </button>
-          
-          <!-- Manual Input Toggle Button -->
-          <button 
-            class="manual-toggle-btn" 
-            (click)="toggleManualInput()"
-            [disabled]="isScanning"
-          >
-            {{ showManualInput ? 'Sembunyikan Input Manual' : 'Masukkan Barcode Manual' }}
-          </button>
-        </div>
-        
-        <!-- Camera Error Message -->
-        <div class="error-message" *ngIf="cameraError">
-          <span class="error-icon">⚠️</span>
-          <p>{{ cameraError }}</p>
-          <small>Silakan gunakan input manual di bawah</small>
-        </div>
-      </div>
 
-      <div class="divider" *ngIf="showManualInput">
-        <span>ATAU</span>
-      </div>
 
-      <div class="manual-input-section" *ngIf="showManualInput">
-        <h3>Masukkan SPK Manual</h3>
+      <div class="manual-input-section">
+        <h3>Masukkan SPK</h3>
         <form (ngSubmit)="onSubmit()">
           <div class="input-group">
             <input
