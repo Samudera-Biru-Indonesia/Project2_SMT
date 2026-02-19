@@ -25,7 +25,18 @@
       <form (ngSubmit)="onSubmit()" class="odometer-form">
         <div class="form-section">
           <div class="form-group">
-            <label for="odometer" class="required">Pembacaan Odometer (KM)</label>
+            <label for="odometer" class="required" style="margin-right:10px;">Pembacaan Odometer (KM)</label>
+            @if (tripType === 'IN') {
+              <label style="color:#616161;">
+                Odometer sebelumnya adalah 
+                @if (odometerFromDb) {
+                  {{ odometerFromDb }} km
+                } @else {
+                  <b>tidak diketahui</b>
+                }.
+              </label>
+            }
+            
             <input
               type="number"
               id="odometer"

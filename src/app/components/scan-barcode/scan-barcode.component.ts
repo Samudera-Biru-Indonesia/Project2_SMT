@@ -34,7 +34,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   hasCamera: boolean = false;
   cameraError: string = '';
   isLoadingTripData: boolean = false;
-  showManualInput: boolean = false;
   errorMessage: string = '';
   errorTitle: string = '';
 
@@ -465,10 +464,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       return false;
     }
     return this.validateDetectedBarcodeEnhanced(this.barcodeInput.trim());
-  }
-
-  toggleManualInput() {
-    this.showManualInput = !this.showManualInput;
   }
 
   get filteredSpkOptions(): string[] {

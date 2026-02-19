@@ -19,6 +19,10 @@
   gap: 12px;
   border-bottom: 1px solid #e0e0e0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  /* spy g take up space */
+  position: fixed;
+  top: 0;
+  width: 100%;
 }
 
 .back-btn {
@@ -49,7 +53,7 @@
   padding: 20px;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   flex: 1;
   min-height: 0;
 }
@@ -597,8 +601,9 @@
     padding-top: 20px;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     flex: 1;
+    
   }
   
   .trip-card {
@@ -712,7 +717,7 @@
     padding-top: 15px;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     flex: 1;
   }
   
