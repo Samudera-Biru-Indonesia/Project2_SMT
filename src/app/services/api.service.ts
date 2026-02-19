@@ -49,6 +49,7 @@ export interface Plant {
 
 export interface GetTotalFromTripNumberResponse {
   total: number;
+  type: string;
 }
 
 export interface OutTruckCheck {

@@ -8,7 +8,6 @@ import { BrowserMultiFormatReader, Result } from '@zxing/library';
 import { BarcodeService } from '../../services/barcode.service';
 import { ApiService, TripInfo, Truck } from '../../services/api.service';
 import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
-
 @Component({
   selector: 'app-scan-barcode',
   standalone: true,
@@ -357,18 +356,47 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
         // Response: { TripData: { Result: [ { tripNumber: "..." }, ... ] } }
         const trips: any[] = response?.TripData?.Result ?? [];
+        const tripType = localStorage.getItem('tripType');
 
-        this.spkOptions = trips
-          .map((t: any) => t.tripNumber ?? '')
-          .filter((s: string) => s.length > 0);
+        if (tripType === 'IN') {
+          this.apiService.getOutTruckCheck().subscribe({
+            next: (response: any) => {
+              const tripOut: any[] = response?.TruckCheckData?.Result ?? [];
+              const tripOutSet = new Set(tripOut.map((t: any) => t.TripNum));
 
-        if (this.spkOptions.length === 1) {
-          this.barcodeInput = this.spkOptions[0];
+              console.log('tripOutSet: ', [...tripOutSet]);
+
+              this.spkOptions = trips
+                .map((t: any) => t.tripNumber ?? '')
+                .filter((tripNum: string) => tripNum.length > 0 && tripOutSet.has(tripNum));
+
+              if (this.spkOptions.length === 1) {
+                this.barcodeInput = this.spkOptions[0];
+              } else {
+                this.barcodeInput = '';
+              }
+
+              this.isLoadingSpk = false;
+            },
+            error: (error) => {
+              console.error('getOutTruckCheck error:', error);
+              this.isLoadingSpk = false;
+              this.handleApiError(error);
+            }
+          });
         } else {
-          this.barcodeInput = '';
-        }
+          this.spkOptions = trips
+            .map((t: any) => t.tripNumber ?? '')
+            .filter((tripNum: string) => tripNum.length > 0);
 
-        this.isLoadingSpk = false;
+          if (this.spkOptions.length === 1) {
+            this.barcodeInput = this.spkOptions[0];
+          } else {
+            this.barcodeInput = '';
+          }
+
+          this.isLoadingSpk = false;
+        }
       },
       error: (error) => {
         console.error('getAllTripData error:', error);
