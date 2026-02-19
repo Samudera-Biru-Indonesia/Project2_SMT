@@ -22,7 +22,16 @@ export class OdometerComponent implements OnInit {
   odometerPhoto: string = '';
   cargoPhoto: string = '';
   isUploading: boolean = false;
+  photoUploadWarning: string = '';
   tripDriver: string = '';
+  expectedMuatan: number | null = null;
+  muatanType: string = '';
+
+  get muatanMismatchWarning(): boolean {
+    if (this.muatanType !== 'CYLINDER' || this.expectedMuatan === null || !this.jumlahMuatan) return false;
+    const entered = parseFloat(this.jumlahMuatan);
+    return !isNaN(entered) && entered !== this.expectedMuatan;
+  }
 
   constructor(private router: Router, private apiService: ApiService) {}
 
@@ -55,6 +64,17 @@ export class OdometerComponent implements OnInit {
     
     if (!this.truckBarcode || !this.tripType) {
       this.router.navigate(['/trip-selection']);
+    }
+
+    if (this.tripType === 'OUT' && this.tripNumber) {
+      this.apiService.getTotalFromTripNumber(this.tripNumber).subscribe({
+        next: (res) => {
+          this.expectedMuatan = res.total;
+          this.muatanType = res.type;
+          console.log(`📦 Expected muatan: ${res.total} (${res.type})`);
+        },
+        error: (err) => console.warn('⚠️ Gagal mengambil total muatan:', err)
+      });
     }
   }
 
@@ -121,30 +141,30 @@ export class OdometerComponent implements OnInit {
 
 
     if (!this.odometerReading) {
-      alert('Silakan isi pembacaan odometer');
+      alert('Pembacaan odometer belum diisi. Silakan masukkan angka odometer terlebih dahulu.');
       return;
     }
 
     if (!this.odometerPhoto || !this.cargoPhoto) {
-      alert('Silakan ambil foto odometer dan foto muatan');
+      alert('Foto odometer dan foto muatan wajib diambil sebelum melanjutkan.');
       return;
     }
 
     if (!this.jumlahMuatan) {
-      alert('Silakan isi jumlah muatan');
+      alert('Jumlah muatan belum diisi. Silakan masukkan jumlah muatan terlebih dahulu.');
       return;
     }
 
     // Validate odometer reading
     const odometerValue = parseFloat(this.odometerReading);
     if (isNaN(odometerValue) || odometerValue < 0) {
-      alert('Pembacaan odometer harus berupa angka yang valid dan tidak negatif');
+      alert('Pembacaan odometer tidak valid. Pastikan nilai yang dimasukkan berupa angka positif.');
       return;
     }
 
     const jumlahMuatanValue = parseFloat(this.jumlahMuatan);
     if (isNaN(jumlahMuatanValue) || jumlahMuatanValue < 0) {
-      alert('Jumlah muatan harus berupa angka yang valid dan tidak negatif');
+      alert('Jumlah muatan tidak valid. Pastikan nilai yang dimasukkan berupa angka positif.');
       return;
     }
 
@@ -169,7 +189,7 @@ export class OdometerComponent implements OnInit {
         console.log('✅ Using saved checklist data for OUT trip');
       } catch (e) {
         console.error('❌ Failed to parse saved trip data:', e);
-        alert('Gagal membaca data perjalanan tersimpan. Silakan coba lagi.');
+        alert('Gagal membaca data perjalanan. Silakan masukkan data secara manual atau hubungi tim support.');
         return;
       }
     } else {
@@ -198,7 +218,10 @@ export class OdometerComponent implements OnInit {
     const tripNum = tripData.tripNum || 'unknown';
     this.apiService.uploadPhotos(tripNum, this.odometerPhoto, this.cargoPhoto).subscribe({
       next: (res) => console.log('📸 Photos uploaded to Drive:', res.fileIds),
-      error: (err) => console.warn('📸 Photo upload failed:', err.message)
+      error: (err) => {
+        console.warn('📸 Photo upload failed:', err.message);
+        this.photoUploadWarning = 'Foto gagal terupload ke Drive. Data perjalanan tetap terkirim.';
+      }
     });
 
     // Send data to API
@@ -264,7 +287,7 @@ export class OdometerComponent implements OnInit {
         // The API might return error details in response body even for 200 status
         if (response && response.error) {
           console.error('API returned error in response body:', response);
-          alert('Kesalahan dari server: ' + (response.message || response.error || JSON.stringify(response)));
+          alert('Kesalahan dari server: ' + (response.message || response.error || JSON.stringify(response)) + '\n\nSilakan masukkan data secara manual atau hubungi tim support.');
         } else {
           console.log('Trip data submission successful!');
           console.log('Data sent to server:', tripData);
@@ -276,27 +299,27 @@ export class OdometerComponent implements OnInit {
       error: (error) => {
         console.error('Error sending trip data:', error);
         
-        let errorMessage = 'Gagal mengirim data ke server';
-        
+        let errorMessage = 'Gagal mengirim data perjalanan.';
+
         if (error.status === 0) {
-          errorMessage += ' - Periksa koneksi internet Anda.';
+          errorMessage += ' Koneksi ke server gagal, periksa jaringan internet Anda.';
         } else if (error.status === 400) {
-          errorMessage += ' - Data yang dikirim tidak valid.';
+          errorMessage += ' Data yang dikirim tidak valid.';
         } else if (error.status === 401) {
-          errorMessage += ' - Autentikasi gagal.';
+          errorMessage += ' Sesi telah berakhir, silakan login ulang.';
         } else if (error.status === 403) {
-          errorMessage += ' - Akses ditolak.';
+          errorMessage += ' Akses ditolak.';
         } else if (error.status === 404) {
-          errorMessage += ' - Endpoint API tidak ditemukan.';
+          errorMessage += ' Layanan tidak ditemukan.';
         } else if (error.status === 409) {
-          errorMessage += ' - Data konflik dengan server.';
+          errorMessage += ' Data konflik dengan server.';
         } else if (error.status >= 500) {
-          errorMessage += ' - Kesalahan server.';
+          errorMessage += ' Terjadi kesalahan pada server.';
         } else {
-          errorMessage += ` - HTTP ${error.status}: ${error.statusText}`;
+          errorMessage += ` HTTP ${error.status}: ${error.statusText}.`;
         }
-        
-        alert(errorMessage + '\n\nData tetap tersimpan secara lokal.');
+
+        alert(errorMessage + '\n\nSilakan masukkan data secara manual atau hubungi tim support.');
       }
     });
   }

@@ -94,7 +94,7 @@ export class ChecklistComponent implements OnInit {
       
       this.router.navigate(['/odometer']);
     } else {
-      alert('Silakan lengkapi semua item checklist yang wajib sebelum melanjutkan.');
+      alert('Semua item checklist wajib harus dicentang sebelum melanjutkan.');
     }
   }
 

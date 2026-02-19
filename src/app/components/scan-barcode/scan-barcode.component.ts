@@ -288,7 +288,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
     if (this.barcodeInput.trim()) {
       this.getTripDataFromAPI(this.barcodeInput.trim());
     } else {
-      alert('Silakan scan atau masukkan barcode');
+      alert('Nomor SPK belum dipilih. Silakan scan barcode atau pilih nomor SPK secara manual.');
     }
   }
 
