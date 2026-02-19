@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-trip-complete',
@@ -15,7 +16,7 @@ export class TripCompleteComponent implements OnInit {
   truckBarcode: string = '';
   tripType: string = '';
   
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit() {
     this.tripNumber = localStorage.getItem('tripNumber') || 'N/A';
@@ -51,4 +52,8 @@ export class TripCompleteComponent implements OnInit {
   // goToLanding() {
   //   this.router.navigate(['/trip-selection']);
   // }
+
+  logout() {
+    this.authService.logout();
+  }
 }

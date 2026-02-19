@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService, TripData, GetTotalFromTripNumberResponse,  GetOutTruckCheckResponse} from '../../services/api.service';
 import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-odometer',
@@ -31,7 +32,7 @@ export class OdometerComponent implements OnInit {
 
   isLoading: boolean = false;
 
-  constructor(private router: Router, private apiService: ApiService) {}
+  constructor(private router: Router, private apiService: ApiService, private authService: AuthService) {}
 
   ngOnInit() {
     this.truckBarcode = localStorage.getItem('currentTruckBarcode') || '';
@@ -425,5 +426,9 @@ export class OdometerComponent implements OnInit {
     //   this.router.navigate(['/trip-selection']);
     // }
     this.router.navigate(['/scan-barcode']);
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }
