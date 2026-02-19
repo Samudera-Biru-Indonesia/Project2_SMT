@@ -17,16 +17,41 @@ import { EnvironmentService, ApiEnvironment } from '../../services/environment.s
   styles: [`
     .env-indicator {
       position: fixed;
-      top: 10px;
-      right: 15px;
-      padding: 5px 12px;
       border-radius: 4px;
-      font-size: 14px;
       font-weight: 500;
       z-index: 1000;
       color: #333;
       background: #f8f9fa;
       border: 1px solid #dee2e6;
+    }
+
+    /* Desktop and laptop specific styles for description */
+    @media (min-width: 769px) {
+      .env-indicator {
+        font-size: 14px;
+        padding: 5px 12px;
+        top: 10px;
+        right: 15px;
+      }
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .env-indicator {
+        font-size: 13px;
+        padding: 4px 8px;
+        top: 10px;
+        right: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .env-indicator {
+        font-size: 12px;
+        padding: 4px 8px;
+        top: 7px;
+        right: 10px;
+      }
     }
 
     .env-indicator.test {
