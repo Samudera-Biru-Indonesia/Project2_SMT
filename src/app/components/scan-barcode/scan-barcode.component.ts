@@ -431,10 +431,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
     return this.validateDetectedBarcodeEnhanced(this.barcodeInput.trim());
   }
 
-  toggleManualInput() {
-    this.showManualInput = !this.showManualInput;
-  }
-
   get filteredSpkOptions(): string[] {
     if (!this.spkSearchQuery.trim()) return this.spkOptions;
     const q = this.spkSearchQuery.trim().toUpperCase();

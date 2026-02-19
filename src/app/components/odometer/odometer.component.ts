@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService, TripData } from '../../services/api.service';
+import { ApiService, TripData, GetTotalFromTripNumberResponse,  GetOutTruckCheckResponse} from '../../services/api.service';
 import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-odometer',
@@ -18,12 +19,17 @@ export class OdometerComponent implements OnInit {
   tripNumber: string = '';
   plateNumber: string = '';
   odometerReading: string = '';
+  odometerFromDb: number | null = null;
   jumlahMuatan: string = '';
   notes: string = '';
   odometerPhoto: string = '';
   cargoPhoto: string = '';
   isUploading: boolean = false;
   tripDriver: string = '';
+  tripLoadFromDb: number | null = null;
+  productType: string = '';
+
+  isLoading: boolean = false;
 
   constructor(private router: Router, private apiService: ApiService) {}
 
@@ -32,10 +38,25 @@ export class OdometerComponent implements OnInit {
     this.tripType = localStorage.getItem('tripType') || '';
     this.tripNumber = localStorage.getItem('tripNumber') || '';
     this.tripDriver = localStorage.getItem('tripDriver') || '';
+
+    if (this.tripNumber) {
+      if (this.tripType === 'OUT') {
+        this.fetchTripTotalLoad(this.tripNumber);
+      } else { // kalok IN
+        this.fetchOdometer();
+      }
+
+      
+      
+    } else {
+      alert('Mohon ulangi isi nomor SPK. Sistem gagal mendapatkan nomor SPK.');
+    }
+
     
     console.log('Odometer Component - Trip Type:', this.tripType);
     console.log('Odometer Component - Trip Type Class:', this.tripType.toLowerCase() + '-trip');
     console.log('Odometer Component - Button Style:', this.getButtonStyle());
+    
     
     // Get plate number from trip data if available
     const tripDataString = localStorage.getItem('currentTripData');
@@ -57,6 +78,57 @@ export class OdometerComponent implements OnInit {
     if (!this.truckBarcode || !this.tripType) {
       this.router.navigate(['/trip-selection']);
     }
+  }
+
+  fetchTripTotalLoad(tripNumberStr: string) {
+    this.isLoading = true;
+
+    // Call the service method
+    this.apiService.getTotalFromTripNumber(tripNumberStr)
+      .subscribe({
+        next: (response: GetTotalFromTripNumberResponse) => {
+          console.log('API Response received:', response);
+          this.isLoading = false;
+            
+          this.tripLoadFromDb = response.total; 
+          this.productType = response.type;
+          
+        },
+        
+        error: (error) => {
+          this.isLoading = false;
+          alert('Error connecting to server.');
+        },
+      });
+  }
+
+   fetchOdometer() {
+    this.isLoading = true;
+
+    // Call the service method
+    this.apiService.getOutTruckCheck()
+      .subscribe({
+        next: (response: GetOutTruckCheckResponse) => {
+          console.log('API Response received:', response);
+          this.isLoading = false;
+            
+          const matchingTrip = response.TruckCheckData.Result.find(
+            (item) => item.TripNum === this.tripNumber
+          );
+
+          if (matchingTrip) {
+            this.odometerFromDb = matchingTrip.Odometer;
+          } else {
+            alert('Gagal mengambil data odometer, gunakan surat jalan sebagai referensi odometer.');
+          }
+          
+        },
+        
+        error: (error) => {
+          this.isLoading = false;
+          alert('Error connecting to server.');
+        },
+      });
   }
 
   onPhotoSelected(event: Event, type: 'odometer' | 'cargo') {
@@ -122,7 +194,7 @@ export class OdometerComponent implements OnInit {
 
 
     if (!this.odometerReading) {
-      alert('Silakan isi pembacaan odometer');
+      alert('Silahkan isi pembacaan odometer');
       return;
     }
 
@@ -174,6 +246,14 @@ export class OdometerComponent implements OnInit {
         return;
       }
     } else {
+      // odometer input harus <= odometer dari DB
+      if (this.odometerFromDb) {
+        const odometerFromDbValue = this.odometerFromDb;
+        if (odometerValue < odometerFromDbValue) {
+          alert(`Data odometer yang Anda masukkan (${odometerValue}) kurang dari pembacaan odometer terakhir yang tercatat di sistem (${odometerFromDbValue}). Silakan periksa kembali pembacaan odometer Anda.`);
+          return;
+        }
+      }
       // For IN trips or if no saved data, create new trip data
       tripData = {
         odometer: odometerValue,
