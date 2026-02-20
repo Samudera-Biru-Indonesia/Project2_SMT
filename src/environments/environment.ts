@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  backendUrl: 'http://localhost:8004',
   api: {
     baseUrl: 'https://epicprodapp.samator.com/KineticPilot/api/v2/efx/SGI/SMTTruckCheckApp',
     endpoints: {

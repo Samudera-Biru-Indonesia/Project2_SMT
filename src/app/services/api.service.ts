@@ -369,7 +369,7 @@ export class ApiService {
   }
 
   uploadPhotos(tripNum: string, odometerPhoto: string, cargoPhoto: string): Observable<any> {
-    const url = 'http://localhost:3000/api/upload-photos';
+    const url = `${environment.backendUrl}/api/upload-photos`;
     return this.http.post<any>(url, { tripNum, odometerPhoto, cargoPhoto });
   }
 

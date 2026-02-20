@@ -167,14 +167,23 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func testHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status":  "ok",
+		"message": "Photo server is running",
+	})
+}
+
 func main() {
 	godotenv.Load()
-	
+
 	if err := initDriveService(); err != nil {
 		log.Fatalf("Failed to initialize Drive service: %v", err)
 	}
 
 	http.HandleFunc("/api/upload-photos", corsMiddleware(uploadPhotosHandler))
+	http.HandleFunc("/test", corsMiddleware(testHandler))
 
 	port := os.Getenv("PORT")
 	if port == "" {

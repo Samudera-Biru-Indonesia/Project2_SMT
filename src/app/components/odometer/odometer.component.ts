@@ -3,13 +3,12 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, TripData, GetTotalFromTripNumberResponse,  GetOutTruckCheckResponse} from '../../services/api.service';
-import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-odometer',
   standalone: true,
-  imports: [CommonModule, FormsModule, EnvironmentIndicatorComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './odometer.component.html',
   styleUrls: ['./odometer.component.css']
 })
