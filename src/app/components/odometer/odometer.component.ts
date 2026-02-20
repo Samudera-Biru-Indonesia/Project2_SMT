@@ -30,6 +30,7 @@ export class OdometerComponent implements OnInit {
   tripDriver: string = '';
   expectedMuatan: number | null = null;
   muatanType: string = '';
+  isOdometerWrong: boolean = false;
 
   get muatanMismatchWarning(): boolean {
     if (this.muatanType !== 'CYLINDER' || this.expectedMuatan === null || !this.jumlahMuatan) return false;
@@ -338,6 +339,7 @@ export class OdometerComponent implements OnInit {
       // odometer input harus >= odometer dari DB
       if (this.odometerFromDb !== null && odometerValue < this.odometerFromDb) {
         if (!this.odometerWarningShown) {
+          this.isOdometerWrong = true;
           this.showOdometerWarning = true;
           this.odometerWarningShown = true;
           return;
