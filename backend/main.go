@@ -175,6 +175,104 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// ─── Dummy Data Handlers ──────────────────────────────────────────────────────
+
+func dummyAuthenticateLogon(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	// API Samator returns empty {} on success
+	w.Write([]byte(`{}`))
+}
+
+func dummyGetTripData(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"driver":    "BUDI SANTOSO",
+		"codriver":  "AGUS PRASETYO",
+		"truckPlate": "B 1234 ABC",
+		"plant":     "SGI053",
+		"ETADate":   "2026-02-20T08:00:00Z",
+		"truckDesc": "TRONTON 10 TON - MITSUBISHI FUSO",
+	})
+}
+
+func dummyGetAllTripData(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"TripData": map[string]interface{}{
+			"Result": []map[string]interface{}{
+				{"tripNumber": "SGI053-00149601"},
+				{"tripNumber": "SGI053-00149602"},
+				{"tripNumber": "SGI053-00149603"},
+			},
+		},
+	})
+}
+
+func dummyGetTruckByAuthSite(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"TruckData": map[string]interface{}{
+			"Result": []map[string]interface{}{
+				{"truckID": "TRK001", "truckPlate": "B 1234 ABC", "truckDesc": "TRONTON 10 TON - MITSUBISHI FUSO", "plantList": "SGI053"},
+				{"truckID": "TRK002", "truckPlate": "B 5678 DEF", "truckDesc": "TRONTON 8 TON - HINO RANGER", "plantList": "SGI053"},
+				{"truckID": "TRK003", "truckPlate": "D 9012 GHI", "truckDesc": "TRONTON 12 TON - ISUZU GIGA", "plantList": "SGI045"},
+			},
+		},
+	})
+}
+
+func dummyGetListPlant(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	// Match the format the login component expects: { Result: { Plant: [...] } }
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"Result": map[string]interface{}{
+			"Plant": []map[string]interface{}{
+				{"Plant": "SGI053", "Name": "SGI YOGYAKARTA", "Lat": -7.797068, "Long": 110.370529},
+				{"Plant": "SGI045", "Name": "SGI SEMARANG", "Lat": -6.966667, "Long": 110.416664},
+				{"Plant": "SGI001", "Name": "SGI JAKARTA", "Lat": -6.200000, "Long": 106.816666},
+			},
+		},
+	})
+}
+
+func dummyGetOutTruckCheck(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"TruckCheckData": map[string]interface{}{
+			"Result": []map[string]interface{}{
+				{"Company": "SGI", "TripNum": "SGI053-00149601", "Odometer": 125000},
+				{"Company": "SGI", "TripNum": "SGI053-00149602", "Odometer": 98500},
+			},
+		},
+	})
+}
+
+func dummyGetTotalFromTripNumber(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"total": 15000,
+		"type":  "OUT",
+	})
+}
+
+func dummyInsertStagingTable(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Data berhasil disimpan (dummy)",
+	})
+}
+
+func dummyProcessTripTimeEntry(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Trip berhasil diproses (dummy)",
+	})
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 func main() {
 	godotenv.Load()
 
@@ -182,13 +280,26 @@ func main() {
 		log.Fatalf("Failed to initialize Drive service: %v", err)
 	}
 
+	// Real endpoints
 	http.HandleFunc("/api/upload-photos", corsMiddleware(uploadPhotosHandler))
 	http.HandleFunc("/test", corsMiddleware(testHandler))
+
+	// Dummy data endpoints (prefix: /api/dummy/)
+	http.HandleFunc("/api/dummy/AuthenticateLogon",     corsMiddleware(dummyAuthenticateLogon))
+	http.HandleFunc("/api/dummy/GetTripData",           corsMiddleware(dummyGetTripData))
+	http.HandleFunc("/api/dummy/GetAllTripData",        corsMiddleware(dummyGetAllTripData))
+	http.HandleFunc("/api/dummy/getTruckByAuthSite",    corsMiddleware(dummyGetTruckByAuthSite))
+	http.HandleFunc("/api/dummy/GetListPlant",          corsMiddleware(dummyGetListPlant))
+	http.HandleFunc("/api/dummy/getOutTruckCheck",      corsMiddleware(dummyGetOutTruckCheck))
+	http.HandleFunc("/api/dummy/getTotalFromTripNumber", corsMiddleware(dummyGetTotalFromTripNumber))
+	http.HandleFunc("/api/dummy/InsertStagingTable",    corsMiddleware(dummyInsertStagingTable))
+	http.HandleFunc("/api/dummy/ProcessTripTimeEntry",  corsMiddleware(dummyProcessTripTimeEntry))
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3000"
 	}
-	fmt.Printf("Photo upload server running on http://localhost:%s\n", port)
+	fmt.Printf("Server running on http://localhost:%s\n", port)
+	fmt.Println("Dummy endpoints available at http://localhost:" + port + "/api/dummy/*")
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

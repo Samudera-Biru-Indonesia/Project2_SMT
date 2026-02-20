@@ -13,6 +13,12 @@ export interface ApiEnvironment {
 })
 export class EnvironmentService {
   private environments: { [key: string]: ApiEnvironment } = {
+    local: {
+      name: 'local',
+      displayName: 'Local (Dummy)',
+      baseUrl: 'http://localhost:3000/api/dummy',
+      apiKey: 'dummy-key'
+    },
     test: {
       name: 'test',
       displayName: 'Test',
