@@ -1,8 +1,9 @@
 <div class="scan-container">
-  <app-environment-indicator></app-environment-indicator>
+  <!-- <app-environment-indicator></app-environment-indicator> -->
   <header class="header">
     <button class="back-btn" (click)="goBack()">← Kembali</button>
     <h1>Scan Barcode Kendaraan</h1>
+    <button class="logout-btn" (click)="logout()"><i class="fi fi-br-exit" style="margin-right:6px;"></i>Keluar</button>
   </header>
 
   <main class="scan-content">
@@ -91,7 +92,7 @@
                     {{ spk }}
                   </div>
                   <div class="spk-no-result" *ngIf="filteredSpkOptions.length === 0">
-                    {{ spkOptions.length === 0 ? 'Isi nopol truck terlebih dahulu' : 'Tidak ditemukan' }}
+                    {{ spkOptions.length === 0 ? 'Tidak ada SPK untuk Nopol yang tertera.' : 'Tidak ditemukan' }}
                   </div>
                 </div>
               </div>

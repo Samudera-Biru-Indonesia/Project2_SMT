@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TripInfo } from '../../services/api.service';
 import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-trip-selection',
@@ -18,7 +19,7 @@ export class TripSelectionComponent implements OnInit {
   tripNumber: string = '';
   plateNumber: string = '';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit() {
     console.log('localStorage items:', Object.keys(localStorage));
@@ -66,4 +67,8 @@ export class TripSelectionComponent implements OnInit {
   // goBack() {
   //   this.router.navigate(['/landing']);
   // }
+
+  logout() {
+    this.authService.logout();
+  }
 }

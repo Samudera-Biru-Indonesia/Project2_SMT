@@ -8,6 +8,8 @@ import { BrowserMultiFormatReader, Result } from '@zxing/library';
 import { BarcodeService } from '../../services/barcode.service';
 import { ApiService, TripInfo, Truck } from '../../services/api.service';
 import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
+import { AuthService } from '../../services/auth.service';
+
 @Component({
   selector: 'app-scan-barcode',
   standalone: true,
@@ -47,7 +49,8 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private barcodeService: BarcodeService,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private authService: AuthService
   ) {
     this.codeReader = new BrowserMultiFormatReader();
   }
@@ -446,6 +449,10 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   goBack() {
     this.stopScanning();
     this.router.navigate(['/trip-selection']);
+  }
+
+  logout() {
+    this.authService.logout();
   }
 
   onBarcodeInputChange() {

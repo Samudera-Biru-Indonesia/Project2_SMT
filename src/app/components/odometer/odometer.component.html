@@ -1,7 +1,9 @@
 <div class="odometer-container">
+  <!-- <app-environment-indicator></app-environment-indicator> -->
   <header class="header">
     <button class="back-btn" (click)="goBack()">← Kembali</button>
     <h1>Pembacaan Odometer</h1>
+    <button class="logout-btn" (click)="logout()"><i class="fi fi-br-exit" style="margin-right:6px;"></i>Keluar</button>
   </header>
 
   <main class="odometer-content">
@@ -30,10 +32,10 @@
               <label style="color:#616161;">
                 Odometer sebelumnya adalah 
                 @if (odometerFromDb) {
-                  {{ odometerFromDb }} km
+                  {{ odometerFromDb }} km.
                 } @else {
-                  <b>tidak diketahui</b>
-                }.
+                  <b>tidak diketahui.</b>
+                }
               </label>
             }
             
@@ -41,9 +43,11 @@
               type="number"
               id="odometer"
               [(ngModel)]="odometerReading"
+              (ngModelChange)="onOdometerChange()"
               name="odometerReading"
               placeholder="Masukkan pembacaan odometer saat ini"
               class="odometer-input"
+              [class.input-error]="showOdometerWarning"
               min="0"
               step="0.1"
               required
@@ -92,16 +96,17 @@
               type="number"
               id="jumlah-muatan"
               [(ngModel)]="jumlahMuatan"
+              (ngModelChange)="onMuatanChange()"
               name="jumlahMuatan"
               placeholder="Masukkan hasil perhitungan jumlah muatan"
               class="odometer-input"
-              [class.input-error]="muatanMismatchWarning"
+              [class.input-error]="muatanMismatchWarning || showMuatanLowWarning"
               min="0"
               step="0.1"
               required
               autocomplete="off"
             />
-            <div class="muatan-warning" *ngIf="muatanMismatchWarning">
+            <div class="muatan-warning" *ngIf="muatanMismatchWarning && !showMuatanLowWarning">
               Jumlah muatan yang dimasukkan ({{ jumlahMuatan }}) tidak sesuai dengan data sistem ({{ expectedMuatan }} cylinder). Pastikan kembali sebelum melanjutkan.
             </div>
           </div>
@@ -134,4 +139,52 @@
       </form>
     </div>
   </main>
+
+  <!-- Modal: Peringatan Odometer -->
+  <div class="modal-overlay" *ngIf="showOdometerWarning">
+    <div class="modal-alert">
+      <div class="modal-icon">⚠️</div>
+      <h3 class="modal-title">Peringatan Odometer</h3>
+      <p class="modal-message">
+        Odometer yang dimasukkan (<b>{{ odometerReading }} km</b>) lebih kecil dari catatan sistem (<b>{{ odometerFromDb }} km</b>).
+        Pastikan pembacaan sudah benar.
+      </p>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" (click)="dismissOdometerWarning()">Perbaiki</button>
+        <button class="modal-btn modal-btn-confirm" (click)="confirmOdometerWarning()">Tetap Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Peringatan Jumlah Muatan Lebih Besar -->
+  <div class="modal-overlay" *ngIf="showMuatanHighWarning">
+    <div class="modal-alert">
+      <div class="modal-icon">⚠️</div>
+      <h3 class="modal-title">Peringatan Jumlah Muatan</h3>
+      <p class="modal-message">
+        Jumlah muatan yang dimasukkan (<b>{{ jumlahMuatan }}</b>) lebih besar dari catatan sistem (<b>{{ expectedMuatan }} cylinder</b>).
+        Pastikan hitungan sudah benar.
+      </p>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" (click)="dismissMuatanHighWarning()">Perbaiki</button>
+        <button class="modal-btn modal-btn-confirm" (click)="confirmMuatanHighWarning()">Tetap Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Peringatan Jumlah Muatan Lebih Kecil -->
+  <div class="modal-overlay" *ngIf="showMuatanLowWarning">
+    <div class="modal-alert">
+      <div class="modal-icon">⚠️</div>
+      <h3 class="modal-title">Peringatan Jumlah Muatan</h3>
+      <p class="modal-message">
+        Jumlah muatan yang dimasukkan (<b>{{ jumlahMuatan }}</b>) lebih kecil dari catatan sistem (<b>{{ expectedMuatan }} cylinder</b>).
+        Pastikan hitungan sudah benar.
+      </p>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" (click)="dismissMuatanWarning()">Perbaiki</button>
+        <button class="modal-btn modal-btn-confirm" (click)="confirmMuatanWarning()">Tetap Lanjutkan</button>
+      </div>
+    </div>
+  </div>
 </div>

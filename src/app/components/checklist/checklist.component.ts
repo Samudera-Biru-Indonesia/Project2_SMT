@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, TripData } from '../../services/api.service';
 import { EnvironmentIndicatorComponent } from '../environment-indicator/environment-indicator.component';
+import { AuthService } from '../../services/auth.service';
 
 interface ChecklistItem {
   id: string;
@@ -28,10 +29,11 @@ export class ChecklistComponent implements OnInit {
   
   checklistItems: ChecklistItem[] = [
     { id: 'chk1', label: 'Surat Jalan', checked: false, required: true },
-    { id: 'chk2', label: 'APD', checked: false, required: true }
+    { id: 'chk2', label: 'APD', checked: false, required: true },
+    { id: 'chk3', label: 'Kendaraan Layak Jalan', checked: false, required: true }
   ];
 
-  constructor(private router: Router, private apiService: ApiService) {}
+  constructor(private router: Router, private apiService: ApiService, private authService: AuthService) {}
 
   ngOnInit() {
     this.truckBarcode = localStorage.getItem('currentTruckBarcode') || '';
@@ -100,5 +102,9 @@ export class ChecklistComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/scan-barcode']);
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }
