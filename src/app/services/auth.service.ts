@@ -84,7 +84,6 @@ export class AuthService {
   isJwtExpired(): boolean {
     const token = this.getToken();
     if (!token) {
-      console.log('JWT Check: No token found');
       return true;
     }
 
@@ -92,14 +91,6 @@ export class AuthService {
       const decoded: any = jwtDecode(token);
       const currentTime = Date.now() / 1000;
       const isExpired = decoded.exp < currentTime;
-      
-      console.log('JWT Check:', {
-        token: token.substring(0, 20) + '...',
-        expiresAt: new Date(decoded.exp * 1000),
-        currentTime: new Date(currentTime * 1000),
-        isExpired: isExpired,
-        timeRemaining: isExpired ? 0 : Math.floor((decoded.exp - currentTime) / 60) + ' minutes'
-      });
       
       return isExpired;
     } catch (error) {
@@ -141,15 +132,9 @@ export class AuthService {
   async getJwt(): Promise<string | null> {
     const user = this.currentUserSubject.value;
     if (!user) {
-      console.log('JWT Generation: No user found, cannot generate JWT');
       return null;
     }
 
-    console.log('JWT Generation: Requesting JWT for user:', {
-      username: user.username,
-      empCode: user.empCode,
-      site: user.site
-    });
 
     try {
       const request = {
@@ -162,23 +147,19 @@ export class AuthService {
         'Content-Type': 'application/json'
       });
 
-      console.log('JWT Generation: Calling backend /api/get-jwt');
+
       const response = await firstValueFrom(
         this.http.post<{ token: string }>(environment.backendUrl + '/api/get-jwt', request, { headers })
       );
 
-      console.log('JWT Generation: Received token from backend');
-      console.log('JWT Generation: Token preview:', response.token.substring(0, 50) + '...');
 
       // Store the token in the user
       user.token = response.token;
       this.saveUserToStorage(user);
       this.currentUserSubject.next(user);
 
-      console.log('JWT Generation: Token stored successfully');
       return response.token;
     } catch (error) {
-      console.error('JWT Generation: Failed to get JWT:', error);
       return null;
     }
   }
@@ -308,8 +289,6 @@ export class AuthService {
         // Get JWT for backend authentication
         await this.getJwt();
 
-        console.log('Login successful! User authenticated:', authUser);
-        console.log('Session will expire at:', sessionExpiryTime);
 
         return {
           success: true,
@@ -515,7 +494,6 @@ export class AuthService {
           this.currentUserSubject.next(tempUser); // Temporarily set to check JWT
           
           if (this.isJwtExpired()) {
-            console.log('Stored JWT has expired, logging out');
             this.logout();
             return;
           }
@@ -615,7 +593,6 @@ export class AuthService {
    */
   private checkJwtExpiration(): void {
     if (this.isJwtExpired()) {
-      console.log('JWT token expired during periodic check, logging out user');
       this.logout();
     }
   }

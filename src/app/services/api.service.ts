@@ -114,13 +114,10 @@ export class ApiService {
    * Check if JWT is expired and logout if needed
    */
   private checkJwtAndLogoutIfExpired(): void {
-    console.log('API Call: Checking JWT expiration before backend call');
     if (this.authService.isJwtExpired()) {
-      console.log('API Call: JWT expired, logging out user');
       this.authService.logout();
       throw new Error('JWT token expired');
     }
-    console.log('API Call: JWT is valid, proceeding with request');
   }
 
   sendTripData(data: TripData): Observable<any> {
@@ -309,14 +306,12 @@ export class ApiService {
     const url = `${environment.backendUrl}/api/upload-photos`;
     const token = this.getToken();
     
-    console.log('API Call: uploadPhotos - Using JWT token:', token ? token.substring(0, 30) + '...' : 'No token');
     
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     });
     
-    console.log('API Call: Making request to:', url);
     return this.http.post<any>(url, { tripNum, odometerPhoto, cargoPhoto }, { headers });
   }
 
