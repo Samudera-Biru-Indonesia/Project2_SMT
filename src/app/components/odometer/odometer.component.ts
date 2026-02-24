@@ -170,10 +170,10 @@ export class OdometerComponent implements OnInit {
     this.muatanHighWarningShown = false;
   }
 
-  confirmOdometerWarning() {
-    this.showOdometerWarning = false;
-    this.onSubmit();
-  }
+  // confirmOdometerWarning() {
+  //   this.showOdometerWarning = false;
+  //   this.onSubmit();
+  // }
 
   dismissOdometerWarning() {
     this.showOdometerWarning = false;

@@ -346,6 +346,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease;
+  margin-bottom: 35px;
 }
 
 .continue-btn:hover:not(:disabled) {

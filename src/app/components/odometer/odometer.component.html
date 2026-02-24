@@ -107,7 +107,10 @@
               autocomplete="off"
             />
             <div class="muatan-warning" *ngIf="muatanMismatchWarning && !showMuatanLowWarning">
-              Jumlah muatan yang dimasukkan ({{ jumlahMuatan }}) tidak sesuai dengan data sistem ({{ expectedMuatan }} cylinder). Pastikan kembali sebelum melanjutkan.
+              Jumlah muatan tidak sesuai dengan sistem. <br>
+              Di sistem: <b>{{ expectedMuatan }}</b> cylinder
+              <br>
+              Nilai Anda: <b>{{ jumlahMuatan }}</b> cylinder
             </div>
           </div>
 
@@ -144,14 +147,13 @@
   <div class="modal-overlay" *ngIf="showOdometerWarning">
     <div class="modal-alert">
       <div class="modal-icon">⚠️</div>
-      <h3 class="modal-title">Peringatan Odometer</h3>
+      <h3 class="modal-title">Nilai Odometer Lebih Kecil</h3>
       <p class="modal-message">
-        Odometer yang dimasukkan (<b>{{ odometerReading }} km</b>) lebih kecil dari catatan sistem (<b>{{ odometerFromDb }} km</b>).
-        Pastikan pembacaan sudah benar.
+        Nilai Saat Keluar: <b>{{ odometerFromDb }} km</b> <br> Nilai Anda Sekarang: <b>{{ odometerReading }} km</b>
       </p>
       <div class="modal-actions">
-        <button class="modal-btn modal-btn-cancel" (click)="dismissOdometerWarning()">Perbaiki</button>
-        <button class="modal-btn modal-btn-confirm" (click)="confirmOdometerWarning()">Tetap Lanjutkan</button>
+        <button class="modal-btn modal-btn-cancel" (click)="dismissOdometerWarning()">Kembali & Perbaiki</button>
+        <!-- <button class="modal-btn modal-btn-confirm" (click)="confirmOdometerWarning()">Tetap Lanjutkan</button> -->
       </div>
     </div>
   </div>
@@ -160,10 +162,11 @@
   <div class="modal-overlay" *ngIf="showMuatanHighWarning">
     <div class="modal-alert">
       <div class="modal-icon">⚠️</div>
-      <h3 class="modal-title">Peringatan Jumlah Muatan</h3>
+      <h3 class="modal-title">Jumlah Muatan Lebih Besar</h3>
       <p class="modal-message">
-        Jumlah muatan yang dimasukkan (<b>{{ jumlahMuatan }}</b>) lebih besar dari catatan sistem (<b>{{ expectedMuatan }} cylinder</b>).
-        Pastikan hitungan sudah benar.
+        Di sistem: <b>{{ expectedMuatan }}</b> cylinder
+        <br>
+        Nilai Anda: <b>{{ jumlahMuatan }}</b> cylinder
       </p>
       <div class="modal-actions">
         <button class="modal-btn modal-btn-cancel" (click)="dismissMuatanHighWarning()">Perbaiki</button>
@@ -176,10 +179,11 @@
   <div class="modal-overlay" *ngIf="showMuatanLowWarning">
     <div class="modal-alert">
       <div class="modal-icon">⚠️</div>
-      <h3 class="modal-title">Peringatan Jumlah Muatan</h3>
+      <h3 class="modal-title">Jumlah Muatan Lebih Kecil</h3>
       <p class="modal-message">
-        Jumlah muatan yang dimasukkan (<b>{{ jumlahMuatan }}</b>) lebih kecil dari catatan sistem (<b>{{ expectedMuatan }} cylinder</b>).
-        Pastikan hitungan sudah benar.
+        Di sistem: <b>{{ expectedMuatan }}</b> cylinder
+        <br>
+        Nilai Anda: <b>{{ jumlahMuatan }}</b> cylinder
       </p>
       <div class="modal-actions">
         <button class="modal-btn modal-btn-cancel" (click)="dismissMuatanWarning()">Perbaiki</button>
