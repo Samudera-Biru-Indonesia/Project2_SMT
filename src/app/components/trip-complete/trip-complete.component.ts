@@ -30,7 +30,6 @@ export class TripCompleteComponent implements OnInit {
         const tripData = JSON.parse(tripDataString);
         this.plateNumber = tripData?.truckPlate || 'N/A';
       } catch (error) {
-        console.error('Error parsing trip data:', error);
         this.plateNumber = 'N/A';
       }
     } else {

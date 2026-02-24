@@ -23,7 +23,7 @@ export class FullscreenService {
         await document.exitFullscreen();
       }
     } catch (error) {
-      console.error('Error toggling fullscreen:', error);
+      // Silently fail if fullscreen is unavailable
     }
   }
 
@@ -33,7 +33,7 @@ export class FullscreenService {
         await document.documentElement.requestFullscreen();
       }
     } catch (error) {
-      console.error('Error entering fullscreen:', error);
+      // Silently fail if fullscreen is unavailable
     }
   }
 
@@ -43,7 +43,7 @@ export class FullscreenService {
         await document.exitFullscreen();
       }
     } catch (error) {
-      console.error('Error exiting fullscreen:', error);
+      // Silently fail if fullscreen is unavailable
     }
   }
 

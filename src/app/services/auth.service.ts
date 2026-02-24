@@ -40,14 +40,14 @@ export class AuthService {
 
   private readonly STORAGE_KEY = 'smt_auth_user';
   private readonly LOGIN_ENDPOINT = '/AuthenticateLogon';
-  
+
   // Session configuration
   private readonly SESSION_DURATION_HOURS = 8.5; // 8 hours 30 minutes
   private readonly ACTIVITY_CHECK_INTERVAL = 60000; // Check every minute
-  
+
   // Timer untuk check session
   private sessionCheckTimer: any;
-  
+
   // Basic Auth credentials dari environment
   private readonly BASIC_AUTH_USERNAME = environment.api.basicAuth.username;
   private readonly BASIC_AUTH_PASSWORD = environment.api.basicAuth.password;
@@ -59,10 +59,10 @@ export class AuthService {
   ) {
     // Check if user is already logged in
     this.loadUserFromStorage();
-    
+
     // Start session monitoring
     this.startSessionMonitoring();
-    
+
     // Track user activity
     this.trackUserActivity();
   }
@@ -112,8 +112,6 @@ export class AuthService {
         curLongitude: location.longitude
       };
 
-      console.log('Login Request:', loginRequest);
-
       // Get current environment dynamically
       const currentEnv = this.environmentService.getCurrentEnvironment();
       const apiUrl = currentEnv.baseUrl + this.LOGIN_ENDPOINT;
@@ -126,21 +124,10 @@ export class AuthService {
         'x-api-key': currentEnv.apiKey
       });
 
-      console.log('Request Headers:', {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${basicAuth}`,
-        'x-api-key': currentEnv.apiKey
-      });
-
-      console.log('🌍 Using environment:', currentEnv.displayName);
-      console.log('API URL:', apiUrl);
-
       // Make API call
       const response = await firstValueFrom(
         this.http.post<any>(apiUrl, loginRequest, { headers })
       );
-
-      console.log('API Response:', response);
 
       // Check if login successful
       // API Samator mengembalikan {} (empty object) jika login berhasil
@@ -149,8 +136,8 @@ export class AuthService {
         // Check untuk empty object {} - ini yang terjadi di API Samator
         (typeof response === 'object' && Object.keys(response).length === 0) ||
         // Check untuk response dengan success flag
-        response.success === true || 
-        response.Success === true || 
+        response.success === true ||
+        response.Success === true ||
         response.status === 'success' ||
         response.Status === 'success'
       );
@@ -160,7 +147,7 @@ export class AuthService {
         const now = new Date();
         const sessionDurationHours = 8.5; // 8 hours 30 minutes
         const sessionExpiryTime = new Date(now.getTime() + (sessionDurationHours * 60 * 60 * 1000));
-        
+
         const authUser: AuthUser = {
           username: empCode.trim().toUpperCase(),
           empCode: empCode.trim().toUpperCase(),
@@ -176,16 +163,12 @@ export class AuthService {
         this.setCurrentUser(authUser);
         this.saveUserToStorage(authUser);
 
-        console.log('Login successful! User authenticated:', authUser);
-        console.log('Session will expire at:', sessionExpiryTime);
-
         return {
           success: true,
           message: 'Login berhasil!',
           user: authUser
         };
       } else {
-        console.log('Login failed. Response does not indicate success:', response);
         return {
           success: false,
           message: response?.message || response?.Message || response?.error || 'Login gagal. Silakan periksa kredensial Anda.'
@@ -193,15 +176,6 @@ export class AuthService {
       }
 
     } catch (error: any) {
-      console.error('Login error:', error);
-      console.error('Error details:', {
-        status: error.status,
-        statusText: error.statusText,
-        error: error.error,
-        message: error.message,
-        url: error.url
-      });
-      
       let errorMessage = 'Login gagal. Silakan coba lagi.';
 
       // Parse API ErrorMessage from response body
@@ -266,11 +240,10 @@ export class AuthService {
     // localStorage.removeItem(this.STORAGE_KEY);
     localStorage.clear();
     this.stopSessionMonitoring();
-    
+
     // Reset environment to LIVE on logout
     this.environmentService.setEnvironment('live');
-    console.log('User logged out and environment reset to LIVE');
-    
+
     // Redirect to login page
     if (typeof window !== 'undefined') {
       const currentEnv = this.environmentService.getCurrentEnvironment();
@@ -306,16 +279,16 @@ export class AuthService {
 
     try {
       const location = await this.geolocationService.getCurrentLocation();
-      
+
       // Update user location
       const updatedUser: AuthUser = {
         ...currentUser,
         location: location
       };
-      
+
       this.setCurrentUser(updatedUser);
       this.saveUserToStorage(updatedUser);
-      
+
       return {
         success: true,
         message: 'Lokasi berhasil diperbarui'
@@ -333,7 +306,7 @@ export class AuthService {
    */
   private setCurrentUser(user: AuthUser): void {
     this.currentUserSubject.next(user);
-    
+
     // Start session monitoring when user is set
     if (user && !this.sessionCheckTimer) {
       this.startSessionMonitoring();
@@ -347,7 +320,7 @@ export class AuthService {
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(user));
     } catch (error) {
-      console.error('Error saving user to storage:', error);
+      // Silently fail if storage is unavailable
     }
   }
 
@@ -359,11 +332,11 @@ export class AuthService {
       const storedUser = localStorage.getItem(this.STORAGE_KEY);
       if (storedUser) {
         const user: AuthUser = JSON.parse(storedUser);
-        
+
         const now = new Date();
         let sessionExpiryTime: Date;
         let lastActivityTime: Date;
-        
+
         // Handle both old and new user formats
         if (user.sessionExpiryTime) {
           sessionExpiryTime = new Date(user.sessionExpiryTime);
@@ -374,7 +347,7 @@ export class AuthService {
           sessionExpiryTime = new Date(loginTime.getTime() + (this.SESSION_DURATION_HOURS * 60 * 60 * 1000));
           lastActivityTime = loginTime;
         }
-        
+
         // Update user object with missing properties if needed
         const updatedUser: AuthUser = {
           ...user,
@@ -382,20 +355,16 @@ export class AuthService {
           lastActivityTime: lastActivityTime,
           sessionExpiryTime: sessionExpiryTime
         };
-        
+
         // Check if session is still valid
         if (now < sessionExpiryTime) {
           this.setCurrentUser(updatedUser);
           // DON'T save here to avoid changing the expiry time on refresh
-          console.log('User session restored from storage. Expires at:', sessionExpiryTime);
-          console.log('Time remaining:', Math.ceil((sessionExpiryTime.getTime() - now.getTime()) / (1000 * 60)), 'minutes');
         } else {
-          console.log('Stored session has expired, logging out');
           this.logout();
         }
       }
     } catch (error) {
-      console.error('Error loading user from storage:', error);
       this.logout();
     }
   }
@@ -471,7 +440,6 @@ export class AuthService {
 
     // Check if session has expired
     if (now >= sessionExpiryTime) {
-      console.log('Session expired, logging out user');
       this.logout();
       return;
     }
@@ -483,11 +451,11 @@ export class AuthService {
   private trackUserActivity(): void {
     // Track significant user activities only
     const significantEvents = ['click', 'keypress', 'touchstart'];
-    
+
     // Throttle activity updates to prevent excessive updates
     let lastActivityUpdate = 0;
     const activityThrottle = 5 * 60 * 1000; // 5 minutes minimum between activity updates
-    
+
     significantEvents.forEach(event => {
       document.addEventListener(event, () => {
         const now = Date.now();
@@ -510,7 +478,7 @@ export class AuthService {
     const sessionExpiryTime = new Date(currentUser.sessionExpiryTime);
     const timeUntilExpiry = sessionExpiryTime.getTime() - now.getTime();
     const oneHour = 60 * 60 * 1000;
-    
+
     // Only extend session if it's going to expire within the next hour
     // This prevents constant extension but ensures session doesn't expire during active use
     if (timeUntilExpiry > oneHour) {
@@ -519,7 +487,7 @@ export class AuthService {
         ...currentUser,
         lastActivityTime: now
       };
-      
+
       this.setCurrentUser(updatedUser);
       this.saveUserToStorage(updatedUser);
       return;
@@ -536,18 +504,16 @@ export class AuthService {
 
     this.setCurrentUser(updatedUser);
     this.saveUserToStorage(updatedUser);
-    
-    console.log('User activity detected, session extended until:', newExpiryTime);
   }
 
   /**
    * Get session info
    */
-  public getSessionInfo(): { 
-    isValid: boolean; 
-    expiresAt: Date | null; 
-    minutesRemaining: number; 
-    lastActivity: Date | null; 
+  public getSessionInfo(): {
+    isValid: boolean;
+    expiresAt: Date | null;
+    minutesRemaining: number;
+    lastActivity: Date | null;
   } {
     const currentUser = this.getCurrentUser();
     if (!currentUser) {
@@ -590,8 +556,7 @@ export class AuthService {
 
     this.setCurrentUser(updatedUser);
     this.saveUserToStorage(updatedUser);
-    
-    console.log('Session manually extended until:', newExpiryTime);
+
     return true;
   }
 }

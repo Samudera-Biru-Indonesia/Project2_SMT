@@ -22,15 +22,10 @@ export class GeolocationService {
    */
   getCurrentLocation(): Promise<UserLocation> {
     return new Promise((resolve, reject) => {
-      console.log('🔍 Starting geolocation request...');
-      
       if (!navigator.geolocation) {
-        console.error('❌ Geolocation not supported');
         reject(new Error('Geolokasi tidak didukung oleh browser ini.'));
         return;
       }
-
-      console.log('✅ Geolocation API available');
 
       const options = {
         enableHighAccuracy: true,
@@ -38,82 +33,33 @@ export class GeolocationService {
         maximumAge: 0 // Always get fresh coordinates, no caching
       };
 
-      console.log('⚙️ Geolocation options:', options);
-
-      const startTime = Date.now();
-
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const endTime = Date.now();
-          const responseTime = endTime - startTime;
-          
-          console.log('🎯 Geolocation SUCCESS:', {
-            responseTime: responseTime + 'ms',
-            coords: {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-              accuracy: position.coords.accuracy,
-              altitude: position.coords.altitude,
-              altitudeAccuracy: position.coords.altitudeAccuracy,
-              heading: position.coords.heading,
-              speed: position.coords.speed
-            },
-            timestamp: new Date(position.timestamp),
-            // Debug info tentang positioning source
-            userAgent: navigator.userAgent,
-            platform: navigator.platform,
-            onLine: navigator.onLine,
-            geolocationEnabled: 'geolocation' in navigator
-          });
-
-          // Check accuracy level
-          if (position.coords.accuracy > 1000) {
-            console.warn('⚠️ LOW ACCURACY detected:', position.coords.accuracy + 'm');
-          } else if (position.coords.accuracy > 100) {
-            console.warn('⚠️ MEDIUM ACCURACY detected:', position.coords.accuracy + 'm');
-          } else {
-            console.log('✅ HIGH ACCURACY detected:', position.coords.accuracy + 'm');
-          }
-          
           const userLocation: UserLocation = {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
             accuracy: position.coords.accuracy,
             timestamp: position.timestamp
           };
-          
+
           this.currentLocationSubject.next(userLocation);
           resolve(userLocation);
         },
         (error) => {
-          const endTime = Date.now();
-          const responseTime = endTime - startTime;
-          
           let errorMessage = 'Terjadi kesalahan yang tidak diketahui';
 
           switch (error.code) {
             case error.PERMISSION_DENIED:
               errorMessage = 'Pengguna menolak permintaan akses lokasi.';
-              console.error('❌ PERMISSION_DENIED:', errorMessage);
               break;
             case error.POSITION_UNAVAILABLE:
               errorMessage = 'Informasi lokasi tidak tersedia.';
-              console.error('❌ POSITION_UNAVAILABLE:', errorMessage);
               break;
             case error.TIMEOUT:
               errorMessage = 'Permintaan lokasi pengguna telah habis waktu.';
-              console.error('❌ TIMEOUT:', errorMessage);
               break;
-            default:
-              console.error('❌ UNKNOWN ERROR:', error);
           }
-          
-          console.error('🚨 Geolocation FAILED:', {
-            errorCode: error.code,
-            errorMessage: errorMessage,
-            responseTime: responseTime + 'ms'
-          });
-          
+
           reject(new Error(errorMessage));
         },
         options
@@ -139,7 +85,7 @@ export class GeolocationService {
             accuracy: position.coords.accuracy,
             timestamp: position.timestamp
           };
-          
+
           this.currentLocationSubject.next(userLocation);
           observer.next(userLocation);
         },

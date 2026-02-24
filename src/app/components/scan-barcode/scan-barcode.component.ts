@@ -87,7 +87,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
         this.cameraError = 'Kamera tidak ditemukan pada perangkat ini';
       }
     } catch (error) {
-      console.error('Error checking camera:', error);
       this.cameraError = 'Tidak dapat mengakses izin kamera';
       this.hasCamera = false;
     }
@@ -134,33 +133,25 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
           (result: Result | null, error?: any) => {
             if (result) {
               const detectedText = result.getText().trim();
-              console.log('Raw barcode detected:', detectedText);
-              
+
               // Track detection attempts for consistency
               this.trackDetectedCode(detectedText);
-              
+
               // Enhanced validation for long barcodes
               if (this.validateDetectedBarcodeEnhanced(detectedText)) {
                 this.onBarcodeDetected(detectedText);
               } else {
-                console.log('Invalid barcode format, continuing scan:', detectedText);
-                
                 // Try to find the most consistent detection if we have multiple attempts
                 const consistentCode = this.findConsistentCode();
                 if (consistentCode && this.validateDetectedBarcodeEnhanced(consistentCode)) {
-                  console.log('Found consistent code from multiple scans:', consistentCode);
                   this.onBarcodeDetected(consistentCode);
                 }
               }
-            }
-            if (error && error.name !== 'NotFoundException') {
-              console.error('Scan error:', error);
             }
           }
         );
       }
     } catch (error) {
-      console.error('Error starting camera:', error);
       this.cameraError = 'Tidak dapat memulai kamera. Periksa izin dan pencahayaan.';
       this.isScanning = false;
     }
@@ -257,8 +248,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   }
 
   onBarcodeDetected(barcode: string) {
-    console.log('Valid barcode detected:', barcode);
-    
     // Format the barcode
     const formattedBarcode = this.formatDetectedBarcode(barcode);
     this.barcodeInput = formattedBarcode;
@@ -301,12 +290,8 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
     this.isLoadingTripData = true;
     this.clearError(); 
 
-    console.log('Getting trip data for:', tripCode);
-
     this.apiService.getTripData(tripCode).subscribe({
       next: (tripData: TripInfo) => {
-        console.log('Trip data received:', tripData);
-
         // Override truckPlate with manual input if provided
         if (this.manualTruckPlate.trim()) {
           tripData = { ...tripData, truckPlate: this.manualTruckPlate.trim().toUpperCase() };
@@ -332,9 +317,8 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        console.error('Error getting trip data:', error);
         this.isLoadingTripData = false;
-        
+
         // Show user-friendly error messages based on error type
         this.handleApiError(error);
       }
@@ -354,8 +338,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
     this.apiService.getAllTripData(nopol).subscribe({
       next: (response: any) => {
-        console.log('getAllTripData response:', response);
-
         // Response: { TripData: { Result: [ { tripNumber: "..." }, ... ] } }
         const trips: any[] = response?.TripData?.Result ?? [];
         const tripType = localStorage.getItem('tripType');
@@ -365,8 +347,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
             next: (response: any) => {
               const tripOut: any[] = response?.TruckCheckData?.Result ?? [];
               const tripOutSet = new Set(tripOut.map((t: any) => t.TripNum));
-
-              console.log('tripOutSet: ', [...tripOutSet]);
 
               this.spkOptions = trips
                 .map((t: any) => t.tripNumber ?? '')
@@ -381,7 +361,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
               this.isLoadingSpk = false;
             },
             error: (error) => {
-              console.error('getOutTruckCheck error:', error);
               this.isLoadingSpk = false;
               this.handleApiError(error);
             }
@@ -401,7 +380,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        console.error('getAllTripData error:', error);
         this.isLoadingSpk = false;
         this.handleApiError(error);
       }

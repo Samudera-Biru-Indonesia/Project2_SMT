@@ -33,7 +33,6 @@ export class BarcodeService {
       this.hasPermission = true;
       return true;
     } catch (error) {
-      console.error('Camera permission denied:', error);
       this.hasPermission = false;
       return false;
     }
@@ -46,7 +45,6 @@ export class BarcodeService {
       this.hasDevices = this.availableDevices.length > 0;
       return this.availableDevices;
     } catch (error) {
-      console.error('Error getting video devices:', error);
       return [];
     }
   }

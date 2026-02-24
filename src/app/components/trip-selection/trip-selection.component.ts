@@ -22,7 +22,6 @@ export class TripSelectionComponent implements OnInit {
   constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit() {
-    console.log('localStorage items:', Object.keys(localStorage));
     // this.truckBarcode = localStorage.getItem('currentTruckBarcode') || '';
     localStorage.removeItem('tripType'); // supaya g ngebug waktu bolak balik halaman. better setiap kali masuk ke halaman ini jadi ke-reset aja.
 
@@ -42,16 +41,13 @@ export class TripSelectionComponent implements OnInit {
         this.tripData = JSON.parse(tripDataString);
         this.hasTripData = true;
         this.plateNumber = this.tripData?.truckPlate || 'N/A';
-        console.log('Trip data loaded:', this.tripData);
       } catch (error) {
-        console.error('Error parsing trip data:', error);
         this.hasTripData = false;
         this.plateNumber = 'N/A';
       }
     } else {
       this.hasTripData = false;
       this.plateNumber = 'N/A';
-      console.log('No trip data available - manual mode');
     }
   }
 

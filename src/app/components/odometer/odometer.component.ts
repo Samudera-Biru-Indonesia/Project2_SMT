@@ -61,19 +61,10 @@ export class OdometerComponent implements OnInit {
       } else { // kalok IN
         this.fetchOdometer();
       }
-
-      
-      
     } else {
       alert('Mohon ulangi isi nomor SPK. Sistem gagal mendapatkan nomor SPK.');
     }
 
-    
-    console.log('Odometer Component - Trip Type:', this.tripType);
-    console.log('Odometer Component - Trip Type Class:', this.tripType.toLowerCase() + '-trip');
-    console.log('Odometer Component - Button Style:', this.getButtonStyle());
-    
-    
     // Get plate number from trip data if available
     const tripDataString = localStorage.getItem('currentTripData');
     if (tripDataString) {
@@ -82,7 +73,6 @@ export class OdometerComponent implements OnInit {
         this.plateNumber = tripData?.truckPlate || 'N/A';
         this.tripDriver = tripData?.driver || 'N/A';
       } catch (error) {
-        console.error('Error parsing trip data:', error);
         this.plateNumber = 'N/A';
         this.tripDriver = 'N/A';
       }
@@ -90,7 +80,7 @@ export class OdometerComponent implements OnInit {
       this.plateNumber = 'N/A';
       this.tripDriver = 'N/A';
     }
-    
+
     if (!this.truckBarcode || !this.tripType) {
       this.router.navigate(['/trip-selection']);
     }
@@ -100,9 +90,8 @@ export class OdometerComponent implements OnInit {
         next: (res) => {
           this.expectedMuatan = res.total;
           this.muatanType = res.type;
-          console.log(`📦 Expected muatan: ${res.total} (${res.type})`);
         },
-        error: (err) => console.warn('⚠️ Gagal mengambil total muatan:', err)
+        error: () => {}
       });
     }
   }
@@ -110,18 +99,13 @@ export class OdometerComponent implements OnInit {
   fetchTripTotalLoad(tripNumberStr: string) {
     this.isLoading = true;
 
-    // Call the service method
     this.apiService.getTotalFromTripNumber(tripNumberStr)
       .subscribe({
         next: (response: GetTotalFromTripNumberResponse) => {
-          console.log('API Response received:', response);
           this.isLoading = false;
-            
-          this.tripLoadFromDb = response.total; 
+          this.tripLoadFromDb = response.total;
           this.productType = response.type;
-          
         },
-        
         error: (error) => {
           this.isLoading = false;
           alert('Error connecting to server.');
@@ -129,16 +113,14 @@ export class OdometerComponent implements OnInit {
       });
   }
 
-   fetchOdometer() {
+  fetchOdometer() {
     this.isLoading = true;
 
-    // Call the service method
     this.apiService.getOutTruckCheck()
       .subscribe({
         next: (response: GetOutTruckCheckResponse) => {
-          console.log('API Response received:', response);
           this.isLoading = false;
-            
+
           const matchingTrip = response.TruckCheckData.Result.find(
             (item) => item.TripNum === this.tripNumber
           );
@@ -148,9 +130,7 @@ export class OdometerComponent implements OnInit {
           } else {
             alert('Gagal mengambil data odometer, gunakan surat jalan sebagai referensi odometer.');
           }
-          
         },
-        
         error: (error) => {
           this.isLoading = false;
           alert('Error connecting to server.');
@@ -253,15 +233,6 @@ export class OdometerComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log('Form submitted with values:', {
-      odometerReading: this.odometerReading,
-      jumlahMuatan: this.jumlahMuatan,
-      notes: this.notes,
-      truckBarcode: this.truckBarcode,
-      tripType: this.tripType
-    });
-
-
     if (!this.odometerReading) {
       alert('Pembacaan odometer belum diisi. Silakan masukkan angka odometer terlebih dahulu.');
       return;
@@ -313,24 +284,16 @@ export class OdometerComponent implements OnInit {
     // Get trip data from localStorage (set by checklist component for OUT trips)
     const savedTripData = localStorage.getItem('tripData');
     const tripNumber = localStorage.getItem('tripNumber') || '';
-    
-    console.log('📦 Retrieved localStorage data:', {
-      savedTripData: savedTripData ? JSON.parse(savedTripData) : null,
-      tripNumber: tripNumber,
-      tripType: this.tripType
-    });
 
     let tripData: TripData;
-    
+
     if (savedTripData && this.tripType === 'OUT') {
       // For OUT trips, use data from checklist
       try {
         tripData = JSON.parse(savedTripData);
         tripData.odometer = odometerValue;
-        tripData.note = this.notes || ''; // Add notes from odometer form
-        console.log('✅ Using saved checklist data for OUT trip');
+        tripData.note = this.notes || '';
       } catch (e) {
-        console.error('❌ Failed to parse saved trip data:', e);
         alert('Gagal membaca data perjalanan. Silakan masukkan data secara manual atau hubungi tim support.');
         return;
       }
@@ -358,23 +321,13 @@ export class OdometerComponent implements OnInit {
         note: this.notes || '',
         tripDriver: this.tripDriver || ''
       };
-      console.log('✅ Created new trip data for IN trip or missing checklist data');
     }
-    
-    console.log('📋 Final trip data to send:', tripData);
 
-    // Validate required fields
-    if (!tripData.tripNum) {
-      console.warn('⚠️ Warning: tripNum is empty');
-      // Don't block submission, as API might accept empty tripNum
-    }
-    
     // Upload foto ke Google Drive via Go backend
     const tripNum = tripData.tripNum || 'unknown';
     this.apiService.uploadPhotos(tripNum, this.odometerPhoto, this.cargoPhoto).subscribe({
-      next: (res) => console.log('📸 Photos uploaded to Drive:', res.fileIds),
+      next: () => {},
       error: (err) => {
-        console.warn('📸 Photo upload failed:', err.message);
         this.photoUploadWarning = 'Foto gagal terupload ke Drive. Data perjalanan tetap terkirim.';
       }
     });
@@ -393,23 +346,19 @@ export class OdometerComponent implements OnInit {
       timestamp: new Date().toISOString(),
       checklistData: this.tripType === 'OUT' ? localStorage.getItem('checklistData') : null
     };
-    
-    console.log('💾 Saving local trip data:', localTripData);
-    
+
     // Save to localStorage (in real app, would send to server)
     const existingTrips = JSON.parse(localStorage.getItem('trips') || '[]');
     existingTrips.push(localTripData);
     localStorage.setItem('trips', JSON.stringify(existingTrips));
-    
-    console.log('🧹 Cleaning up localStorage...');
+
     // Clean up temporary data
     localStorage.removeItem('currentTruckBarcode');
     localStorage.removeItem('tripType');
     localStorage.removeItem('checklistData');
     localStorage.removeItem('tripData');
     localStorage.removeItem('tripNumber');
-    
-    console.log('🚀 Navigating to trip-complete page...');
+
     this.router.navigate(['/trip-complete']);
   }
 
@@ -432,29 +381,20 @@ export class OdometerComponent implements OnInit {
 
   // Function to send data to API
   sendTripDataToAPI(tripData: TripData) {
-    console.log('Sending trip data to API:', tripData);
-    
     this.apiService.sendTripData(tripData).subscribe({
       next: (response) => {
-        console.log('API Response:', response);
-        
         // For this API, any successful response (even if it has content) is considered success
         // The API might return error details in response body even for 200 status
         if (response && response.error) {
-          console.error('API returned error in response body:', response);
           alert('Kesalahan dari server: ' + (response.message || response.error || JSON.stringify(response)) + '\n\nSilakan masukkan data secara manual atau hubungi tim support.');
         } else {
-          console.log('Trip data submission successful!');
-          console.log('Data sent to server:', tripData);
           alert('Data trip berhasil dikirim ke server!');
-          
+
           // After successful insert to staging table, process the trip data to Epicor
-          // this.processDataToEpicor(tripData.tripNum);
+          this.processDataToEpicor(tripData.tripNum);
         }
       },
       error: (error) => {
-        console.error('Error sending trip data:', error);
-        
         let errorMessage = 'Gagal mengirim data perjalanan.';
 
         if (error.status === 0) {
@@ -481,35 +421,30 @@ export class OdometerComponent implements OnInit {
   }
 
   // Function to process trip data to Epicor
-  // processDataToEpicor(tripNum: string) {
-  //   console.log('Processing trip data to Epicor for trip:', tripNum);
-    
-  //   this.apiService.processTripData(tripNum).subscribe({
-  //     next: (response) => {
-  //       console.log('✅ Process to Epicor successful:', response);
-  //       alert('Data berhasil diproses ke sistem Epicor!');
-  //     },
-  //     error: (error) => {
-  //       console.error('❌ Error processing to Epicor:', error);
-        
-  //       let errorMessage = 'Gagal memproses data ke sistem Epicor';
-        
-  //       if (error.status === 0) {
-  //         errorMessage += ' - Periksa koneksi internet.';
-  //       } else if (error.status === 400) {
-  //         errorMessage += ' - Data tidak valid untuk proses Epicor.';
-  //       } else if (error.status === 401) {
-  //         errorMessage += ' - Authentication gagal.';
-  //       } else if (error.status === 500) {
-  //         errorMessage += ' - Server error saat proses ke Epicor.';
-  //       } else {
-  //         errorMessage += ` - HTTP ${error.status}: ${error.statusText}`;
-  //       }
-        
-  //       alert(errorMessage + '\n\nData sudah tersimpan di staging table, tapi gagal diproses ke Epicor.');
-  //     }
-  //   });
-  // }
+  processDataToEpicor(tripNum: string) {
+    this.apiService.processTripData(tripNum).subscribe({
+      next: (response) => {
+        alert('Data berhasil diproses ke sistem Epicor!');
+      },
+      error: (error) => {
+        let errorMessage = 'Gagal memproses data ke sistem Epicor';
+
+        if (error.status === 0) {
+          errorMessage += ' - Periksa koneksi internet.';
+        } else if (error.status === 400) {
+          errorMessage += ' - Data tidak valid untuk proses Epicor.';
+        } else if (error.status === 401) {
+          errorMessage += ' - Authentication gagal.';
+        } else if (error.status === 500) {
+          errorMessage += ' - Server error saat proses ke Epicor.';
+        } else {
+          errorMessage += ` - HTTP ${error.status}: ${error.statusText}`;
+        }
+
+        alert(errorMessage + '\n\nData sudah tersimpan di staging table, tapi gagal diproses ke Epicor.');
+      }
+    });
+  }
 
   goBack() {
     // if (this.tripType === 'OUT') {

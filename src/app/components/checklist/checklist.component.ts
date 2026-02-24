@@ -48,7 +48,6 @@ export class ChecklistComponent implements OnInit {
         this.plateNumber = tripData?.truckPlate || 'N/A';
         this.tripDriver = tripData?.driver || 'N/A';
       } catch (error) {
-        console.error('Error parsing trip data:', error);
         this.plateNumber = 'N/A';
         this.tripDriver = 'N/A';
       }

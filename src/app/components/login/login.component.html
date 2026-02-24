@@ -69,14 +69,14 @@
     </form>
 
     <!-- Settings Button -->
-    <!-- <div class="settings-section" *ngIf="!isLoading">
+    <div class="settings-section" *ngIf="!isLoading">
       <button type="button" class="settings-btn" (click)="toggleSettings()">
         ⚙️ Pengaturan
       </button>
-    </div> -->
+    </div>
 
     <!-- Environment Selector (Hidden by default) -->
-    <!-- <div class="environment-section" *ngIf="!isLoading && showSettings">
+    <div class="environment-section" *ngIf="!isLoading && showSettings">
       <h4>Pilihan Lingkungan</h4>
       <div class="env-toggle">
         <button 
@@ -91,7 +91,7 @@
           {{ env.displayName }}
         </button>
       </div>
-    </div> -->
+    </div>
 
     <!-- Error Message -->
     <div class="error-alert" *ngIf="errorMessage">
