@@ -4,6 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { EnvironmentService } from './environment.service';
+import { AuthService } from './auth.service';
 
 export interface TripData {
   odometer: number;
@@ -101,8 +102,26 @@ export class ApiService {
 
   constructor(
     private http: HttpClient,
-    private environmentService: EnvironmentService
+    private environmentService: EnvironmentService,
+    private authService: AuthService
   ) {}
+
+  private getToken(): string | null {
+    return this.authService.getToken();
+  }
+
+  /**
+   * Check if JWT is expired and logout if needed
+   */
+  private checkJwtAndLogoutIfExpired(): void {
+    console.log('API Call: Checking JWT expiration before backend call');
+    if (this.authService.isJwtExpired()) {
+      console.log('API Call: JWT expired, logging out user');
+      this.authService.logout();
+      throw new Error('JWT token expired');
+    }
+    console.log('API Call: JWT is valid, proceeding with request');
+  }
 
   sendTripData(data: TripData): Observable<any> {
     const currentEnv = this.environmentService.getCurrentEnvironment();
@@ -284,8 +303,21 @@ export class ApiService {
   }
 
   uploadPhotos(tripNum: string, odometerPhoto: string, cargoPhoto: string): Observable<any> {
+    // Check JWT expiration before making the call
+    this.checkJwtAndLogoutIfExpired();
+
     const url = `${environment.backendUrl}/api/upload-photos`;
-    return this.http.post<any>(url, { tripNum, odometerPhoto, cargoPhoto });
+    const token = this.getToken();
+    
+    console.log('API Call: uploadPhotos - Using JWT token:', token ? token.substring(0, 30) + '...' : 'No token');
+    
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
+    
+    console.log('API Call: Making request to:', url);
+    return this.http.post<any>(url, { tripNum, odometerPhoto, cargoPhoto }, { headers });
   }
 
 }

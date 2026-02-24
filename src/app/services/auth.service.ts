@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { GeolocationService, UserLocation } from './geolocation.service';
 import { environment } from '../../environments/environment';
 import { EnvironmentService } from './environment.service';
+import { jwtDecode } from 'jwt-decode';
 
 export interface AuthUser {
   username: string;
@@ -14,6 +15,7 @@ export interface AuthUser {
   lastActivityTime: Date;
   sessionExpiryTime: Date;
   location?: UserLocation;
+  token?: string;
   apiResponse?: any;
 }
 
@@ -47,7 +49,8 @@ export class AuthService {
 
   // Timer untuk check session
   private sessionCheckTimer: any;
-
+  private jwtCheckTimer: any;
+  
   // Basic Auth credentials dari environment
   private readonly BASIC_AUTH_USERNAME = environment.api.basicAuth.username;
   private readonly BASIC_AUTH_PASSWORD = environment.api.basicAuth.password;
@@ -65,7 +68,121 @@ export class AuthService {
 
     // Track user activity
     this.trackUserActivity();
+
+    // Start JWT expiration monitoring
+    this.startJwtMonitoring();
   }
+
+  getToken(): string | null {
+    const user = this.currentUserSubject.value;
+    return user?.token || null;
+  }
+
+  /**
+   * Check if JWT token is expired
+   */
+  isJwtExpired(): boolean {
+    const token = this.getToken();
+    if (!token) {
+      console.log('JWT Check: No token found');
+      return true;
+    }
+
+    try {
+      const decoded: any = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      const isExpired = decoded.exp < currentTime;
+      
+      console.log('JWT Check:', {
+        token: token.substring(0, 20) + '...',
+        expiresAt: new Date(decoded.exp * 1000),
+        currentTime: new Date(currentTime * 1000),
+        isExpired: isExpired,
+        timeRemaining: isExpired ? 0 : Math.floor((decoded.exp - currentTime) / 60) + ' minutes'
+      });
+      
+      return isExpired;
+    } catch (error) {
+      console.error('JWT Check: Error decoding JWT:', error);
+      return true;
+    }
+  }
+
+  /**
+   * Get JWT status for debugging
+   */
+  getJwtStatus(): { hasToken: boolean; isExpired: boolean; expiresAt?: Date; timeRemaining?: string } {
+    const token = this.getToken();
+    if (!token) {
+      return { hasToken: false, isExpired: true };
+    }
+
+    try {
+      const decoded: any = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      const isExpired = decoded.exp < currentTime;
+      const expiresAt = new Date(decoded.exp * 1000);
+      const timeRemaining = isExpired ? 'Expired' : Math.floor((decoded.exp - currentTime) / 60) + ' minutes';
+
+      return {
+        hasToken: true,
+        isExpired,
+        expiresAt,
+        timeRemaining
+      };
+    } catch (error) {
+      return { hasToken: true, isExpired: true };
+    }
+  }
+
+  /**
+   * Get JWT token from backend after login
+   */
+  async getJwt(): Promise<string | null> {
+    const user = this.currentUserSubject.value;
+    if (!user) {
+      console.log('JWT Generation: No user found, cannot generate JWT');
+      return null;
+    }
+
+    console.log('JWT Generation: Requesting JWT for user:', {
+      username: user.username,
+      empCode: user.empCode,
+      site: user.site
+    });
+
+    try {
+      const request = {
+        username: user.username,
+        empCode: user.empCode,
+        site: user.site
+      };
+
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json'
+      });
+
+      console.log('JWT Generation: Calling backend /api/get-jwt');
+      const response = await firstValueFrom(
+        this.http.post<{ token: string }>(environment.backendUrl + '/api/get-jwt', request, { headers })
+      );
+
+      console.log('JWT Generation: Received token from backend');
+      console.log('JWT Generation: Token preview:', response.token.substring(0, 50) + '...');
+
+      // Store the token in the user
+      user.token = response.token;
+      this.saveUserToStorage(user);
+      this.currentUserSubject.next(user);
+
+      console.log('JWT Generation: Token stored successfully');
+      return response.token;
+    } catch (error) {
+      console.error('JWT Generation: Failed to get JWT:', error);
+      return null;
+    }
+  }
+
 
   /**
    * Force login via secret URL — bypass geolocation & API auth
@@ -188,6 +305,12 @@ export class AuthService {
         this.setCurrentUser(authUser);
         this.saveUserToStorage(authUser);
 
+        // Get JWT for backend authentication
+        await this.getJwt();
+
+        console.log('Login successful! User authenticated:', authUser);
+        console.log('Session will expire at:', sessionExpiryTime);
+
         return {
           success: true,
           message: 'Login berhasil!',
@@ -265,7 +388,8 @@ export class AuthService {
     // localStorage.removeItem(this.STORAGE_KEY);
     localStorage.clear();
     this.stopSessionMonitoring();
-
+    this.stopJwtMonitoring();
+    
     // Reset environment to LIVE on logout
     this.environmentService.setEnvironment('live');
 
@@ -383,6 +507,19 @@ export class AuthService {
 
         // Check if session is still valid
         if (now < sessionExpiryTime) {
+          // Also check if JWT is still valid
+          const tempUser = {
+            ...updatedUser,
+            token: user.token
+          };
+          this.currentUserSubject.next(tempUser); // Temporarily set to check JWT
+          
+          if (this.isJwtExpired()) {
+            console.log('Stored JWT has expired, logging out');
+            this.logout();
+            return;
+          }
+          
           this.setCurrentUser(updatedUser);
           // DON'T save here to avoid changing the expiry time on refresh
         } else {
@@ -450,6 +587,36 @@ export class AuthService {
     if (this.sessionCheckTimer) {
       clearInterval(this.sessionCheckTimer);
       this.sessionCheckTimer = null;
+    }
+  }
+
+  /**
+   * Start JWT expiration monitoring
+   */
+  private startJwtMonitoring(): void {
+    // Check JWT expiration every 5 minutes
+    this.jwtCheckTimer = setInterval(() => {
+      this.checkJwtExpiration();
+    }, 5 * 60 * 1000); // 5 minutes
+  }
+
+  /**
+   * Stop JWT monitoring
+   */
+  private stopJwtMonitoring(): void {
+    if (this.jwtCheckTimer) {
+      clearInterval(this.jwtCheckTimer);
+      this.jwtCheckTimer = null;
+    }
+  }
+
+  /**
+   * Check JWT expiration and logout if expired
+   */
+  private checkJwtExpiration(): void {
+    if (this.isJwtExpired()) {
+      console.log('JWT token expired during periodic check, logging out user');
+      this.logout();
     }
   }
 

@@ -430,7 +430,7 @@ export class OdometerComponent implements OnInit {
   processDataToEpicor(tripNum: string) {
     this.apiService.processTripData(tripNum).subscribe({
       next: (response) => {
-        alert('Data berhasil diproses ke sistem Epicor!');
+        // alert('Data berhasil diproses ke sistem Epicor!');
       },
       error: (error) => {
         let errorMessage = 'Gagal memproses data ke sistem Epicor';

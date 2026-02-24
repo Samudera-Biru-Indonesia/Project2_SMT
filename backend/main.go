@@ -10,11 +10,13 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/drive/v3"
 	"google.golang.org/api/option"
-	"github.com/joho/godotenv"
 )
 
 type UploadRequest struct {
@@ -27,6 +29,15 @@ type UploadResponse struct {
 	Success bool     `json:"success"`
 	FileIDs []string `json:"fileIds"`
 }
+
+type Claims struct {
+	Username string `json:"username"`
+	EmpCode  string `json:"empCode"`
+	Site     string `json:"site"`
+	jwt.RegisteredClaims
+}
+
+var jwtSecret = []byte("your-secret-key") // In production, use environment variable
 
 var driveService *drive.Service
 
@@ -41,6 +52,73 @@ func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
+		next(w, r)
+	}
+}
+
+func getJwtHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		Username string `json:"username"`
+		EmpCode  string `json:"empCode"`
+		Site     string `json:"site"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Generate JWT for the user
+	claims := Claims{
+		Username: req.Username,
+		EmpCode:  req.EmpCode,
+		Site:     req.Site,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(3 * time.Hour)), // 3 hours
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtSecret)
+	if err != nil {
+		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
+}
+
+func jwtMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(w, "Authorization header required", http.StatusUnauthorized)
+			return
+		}
+
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		if tokenString == authHeader {
+			http.Error(w, "Invalid token format", http.StatusUnauthorized)
+			return
+		}
+
+		token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+			return jwtSecret, nil
+		})
+
+		if err != nil || !token.Valid {
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		// Optionally set user info in context
 		next(w, r)
 	}
 }
@@ -72,9 +150,6 @@ func initDriveService() error {
 	log.Println("Google Drive service initialized successfully")
 	return nil
 }
-
-
-
 
 func uploadFileToDrive(filename string, data []byte, parentID string) (string, error) {
 	f := &drive.File{
@@ -136,7 +211,7 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		id, err := uploadFileToDrive(filename, imgBytes, rootFolderID)
 		if err != nil {
 			log.Printf("Failed to upload odometer photo: %v", err)
-			http.Error(w, "Failed to upload odometer photo to Drive", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		fileIDs = append(fileIDs, id)
@@ -186,12 +261,12 @@ func dummyAuthenticateLogon(w http.ResponseWriter, r *http.Request) {
 func dummyGetTripData(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"driver":    "BUDI SANTOSO",
-		"codriver":  "AGUS PRASETYO",
+		"driver":     "BUDI SANTOSO",
+		"codriver":   "AGUS PRASETYO",
 		"truckPlate": "B 1234 ABC",
-		"plant":     "SGI053",
-		"ETADate":   "2026-02-20T08:00:00Z",
-		"truckDesc": "TRONTON 10 TON - MITSUBISHI FUSO",
+		"plant":      "SGI053",
+		"ETADate":    "2026-02-20T08:00:00Z",
+		"truckDesc":  "TRONTON 10 TON - MITSUBISHI FUSO",
 	})
 }
 
@@ -276,24 +351,27 @@ func dummyProcessTripTimeEntry(w http.ResponseWriter, r *http.Request) {
 func main() {
 	godotenv.Load()
 
+	// Try to initialize Drive service, but don't fail if it doesn't work
 	if err := initDriveService(); err != nil {
-		log.Fatalf("Failed to initialize Drive service: %v", err)
+		log.Printf("Warning: Failed to initialize Drive service: %v", err)
+		log.Println("Continuing without Drive functionality - JWT and other endpoints will still work")
 	}
 
 	// Real endpoints
-	http.HandleFunc("/api/upload-photos", corsMiddleware(uploadPhotosHandler))
+	http.HandleFunc("/api/get-jwt", corsMiddleware(getJwtHandler))
+	http.HandleFunc("/api/upload-photos", corsMiddleware(jwtMiddleware(uploadPhotosHandler)))
 	http.HandleFunc("/test", corsMiddleware(testHandler))
 
 	// Dummy data endpoints (prefix: /api/dummy/)
-	http.HandleFunc("/api/dummy/AuthenticateLogon",     corsMiddleware(dummyAuthenticateLogon))
-	http.HandleFunc("/api/dummy/GetTripData",           corsMiddleware(dummyGetTripData))
-	http.HandleFunc("/api/dummy/GetAllTripData",        corsMiddleware(dummyGetAllTripData))
-	http.HandleFunc("/api/dummy/getTruckByAuthSite",    corsMiddleware(dummyGetTruckByAuthSite))
-	http.HandleFunc("/api/dummy/GetListPlant",          corsMiddleware(dummyGetListPlant))
-	http.HandleFunc("/api/dummy/getOutTruckCheck",      corsMiddleware(dummyGetOutTruckCheck))
+	http.HandleFunc("/api/dummy/AuthenticateLogon", corsMiddleware(dummyAuthenticateLogon))
+	http.HandleFunc("/api/dummy/GetTripData", corsMiddleware(dummyGetTripData))
+	http.HandleFunc("/api/dummy/GetAllTripData", corsMiddleware(dummyGetAllTripData))
+	http.HandleFunc("/api/dummy/getTruckByAuthSite", corsMiddleware(dummyGetTruckByAuthSite))
+	http.HandleFunc("/api/dummy/GetListPlant", corsMiddleware(dummyGetListPlant))
+	http.HandleFunc("/api/dummy/getOutTruckCheck", corsMiddleware(dummyGetOutTruckCheck))
 	http.HandleFunc("/api/dummy/getTotalFromTripNumber", corsMiddleware(dummyGetTotalFromTripNumber))
-	http.HandleFunc("/api/dummy/InsertStagingTable",    corsMiddleware(dummyInsertStagingTable))
-	http.HandleFunc("/api/dummy/ProcessTripTimeEntry",  corsMiddleware(dummyProcessTripTimeEntry))
+	http.HandleFunc("/api/dummy/InsertStagingTable", corsMiddleware(dummyInsertStagingTable))
+	http.HandleFunc("/api/dummy/ProcessTripTimeEntry", corsMiddleware(dummyProcessTripTimeEntry))
 
 	port := os.Getenv("PORT")
 	if port == "" {
