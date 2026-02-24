@@ -31,6 +31,12 @@ export class OdometerComponent implements OnInit {
   muatanType: string = '';
   isOdometerWrong: boolean = false;
 
+  get odometerMismatchWarning(): boolean {
+    if (this.tripType !== 'IN' || this.odometerFromDb === null || !this.odometerReading) return false;
+    const entered = parseFloat(this.odometerReading);
+    return !isNaN(entered) && entered < this.odometerFromDb;
+  }
+
   get muatanMismatchWarning(): boolean {
     if (this.muatanType !== 'CYLINDER' || this.expectedMuatan === null || !this.jumlahMuatan) return false;
     const entered = parseFloat(this.jumlahMuatan);

@@ -47,12 +47,18 @@
               name="odometerReading"
               placeholder="Masukkan pembacaan odometer saat ini"
               class="odometer-input"
-              [class.input-error]="isOdometerWrong"
+              [class.input-error]="isOdometerWrong || odometerMismatchWarning"
               min="0"
               step="0.1"
               required
               autocomplete="off"
             />
+            <div class="muatan-warning" *ngIf="odometerMismatchWarning && !showOdometerWarning">
+              Odometer lebih kecil dari saat keluar. <br>
+              Saat keluar: <b>{{ odometerFromDb }} km</b>
+              <br>
+              Nilai Anda: <b>{{ odometerReading }} km</b>
+            </div>
           </div>
 
           <!-- Foto Odometer -->

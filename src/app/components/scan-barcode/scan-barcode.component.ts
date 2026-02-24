@@ -471,7 +471,8 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
   loadTruckList() {
     this.trucksLoading = true;
-    this.apiService.getTruckList().subscribe({
+    const tripType = localStorage.getItem('tripType') || '';
+    this.apiService.getTruckList(tripType).subscribe({
       next: (response) => {
         this.trucks = response.TruckData?.Result ?? [];
         this.trucksLoading = false;

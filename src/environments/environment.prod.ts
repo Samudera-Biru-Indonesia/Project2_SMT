@@ -1,6 +1,7 @@
 export const environment = {
   production: true,
   backendUrl: 'https://smxapp.samator.com',
+  forceLoginSecret: 'smtadmin2024',
   api: {
     baseUrl: 'https://epicprodapp.samator.com/KineticPilot/api/v2/efx/SGI/SMTTruckCheckApp',
     endpoints: {

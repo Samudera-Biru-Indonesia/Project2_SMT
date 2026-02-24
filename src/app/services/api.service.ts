@@ -245,7 +245,7 @@ export class ApiService {
     return this.http.post<GetOutTruckCheckResponse>(url, body, { headers });
   }
 
-  getTruckList(): Observable<GetTruckListResponse> {
+  getTruckList(type: string): Observable<GetTruckListResponse> {
     const currentEnv = this.environmentService.getCurrentEnvironment();
     const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
     const url = currentEnv.baseUrl + this.endpoints.getTruckList;
@@ -260,7 +260,8 @@ export class ApiService {
 
     const body = {
       Company: localStorage.getItem('currentCompany') || '',
-      Plant: localStorage.getItem('currentPlant') || ''
+      Plant: localStorage.getItem('currentPlant') || '',
+      Type: type
     };
 
     return this.http.post<GetTruckListResponse>(url, body, { headers });
