@@ -262,6 +262,22 @@ export class LoginComponent {
     return coord.toFixed(6);
   }
 
+  // Returns only plants within 1 km of current location (or all if no location yet)
+  get accessiblePlants(): Plant[] {
+    if (!this.currentLocation || this.plants.length === 0) {
+      return this.plants;
+    }
+    return this.plants.filter(plant => {
+      if (plant.Lat == null || plant.Long == null) return false;
+      return this.calculateDistance(
+        this.currentLocation!.latitude,
+        this.currentLocation!.longitude,
+        plant.Lat,
+        plant.Long
+      ) <= 1;
+    });
+  }
+
   // Custom dropdown methods
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;

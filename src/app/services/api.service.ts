@@ -224,20 +224,20 @@ export class ApiService {
   getPlantList(): Observable<any> {
     const currentEnv = this.environmentService.getCurrentEnvironment();
     const url = currentEnv.baseUrl + this.endpoints.getPlantList;
-    
+
     // Debug Basic Auth encoding
     console.log('🔐 Raw credentials:', {
       username: environment.api.basicAuth.username,
       password: environment.api.basicAuth.password.substring(0, 5) + '...' + environment.api.basicAuth.password.slice(-3)
     });
-    
+
     const credentialsString = `${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`;
     console.log('🔗 Credentials string (first 20 chars):', credentialsString.substring(0, 20) + '...');
-    
+
     const basicAuth = btoa(credentialsString);
     console.log('🔑 Basic Auth encoded (first 30 chars):', basicAuth.substring(0, 30) + '...');
     console.log('🔑 Basic Auth length:', basicAuth.length);
-    
+
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Accept': 'application/json',

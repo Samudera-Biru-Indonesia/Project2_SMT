@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface ApiEnvironment {
   name: string;
@@ -16,7 +17,7 @@ export class EnvironmentService {
     local: {
       name: 'local',
       displayName: 'Local (Dummy)',
-      baseUrl: 'http://localhost:3000/api/dummy',
+      baseUrl: '/api/dummy',
       apiKey: 'dummy-key'
     },
     test: {

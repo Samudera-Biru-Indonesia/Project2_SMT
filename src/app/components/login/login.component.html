@@ -26,8 +26,8 @@
             <span class="dropdown-arrow">▼</span>
           </div>
           <div class="dropdown-options" [hidden]="!dropdownOpen">
-            <div class="dropdown-option" 
-                 *ngFor="let plant of plants" 
+            <div class="dropdown-option"
+                 *ngFor="let plant of accessiblePlants"
                  [class.selected]="site === plant.Plant"
                  (click)="selectSite(plant.Plant, plant.Name)">
               <div class="option-name">{{ plant.Name }}</div>
