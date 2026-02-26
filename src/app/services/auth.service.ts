@@ -70,7 +70,7 @@ export class AuthService {
   /**
    * Force login via secret URL — bypass geolocation & API auth
    */
-  forceLogin(site: string): void {
+  async forceLogin(site: string): Promise<void> {
     const now = new Date();
     const sessionExpiryTime = new Date(now.getTime() + (this.SESSION_DURATION_HOURS * 60 * 60 * 1000));
     const plant = site.trim().toUpperCase();
@@ -90,6 +90,8 @@ export class AuthService {
 
     this.setCurrentUser(authUser);
     this.saveUserToStorage(authUser);
+
+    await this.getJwt();
   }
 
   /**
