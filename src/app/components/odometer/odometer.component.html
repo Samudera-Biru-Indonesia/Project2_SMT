@@ -68,11 +68,17 @@
               <div class="photo-actions">
                 <label class="photo-btn camera-btn" style="color: white;">
                   Kamera
-                  <input type="file" accept="image/*" capture="environment" (change)="onPhotoSelected($event, 'odometer')" hidden />
+                  <input type="file" accept="image/*" multiple (change)="onPhotoSelected($event, 'odometer')" hidden />
                 </label>
-                <button *ngIf="odometerPhoto" type="button" class="remove-photo-btn" (click)="removePhoto('odometer')">Hapus</button>
               </div>
-              <img *ngIf="odometerPhoto" [src]="odometerPhoto" class="photo-preview" />
+              
+              <div class="photo-preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                <div *ngFor="let photo of odometerPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                  <img [src]="photo" class="photo-preview" style="max-width: 120px; border-radius: 8px; object-fit: cover;" />
+                  <!-- <button type="button" class="remove-photo-btn" style="width: 100%; padding: 4px;" (click)="removePhoto('odometer', i)">Hapus</button> -->
+                  <button type="button" class="remove-badge" (click)="removePhoto('odometer', i)">×</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -83,11 +89,17 @@
               <div class="photo-actions">
                 <label class="photo-btn camera-btn" style="color: white;">
                   Kamera
-                  <input type="file" accept="image/*" capture="environment" (change)="onPhotoSelected($event, 'cargo')" hidden />
+                  <input type="file" accept="image/*" multiple capture="environment" (change)="onPhotoSelected($event, 'cargo')" hidden />
                 </label>
-                <button *ngIf="cargoPhoto" type="button" class="remove-photo-btn" (click)="removePhoto('cargo')">Hapus</button>
               </div>
-              <img *ngIf="cargoPhoto" [src]="cargoPhoto" class="photo-preview" />
+              
+              <div class="photo-preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                <div *ngFor="let photo of cargoPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                  <img [src]="photo" class="photo-preview" style="max-width: 120px; border-radius: 8px; object-fit: cover;" />
+                  <!-- <button type="button" class="remove-photo-btn" style="width: 100%; padding: 4px;" (click)="removePhoto('cargo', i)">Hapus</button> -->
+                  <button type="button" class="remove-badge" (click)="removePhoto('cargo', i)">×</button>
+                </div>
+              </div>
             </div>
           </div>
 

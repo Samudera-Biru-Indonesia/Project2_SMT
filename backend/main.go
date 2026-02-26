@@ -21,8 +21,9 @@ import (
 
 type UploadRequest struct {
 	TripNum       string `json:"tripNum"`
-	OdometerPhoto string `json:"odometerPhoto"`
-	CargoPhoto    string `json:"cargoPhoto"`
+	OdometerPhotos []string `json:"odometerPhotos"` 
+    CargoPhotos    []string `json:"cargoPhotos"`
+	Condition	  string `json:"condition"`		
 }
 
 type UploadResponse struct {
@@ -180,7 +181,7 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	r.Body = http.MaxBytesReader(w, r.Body, 20<<20) // limit 20MB
+	r.Body = http.MaxBytesReader(w, r.Body, 5<<20) // limit 20MB
 
 	var req UploadRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -193,6 +194,11 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.Condition == "" {
+		http.Error(w, "Truck IN/OUT status is required", http.StatusBadRequest)
+		return
+	}
+
 	rootFolderID := os.Getenv("DRIVE_FOLDER_ID")
 	if rootFolderID == "" {
 		http.Error(w, "DRIVE_FOLDER_ID environment variable not set", http.StatusInternalServerError)
@@ -201,36 +207,53 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 
 	var fileIDs []string
 
-	if req.OdometerPhoto != "" {
-		imgBytes, err := decodeBase64Image(req.OdometerPhoto)
+	for i, photoData := range req.OdometerPhotos {
+		if photoData == "" {
+			continue
+		}
+		
+		imgBytes, err := decodeBase64Image(photoData)
 		if err != nil {
 			http.Error(w, "Failed to decode odometer photo: "+err.Error(), http.StatusBadRequest)
 			return
 		}
-		filename := req.TripNum + "_odometer.jpg"
+		
+		// 3. Append the index (i+1) to make the filename unique (e.g., TRP123_IN_odometer_1.jpg)
+		filename := fmt.Sprintf("%s_%s_odometer_%d.jpg", req.TripNum, req.Condition, i+1)
+		
 		id, err := uploadFileToDrive(filename, imgBytes, rootFolderID)
 		if err != nil {
 			log.Printf("Failed to upload odometer photo: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		
 		fileIDs = append(fileIDs, id)
 		log.Printf("Uploaded %s — Drive ID: %s", filename, id)
 	}
 
-	if req.CargoPhoto != "" {
-		imgBytes, err := decodeBase64Image(req.CargoPhoto)
+	// 4. Loop through Cargo Photos
+	for i, photoData := range req.CargoPhotos {
+		if photoData == "" {
+			continue
+		}
+		
+		imgBytes, err := decodeBase64Image(photoData)
 		if err != nil {
 			http.Error(w, "Failed to decode cargo photo: "+err.Error(), http.StatusBadRequest)
 			return
 		}
-		filename := req.TripNum + "_cargo.jpg"
+		
+		// Append the index (i+1) to make the filename unique
+		filename := fmt.Sprintf("%s_cargo_%d.jpg", req.TripNum, i+1)
+		
 		id, err := uploadFileToDrive(filename, imgBytes, rootFolderID)
 		if err != nil {
 			log.Printf("Failed to upload cargo photo: %v", err)
 			http.Error(w, "Failed to upload cargo photo to Drive", http.StatusInternalServerError)
 			return
 		}
+		
 		fileIDs = append(fileIDs, id)
 		log.Printf("Uploaded %s — Drive ID: %s", filename, id)
 	}

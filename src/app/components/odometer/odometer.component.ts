@@ -22,8 +22,8 @@ export class OdometerComponent implements OnInit {
   odometerFromDb: number | null = null;
   jumlahMuatan: string = '';
   notes: string = '';
-  odometerPhoto: string = '';
-  cargoPhoto: string = '';
+  odometerPhotos: string[] = [];
+  cargoPhotos: string[] = [];
   isUploading: boolean = false;
   photoUploadWarning: string = '';
   tripDriver: string = '';
@@ -188,53 +188,57 @@ export class OdometerComponent implements OnInit {
 
   onPhotoSelected(event: Event, type: 'odometer' | 'cargo') {
     const input = event.target as HTMLInputElement;
-    if (!input.files || !input.files[0]) return;
+    if (!input.files || input.files.length === 0) return;
 
-    const file = input.files[0];
-    const reader = new FileReader();
+    Array.from(input.files).forEach(file => {
+      const reader = new FileReader();
 
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const maxSize = 800;
-        let width = img.width;
-        let height = img.height;
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxSize = 800;
+          let width = img.width;
+          let height = img.height;
 
-        if (width > maxSize || height > maxSize) {
-          if (width > height) {
-            height = Math.round((height * maxSize) / width);
-            width = maxSize;
-          } else {
-            width = Math.round((width * maxSize) / height);
-            height = maxSize;
+          // Resize logic
+          if (width > maxSize || height > maxSize) {
+            if (width > height) {
+              height = Math.round((height * maxSize) / width);
+              width = maxSize;
+            } else {
+              width = Math.round((width * maxSize) / height);
+              height = maxSize;
+            }
           }
-        }
 
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d')!;
-        ctx.drawImage(img, 0, 0, width, height);
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d')!;
+          ctx.drawImage(img, 0, 0, width, height);
 
-        const compressed = canvas.toDataURL('image/jpeg', 0.7);
-        if (type === 'odometer') {
-          this.odometerPhoto = compressed;
-        } else {
-          this.cargoPhoto = compressed;
-        }
+          const compressed = canvas.toDataURL('image/jpeg', 0.7);
+          
+          // PUSH to array instead of assigning to string
+          if (type === 'odometer') {
+            this.odometerPhotos.push(compressed);
+          } else {
+            this.cargoPhotos.push(compressed);
+          }
+        };
+        img.src = reader.result as string;
       };
-      img.src = reader.result as string;
-    };
 
-    reader.readAsDataURL(file);
+      reader.readAsDataURL(file);
+    });
     input.value = '';
   }
 
-  removePhoto(type: 'odometer' | 'cargo') {
+  removePhoto(type: 'odometer' | 'cargo', index: number) {
     if (type === 'odometer') {
-      this.odometerPhoto = '';
+      this.odometerPhotos.splice(index, 1);
     } else {
-      this.cargoPhoto = '';
+      this.cargoPhotos.splice(index, 1);
     }
   }
 
@@ -244,8 +248,18 @@ export class OdometerComponent implements OnInit {
       return;
     }
 
-    if (!this.odometerPhoto || !this.cargoPhoto) {
+    if (this.odometerPhotos.length === 0 && this.cargoPhotos.length === 0) {
       alert('Foto odometer dan foto muatan wajib diambil sebelum melanjutkan.');
+      return;
+    }
+
+    if (this.odometerPhotos.length === 0) {
+      alert('Foto odometer wajib diambil sebelum melanjutkan.');
+      return;
+    }
+
+    if (this.cargoPhotos.length === 0) {
+      alert('Foto muatan wajib diambil sebelum melanjutkan.');
       return;
     }
 
@@ -329,43 +343,52 @@ export class OdometerComponent implements OnInit {
       };
     }
 
+    
     // Upload foto ke Google Drive via Go backend
     const tripNum = tripData.tripNum || 'unknown';
-    this.apiService.uploadPhotos(tripNum, this.odometerPhoto, this.cargoPhoto).subscribe({
-      next: () => {},
+    this.apiService.uploadPhotos(tripNum, this.odometerPhotos, this.cargoPhotos, this.tripType).subscribe({
+      next: () => {
+        // 1. Upload Success!
+        this.isUploading = false;
+
+        // 2. Send Data to API
+        this.sendTripDataToAPI(tripData);
+
+        // 3. Save to Local Storage
+        const localTripData = {
+          truckBarcode: this.truckBarcode,
+          tripType: this.tripType,
+          odometerReading: this.odometerReading,
+          notes: this.notes,
+          odometerPhotos: this.odometerPhotos, // Save array
+          cargoPhotos: this.cargoPhotos,       // Save array
+          timestamp: new Date().toISOString(),
+          checklistData: this.tripType === 'OUT' ? localStorage.getItem('checklistData') : null
+        };
+
+        const existingTrips = JSON.parse(localStorage.getItem('trips') || '[]');
+        existingTrips.push(localTripData);
+        localStorage.setItem('trips', JSON.stringify(existingTrips));
+
+        // 4. Cleanup
+        localStorage.removeItem('currentTruckBarcode');
+        localStorage.removeItem('tripType');
+        localStorage.removeItem('checklistData');
+        localStorage.removeItem('tripData');
+        localStorage.removeItem('tripNumber');
+
+        // 5. Navigate
+        this.router.navigate(['/trip-complete']);
+      },
       error: (err) => {
-        this.photoUploadWarning = 'Foto gagal terupload ke Drive. Data perjalanan tetap terkirim.';
+        // Upload Failed!
+        this.isUploading = false;
+        console.error('Upload error', err);
+        this.photoUploadWarning = 'Foto gagal terupload ke Drive. Harap coba lagi.';
+        alert('Gagal mengunggah foto. Periksa koneksi internet Anda dan coba lagi.');
+        // Do NOT navigate away. Let user try again.
       }
     });
-
-    // Send data to API
-    this.sendTripDataToAPI(tripData);
-
-    // Save trip data locally including photos
-    const localTripData = {
-      truckBarcode: this.truckBarcode,
-      tripType: this.tripType,
-      odometerReading: this.odometerReading,
-      notes: this.notes,
-      odometerPhoto: this.odometerPhoto,
-      cargoPhoto: this.cargoPhoto,
-      timestamp: new Date().toISOString(),
-      checklistData: this.tripType === 'OUT' ? localStorage.getItem('checklistData') : null
-    };
-
-    // Save to localStorage (in real app, would send to server)
-    const existingTrips = JSON.parse(localStorage.getItem('trips') || '[]');
-    existingTrips.push(localTripData);
-    localStorage.setItem('trips', JSON.stringify(existingTrips));
-
-    // Clean up temporary data
-    localStorage.removeItem('currentTruckBarcode');
-    localStorage.removeItem('tripType');
-    localStorage.removeItem('checklistData');
-    localStorage.removeItem('tripData');
-    localStorage.removeItem('tripNumber');
-
-    this.router.navigate(['/trip-complete']);
   }
 
   // Method to get button style based on trip type

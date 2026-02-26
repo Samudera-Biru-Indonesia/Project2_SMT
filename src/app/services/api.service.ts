@@ -299,7 +299,7 @@ export class ApiService {
     return this.http.post<GetTotalFromTripNumberResponse>(url, { tripNumber }, { headers });
   }
 
-  uploadPhotos(tripNum: string, odometerPhoto: string, cargoPhoto: string): Observable<any> {
+  uploadPhotos(tripNum: string, odometerPhotos: string[], cargoPhotos: string[], condition: string): Observable<any> {
     // Check JWT expiration before making the call
     this.checkJwtAndLogoutIfExpired();
 
@@ -312,7 +312,14 @@ export class ApiService {
       'Authorization': `Bearer ${token}`
     });
     
-    return this.http.post<any>(url, { tripNum, odometerPhoto, cargoPhoto }, { headers });
+    const body = { 
+        tripNum, 
+        odometerPhotos, 
+        cargoPhotos, 
+        condition 
+    };
+
+    return this.http.post<any>(url, body, { headers });
   }
 
 }
