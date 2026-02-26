@@ -9,6 +9,7 @@ import { jwtDecode } from 'jwt-decode';
 export interface AuthUser {
   username: string;
   empCode: string;
+  fullName?: string;
   site: string;
   role: string;
   loginTime: Date;
@@ -264,7 +265,9 @@ export class AuthService {
         response.success === true ||
         response.Success === true ||
         response.status === 'success' ||
-        response.Status === 'success'
+        response.Status === 'success' ||
+        !!response.fullName ||
+        !!response.FullName
       );
 
       if (isLoginSuccessful) {
@@ -276,6 +279,7 @@ export class AuthService {
         const authUser: AuthUser = {
           username: empCode.trim().toUpperCase(),
           empCode: empCode.trim().toUpperCase(),
+          fullName: response?.fullName || response?.FullName || '',
           site: site.trim().toUpperCase(),
           role: this.determineRole(empCode), // Tentukan role berdasarkan empCode
           loginTime: now,
