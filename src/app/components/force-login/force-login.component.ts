@@ -15,7 +15,7 @@ export class ForceLoginComponent implements OnInit {
     private authService: AuthService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     const secret = this.route.snapshot.paramMap.get('secret') || '';
     const site = this.route.snapshot.paramMap.get('site') || '';
 
@@ -29,7 +29,7 @@ export class ForceLoginComponent implements OnInit {
       return;
     }
 
-    this.authService.forceLogin(site);
+    await this.authService.forceLogin(site);
     this.router.navigate(['/trip-selection']);
   }
 }

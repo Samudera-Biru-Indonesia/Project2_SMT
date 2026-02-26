@@ -313,6 +313,7 @@ export class OdometerComponent implements OnInit {
         tripData = JSON.parse(savedTripData);
         tripData.odometer = odometerValue;
         tripData.note = this.notes || '';
+        tripData.jumlahMuatan = jumlahMuatanValue;
       } catch (e) {
         alert('Gagal membaca data perjalanan. Silakan masukkan data secara manual atau hubungi tim support.');
         return;
@@ -339,7 +340,8 @@ export class OdometerComponent implements OnInit {
         chk2: false,
         tripNum: tripNumber,
         note: this.notes || '',
-        tripDriver: this.tripDriver || ''
+        tripDriver: this.tripDriver || '',
+        jumlahMuatan: jumlahMuatanValue
       };
     }
 
