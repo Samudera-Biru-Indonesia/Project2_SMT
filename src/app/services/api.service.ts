@@ -14,6 +14,7 @@ export interface TripData {
   tripNum: string;
   note: string;
   tripDriver: string;
+  jumlahMuatan?: number;
 }
 
 export interface TripInfo {
@@ -140,7 +141,8 @@ export class ApiService {
       chk1: Boolean(data.chk1),
       chk2: Boolean(data.chk2),
       tripNum: String(data.tripNum || ''),
-      note: String(data.note || '')
+      note: String(data.note || ''),
+      jumlahMuatan: Number(data.jumlahMuatan) || 0
     };
 
     return this.http.post(url, requestData, { headers });
