@@ -245,7 +245,7 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		
 		// Append the index (i+1) to make the filename unique
-		filename := fmt.Sprintf("%s_cargo_%d.jpg", req.TripNum, i+1)
+		filename := fmt.Sprintf("%s_%s_cargo_%d.jpg", req.TripNum, req.Condition, i+1)
 		
 		id, err := uploadFileToDrive(filename, imgBytes, rootFolderID)
 		if err != nil {
