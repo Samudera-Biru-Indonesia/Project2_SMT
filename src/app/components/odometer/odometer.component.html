@@ -24,6 +24,35 @@
         </div>
       </div>
 
+      <!-- Order Details (hanya OUT trip) -->
+      <div class="order-details-section" *ngIf="tripType === 'OUT' && orderDetails.length > 0">
+        <h3 class="order-details-title">Detail Order</h3>
+        <div class="order-table-wrapper">
+          <table class="order-table">
+            <thead>
+              <tr>
+                <th>No. Order</th>
+                <th>Customer</th>
+                <th>Qty</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of orderDetails">
+                <td>{{ order.orderNum }}</td>
+                <td>{{ order.customerName }}</td>
+                <td>{{ order.totalQty }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="2"><strong>Total</strong></td>
+                <td><strong>{{ expectedMuatan }}</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
       <form (ngSubmit)="onSubmit()" class="odometer-form">
         <div class="form-section">
           <div class="form-group">
@@ -133,13 +162,18 @@
           </div>
 
           <div class="form-group">
-            <label for="notes">Catatan Tambahan (Opsional)</label>
+            <label for="notes" [class.required]="muatanMismatchWarning">
+              Catatan Tambahan
+              <span *ngIf="!muatanMismatchWarning" style="font-weight:400; color:#6c757d;"> (Opsional)</span>
+              <span *ngIf="muatanMismatchWarning" style="font-weight:400; color:#dc3545;"> — wajib diisi jika muatan berbeda</span>
+            </label>
             <textarea
               id="notes"
               [(ngModel)]="notes"
               name="notes"
               placeholder="Masukkan catatan atau pengamatan tambahan"
               class="textarea-input"
+              [class.input-error]="muatanMismatchWarning && !notes"
               rows="4"
               autocomplete="off"
             ></textarea>
@@ -153,13 +187,20 @@
         <div class="form-actions">
           <button type="submit"
                   class="complete-btn"
-                  [ngStyle]="getButtonStyle()">
-            Selesaikan Registrasi Perjalanan
+                  [ngStyle]="getButtonStyle()"
+                  [disabled]="isUploading">
+            {{ isUploading ? 'Mengirim...' : 'Selesaikan Registrasi Perjalanan' }}
           </button>
         </div>
       </form>
     </div>
   </main>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading || isUploading">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">{{ isUploading ? 'Mengirim data...' : 'Memuat data order...' }}</p>
+  </div>
 
   <!-- Modal: Peringatan Odometer -->
   <div class="modal-overlay" *ngIf="showOdometerWarning">

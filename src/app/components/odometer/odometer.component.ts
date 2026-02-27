@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService, TripData, GetTotalFromTripNumberResponse,  GetOutTruckCheckResponse} from '../../services/api.service';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { ApiService, TripData, GetOutTruckCheckResponse, GetOrderDetailsResponse, OrderDetail } from '../../services/api.service';
+import { debounceTime, distinctUntilChanged, Subject, timeout } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -29,6 +29,7 @@ export class OdometerComponent implements OnInit {
   tripDriver: string = '';
   expectedMuatan: number | null = null;
   muatanType: string = '';
+  orderDetails: OrderDetail[] = [];
   isOdometerWrong: boolean = false;
 
   get odometerMismatchWarning(): boolean {
@@ -63,7 +64,7 @@ export class OdometerComponent implements OnInit {
 
     if (this.tripNumber) {
       if (this.tripType === 'OUT') {
-        this.fetchTripTotalLoad(this.tripNumber);
+        this.fetchOrderDetails(this.tripNumber);
       } else { // kalok IN
         this.fetchOdometer();
       }
@@ -91,30 +92,31 @@ export class OdometerComponent implements OnInit {
       this.router.navigate(['/trip-selection']);
     }
 
-    if (this.tripType === 'OUT' && this.tripNumber) {
-      this.apiService.getTotalFromTripNumber(this.tripNumber).subscribe({
-        next: (res) => {
-          this.expectedMuatan = res.total;
-          this.muatanType = res.type;
-        },
-        error: () => {}
-      });
-    }
   }
 
-  fetchTripTotalLoad(tripNumberStr: string) {
+  fetchOrderDetails(tripNumberStr: string) {
     this.isLoading = true;
+    const company = localStorage.getItem('currentCompany') || '';
+    const plant = localStorage.getItem('currentPlant') || '';
 
-    this.apiService.getTotalFromTripNumber(tripNumberStr)
+    this.apiService.getOrderDetails(company, plant, tripNumberStr)
+      .pipe(timeout(30000))
       .subscribe({
-        next: (response: GetTotalFromTripNumberResponse) => {
+        next: (response: GetOrderDetailsResponse) => {
           this.isLoading = false;
-          this.tripLoadFromDb = response.total;
-          this.productType = response.type;
+          this.orderDetails = response.OrderData?.Result || [];
+          this.muatanType = response.Type || '';
+          this.expectedMuatan = response.TotalQty ?? null;
+          this.tripLoadFromDb = response.TotalQty ?? null;
+          this.productType = response.Type || '';
         },
-        error: (error) => {
+        error: (err) => {
           this.isLoading = false;
-          alert('Error connecting to server.');
+          if (err.name === 'TimeoutError') {
+            alert('Koneksi ke server lambat, data order tidak dapat dimuat. Anda tetap dapat melanjutkan pengisian.');
+          } else {
+            alert('Error connecting to server.');
+          }
         },
       });
   }
@@ -281,6 +283,12 @@ export class OdometerComponent implements OnInit {
       return;
     }
 
+    // Validasi catatan: wajib diisi jika muatan berbeda dari sistem
+    if (this.muatanMismatchWarning && !this.notes.trim()) {
+      alert('Catatan wajib diisi karena jumlah muatan berbeda dari sistem.');
+      return;
+    }
+
     // Validasi muatan: jika input < sistem, tampilkan warning dulu
     if (this.muatanType === 'CYLINDER' && this.expectedMuatan !== null && jumlahMuatanValue < this.expectedMuatan) {
       if (!this.muatanLowWarningShown) {
@@ -348,6 +356,7 @@ export class OdometerComponent implements OnInit {
     
     // Upload foto ke Google Drive via Go backend
     const tripNum = tripData.tripNum || 'unknown';
+    this.isUploading = true;
     this.apiService.uploadPhotos(tripNum, this.odometerPhotos, this.cargoPhotos, this.tripType).subscribe({
       next: () => {
         // 1. Upload Success!

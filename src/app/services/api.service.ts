@@ -85,6 +85,25 @@ export interface GetPlantListResponse {
   // API might return different structure, so we handle both
 }
 
+export interface OrderDetail {
+  orderNum: string;
+  orderType: string;
+  customerName: string;
+  shipToNum: string;
+  shipToName: string;
+  shipToAddress: string;
+  toPlantDesc: string;
+  totalQty: number;
+}
+
+export interface GetOrderDetailsResponse {
+  Type: string;
+  OrderData: {
+    Result: OrderDetail[];
+  };
+  TotalQty: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -98,7 +117,8 @@ export class ApiService {
     getAllTripData: '/GetAllTripData',
     GetTotalFromTripNumber: "/getTotalFromTripNumber",
     getTruckList: '/getTruckByAuthSite',
-    getOutTruckCheck: '/getOutTruckCheck'
+    getOutTruckCheck: '/getOutTruckCheck',
+    getOrderDetails: '/getOrderDetails'
   };
 
   constructor(
@@ -299,6 +319,28 @@ export class ApiService {
     });
 
     return this.http.post<GetTotalFromTripNumberResponse>(url, { tripNumber }, { headers });
+  }
+
+  getOrderDetails(company: string, plant: string, tripNumber: string): Observable<GetOrderDetailsResponse> {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
+    const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    const url = currentEnv.baseUrl + this.endpoints.getOrderDetails;
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Basic ${basicAuth}`,
+      'Company': company,
+      'x-api-key': currentEnv.apiKey
+    });
+
+    const body = {
+      Company: company,
+      Plant: plant,
+      TripNumber: tripNumber
+    };
+
+    return this.http.post<GetOrderDetailsResponse>(url, body, { headers });
   }
 
   uploadPhotos(tripNum: string, odometerPhotos: string[], cargoPhotos: string[], condition: string): Observable<any> {
