@@ -499,10 +499,11 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   }
 
   selectTruck(truck: Truck) {
-    this.manualTruckPlate = truck.truckPlate;
+    const plate = truck.truckPlate || truck.truckID;
+    this.manualTruckPlate = plate;
     this.truckDropdownOpen = false;
     this.truckSearchQuery = '';
-    this.onNopolChange(truck.truckPlate);
+    this.onNopolChange(plate);
   }
 
   @HostListener('document:click', ['$event'])

@@ -42,8 +42,13 @@
                   [class.selected]="manualTruckPlate === truck.truckPlate"
                   (click)="selectTruck(truck)"
                 >
-                  <span class="truck-plate">{{ truck.truckPlate }}</span>
-                  <span class="truck-desc" *ngIf="truck.truckDesc"> — {{ truck.truckDesc }}</span>
+                  <ng-container *ngIf="truck.truckPlate; else specialTruck">
+                    <span class="truck-plate">{{ truck.truckPlate }}</span>
+                    <span class="truck-desc" *ngIf="truck.truckDesc"> — {{ truck.truckDesc }}</span>
+                  </ng-container>
+                  <ng-template #specialTruck>
+                    <span class="truck-plate">{{ truck.truckDesc || truck.truckID }}</span>
+                  </ng-template>
                 </div>
                 <div class="spk-no-result" *ngIf="filteredTruckOptions.length === 0">
                   {{ trucks.length === 0 ? 'Tidak ada data truck' : 'Tidak ditemukan' }}
