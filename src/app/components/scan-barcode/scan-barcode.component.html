@@ -39,7 +39,7 @@
                 <div
                   *ngFor="let truck of filteredTruckOptions"
                   class="spk-option"
-                  [class.selected]="manualTruckPlate === truck.truckPlate"
+                  [class.selected]="manualTruckPlate !== '' && manualTruckPlate === (truck.truckPlate || truck.truckID)"
                   (click)="selectTruck(truck)"
                 >
                   <ng-container *ngIf="truck.truckPlate; else specialTruck">
