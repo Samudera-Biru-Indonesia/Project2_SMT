@@ -167,30 +167,22 @@ export class AuthService {
 
 
   /**
-   * Force login via secret URL — bypass geolocation & API auth
+   * Force login via secret URL — calls AuthenticateLogon with CHARLES_W & dummy coords
    */
   async forceLogin(site: string): Promise<void> {
-    const now = new Date();
-    const sessionExpiryTime = new Date(now.getTime() + (this.SESSION_DURATION_HOURS * 60 * 60 * 1000));
     const plant = site.trim().toUpperCase();
 
-    const authUser: AuthUser = {
-      username: 'CHARLES_W',
-      empCode: 'CHARLES_W',
-      site: plant,
-      role: 'admin',
-      loginTime: now,
-      lastActivityTime: now,
-      sessionExpiryTime: sessionExpiryTime
-    };
+    const result = await this.loginWithLocation('CHARLES_W', site, { latitude: 0, longitude: 0 });
 
-    localStorage.setItem('currentPlant', plant);
-    localStorage.setItem('currentCompany', plant.substring(0, 3));
+    if (result.success && result.user) {
+      localStorage.setItem('currentPlant', plant);
+      localStorage.setItem('currentCompany', plant.substring(0, 3));
 
-    this.setCurrentUser(authUser);
-    this.saveUserToStorage(authUser);
-
-    await this.getJwt();
+      // Override role to admin for force-login
+      const adminUser: AuthUser = { ...result.user, role: 'admin' };
+      this.setCurrentUser(adminUser);
+      this.saveUserToStorage(adminUser);
+    }
   }
 
   /**
@@ -498,20 +490,25 @@ export class AuthService {
             token: user.token
           };
           this.currentUserSubject.next(tempUser); // Temporarily set to check JWT
-          
+
           if (this.isJwtExpired()) {
-            this.logout();
+            // Clear state only — don't hard-redirect so force-login can still work
+            this.currentUserSubject.next(null);
+            localStorage.clear();
             return;
           }
-          
+
           this.setCurrentUser(updatedUser);
           // DON'T save here to avoid changing the expiry time on refresh
         } else {
-          this.logout();
+          // Clear state only — don't hard-redirect so force-login can still work
+          this.currentUserSubject.next(null);
+          localStorage.clear();
         }
       }
     } catch (error) {
-      this.logout();
+      this.currentUserSubject.next(null);
+      localStorage.clear();
     }
   }
 
