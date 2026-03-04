@@ -180,8 +180,22 @@ export class AuthService {
 
       // Override role to admin for force-login
       const adminUser: AuthUser = { ...result.user, role: 'admin' };
+      
+      // Get JWT first before setting user
       this.setCurrentUser(adminUser);
       this.saveUserToStorage(adminUser);
+      
+      const token = await this.getJwt();
+      if (!token) {
+        throw new Error('Failed to get JWT token');
+      }
+      
+      // Update user with token
+      adminUser.token = token;
+      this.setCurrentUser(adminUser);
+      this.saveUserToStorage(adminUser);
+    } else {
+      throw new Error(result.message || 'Force login failed');
     }
   }
 

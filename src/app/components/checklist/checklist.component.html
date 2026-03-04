@@ -10,18 +10,35 @@
     <div class="checklist-card out-trip">
       <!-- Trip Header Info -->
       <div class="trip-header-info">
-        <div class="trip-number-display">
-          <span class="trip-label">Nomor SPK:</span>
-          <span class="trip-value">{{ tripNumber }}</span>
-        </div>
+        @if(manualTruckPlate === 'LAINNYA' || manualTruckPlate === 'RELASI' || manualTruckPlate === 'TPF-CONT') {
+          <div class="trip-number-display">
+            <span class="trip-label">Nama Perusahaan:</span>
+            <span class="trip-value">{{ customerName }}</span>
+          </div>
+        }
+        
         <div class="plate-number-display">
           <span class="plate-label">Plat Nomor:</span>
-          <span class="plate-value">{{ plateNumber }}</span>
+          <span class="plate-value">{{ plateNumber || newTruckPlate || 'N/A' }}</span>
         </div>
-        <div class="driver-display">
-          <span class="driver-label">Driver:</span>
-          <span class="driver-value">{{ tripDriver || '-' }}</span>
-        </div>
+
+        @if((manualTruckPlate === 'TPF-CONT' || manualTruckPlate === 'RELASI') && tripType === 'OUT') {
+          <div class="trip-number-display">
+            <span class="trip-label">Nomor SPK:</span>
+            <span class="trip-value">{{ tripNumber || 'N/A' }}</span>
+          </div>
+        }
+        
+        @if(manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI' && manualTruckPlate !== 'TPF-CONT') {
+          <div class="trip-number-display">
+            <span class="trip-label">Nomor SPK:</span>
+            <span class="trip-value">{{ tripNumber }}</span>
+          </div>
+          <div class="driver-display">
+            <span class="driver-label">Driver:</span>
+            <span class="driver-value">{{ tripDriver || '-' }}</span>
+          </div>
+        }
       </div>
 
       <div class="vehicle-info">

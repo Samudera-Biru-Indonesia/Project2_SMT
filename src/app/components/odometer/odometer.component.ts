@@ -24,6 +24,7 @@ export class OdometerComponent implements OnInit {
   notes: string = '';
   odometerPhotos: string[] = [];
   cargoPhotos: string[] = [];
+  carPhotos: string[] = [];
   isUploading: boolean = false;
   photoUploadWarning: string = '';
   tripDriver: string = '';
@@ -31,6 +32,9 @@ export class OdometerComponent implements OnInit {
   muatanType: string = '';
   orderDetails: OrderDetail[] = [];
   isOdometerWrong: boolean = false;
+  manualTruckPlate: string = '';
+  customerName: string = '';
+  newTruckPlate: string = '';
 
   get odometerMismatchWarning(): boolean {
     if (this.tripType !== 'IN' || this.odometerFromDb === null || !this.odometerReading) return false;
@@ -53,6 +57,7 @@ export class OdometerComponent implements OnInit {
   muatanLowWarningShown: boolean = false;
   showMuatanHighWarning: boolean = false;
   muatanHighWarningShown: boolean = false;
+  showSummaryModal: boolean = false;
 
   constructor(private router: Router, private apiService: ApiService, private authService: AuthService) {}
 
@@ -61,6 +66,9 @@ export class OdometerComponent implements OnInit {
     this.tripType = localStorage.getItem('tripType') || '';
     this.tripNumber = localStorage.getItem('tripNumber') || '';
     this.tripDriver = localStorage.getItem('tripDriver') || '';
+    this.manualTruckPlate = localStorage.getItem('manualTruckPlate') || '';
+    this.customerName = localStorage.getItem('customerName') || '';
+    this.newTruckPlate = localStorage.getItem('newTruckPlate') || '';
 
     if (this.tripNumber) {
       if (this.tripType === 'OUT') {
@@ -73,23 +81,43 @@ export class OdometerComponent implements OnInit {
     }
 
     // Get plate number from trip data if available
-    const tripDataString = localStorage.getItem('currentTripData');
-    if (tripDataString) {
-      try {
-        const tripData = JSON.parse(tripDataString);
-        this.plateNumber = tripData?.truckPlate || 'N/A';
-        this.tripDriver = tripData?.driver || 'N/A';
-      } catch (error) {
-        this.plateNumber = 'N/A';
-        this.tripDriver = 'N/A';
-      }
+    if (this.manualTruckPlate === 'LAINNYA' || this.manualTruckPlate === 'RELASI' || this.manualTruckPlate === 'TPF-CONT') {
+      this.plateNumber = this.newTruckPlate || '-';
     } else {
-      this.plateNumber = 'N/A';
-      this.tripDriver = 'N/A';
+      const tripDataString = localStorage.getItem('currentTripData');
+      if (tripDataString) {
+        try {
+          const tripData = JSON.parse(tripDataString);
+          this.plateNumber = tripData?.truckPlate || '-';
+          this.tripDriver = tripData?.driver || '-';
+        } catch (error) {
+          this.plateNumber = '-';
+          this.tripDriver = '-';
+        }
+      } else {
+        this.plateNumber = '-';
+        this.tripDriver = '-';
+      }
     }
 
-    if (!this.truckBarcode || !this.tripType) {
+
+
+    const isBarcodeExempt = 
+      this.manualTruckPlate === 'LAINNYA' || 
+      this.manualTruckPlate === 'RELASI' || 
+      this.manualTruckPlate === 'TPF-CONT';
+
+
+      console.log('Current trip type:', this.tripType);
+      console.log('Is barcode exempt:', isBarcodeExempt);
+      console.log('Manual truck plate:', this.manualTruckPlate);
+      console.log('Current truck barcode:', this.truckBarcode);
+    if (!this.tripType || (!isBarcodeExempt && !this.truckBarcode)) {
+      console.log('manual truck plate:' + this.manualTruckPlate)
+      console.log('truck barcode/SPK' + this.truckBarcode)
+
       this.router.navigate(['/trip-selection']);
+      
     }
 
   }
@@ -135,7 +163,7 @@ export class OdometerComponent implements OnInit {
 
           if (matchingTrip) {
             this.odometerFromDb = matchingTrip.Odometer;
-          } else {
+          } else if (!(this.manualTruckPlate === 'TPF-CONT' || this.manualTruckPlate === 'RELASI' || this.manualTruckPlate === 'LAINNYA')) {
             alert('Gagal mengambil data odometer, gunakan surat jalan sebagai referensi odometer.');
           }
         },
@@ -188,7 +216,7 @@ export class OdometerComponent implements OnInit {
     this.muatanHighWarningShown = false;
   }
 
-  onPhotoSelected(event: Event, type: 'odometer' | 'cargo') {
+  onPhotoSelected(event: Event, type: 'odometer' | 'cargo' | 'car') {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
 
@@ -221,11 +249,12 @@ export class OdometerComponent implements OnInit {
 
           const compressed = canvas.toDataURL('image/jpeg', 0.7);
           
-          // PUSH to array instead of assigning to string
           if (type === 'odometer') {
             this.odometerPhotos.push(compressed);
-          } else {
+          } else if (type === 'cargo') {
             this.cargoPhotos.push(compressed);
+          } else {
+            this.carPhotos.push(compressed);
           }
         };
         img.src = reader.result as string;
@@ -236,84 +265,156 @@ export class OdometerComponent implements OnInit {
     input.value = '';
   }
 
-  removePhoto(type: 'odometer' | 'cargo', index: number) {
+  removePhoto(type: 'odometer' | 'cargo' | 'car', index: number) {
     if (type === 'odometer') {
       this.odometerPhotos.splice(index, 1);
-    } else {
+    } else if (type === 'cargo') {
       this.cargoPhotos.splice(index, 1);
+    } else {
+      this.carPhotos.splice(index, 1);
     }
   }
 
   onSubmit() {
-    if (!this.odometerReading) {
-      alert('Pembacaan odometer belum diisi. Silakan masukkan angka odometer terlebih dahulu.');
-      return;
-    }
+    const isSpecialTruck = ['LAINNYA', 'RELASI', 'TPF-CONT'].includes(this.manualTruckPlate);
 
-    if (this.odometerPhotos.length === 0 && this.cargoPhotos.length === 0) {
-      alert('Foto odometer dan foto muatan wajib diambil sebelum melanjutkan.');
-      return;
-    }
-
-    if (this.odometerPhotos.length === 0) {
-      alert('Foto odometer wajib diambil sebelum melanjutkan.');
-      return;
-    }
-
-    if (this.cargoPhotos.length === 0) {
-      alert('Foto muatan wajib diambil sebelum melanjutkan.');
-      return;
-    }
-
-    if (!this.jumlahMuatan) {
-      alert('Jumlah muatan belum diisi. Silakan masukkan jumlah muatan terlebih dahulu.');
-      return;
-    }
-
-    // Validate odometer reading
-    const odometerValue = parseFloat(this.odometerReading);
-    if (isNaN(odometerValue) || odometerValue < 0) {
-      alert('Pembacaan odometer tidak valid. Pastikan nilai yang dimasukkan berupa angka positif.');
-      return;
-    }
-
-    const jumlahMuatanValue = parseFloat(this.jumlahMuatan);
-    if (isNaN(jumlahMuatanValue) || jumlahMuatanValue < 0) {
-      alert('Jumlah muatan tidak valid. Pastikan nilai yang dimasukkan berupa angka positif.');
-      return;
-    }
-
-    // Validasi catatan: wajib diisi jika muatan berbeda dari sistem
-    if (this.muatanMismatchWarning && !this.notes.trim()) {
-      alert('Catatan wajib diisi karena jumlah muatan berbeda dari sistem.');
-      return;
-    }
-
-    // Validasi muatan: jika input < sistem, tampilkan warning dulu
-    if (this.muatanType === 'CYLINDER' && this.expectedMuatan !== null && jumlahMuatanValue < this.expectedMuatan) {
-      if (!this.muatanLowWarningShown) {
-        this.showMuatanLowWarning = true;
-        this.muatanLowWarningShown = true;
+    // Validation for regular trucks
+    if (!isSpecialTruck) {
+      if (!this.odometerReading) {
+        alert('Pembacaan odometer belum diisi. Silakan masukkan angka odometer terlebih dahulu.');
         return;
       }
-      this.showMuatanLowWarning = false;
-    } else if (this.muatanType === 'CYLINDER' && this.expectedMuatan !== null && jumlahMuatanValue > this.expectedMuatan) {
-      if (!this.muatanHighWarningShown) {
-        this.showMuatanHighWarning = true;
-        this.muatanHighWarningShown = true;
+
+      if (this.odometerPhotos.length === 0) {
+        alert('Foto odometer wajib diambil sebelum melanjutkan.');
         return;
       }
-      this.showMuatanHighWarning = false;
-    } else {
-      this.showMuatanLowWarning = false;
-      this.showMuatanHighWarning = false;
+
+      if (this.cargoPhotos.length === 0) {
+        alert('Foto muatan wajib diambil sebelum melanjutkan.');
+        return;
+      }
+
+      if (!this.jumlahMuatan) {
+        alert('Jumlah muatan belum diisi. Silakan masukkan jumlah muatan terlebih dahulu.');
+        return;
+      }
+
+      const odometerValue = parseFloat(this.odometerReading);
+      if (isNaN(odometerValue) || odometerValue < 0) {
+        alert('Pembacaan odometer tidak valid. Pastikan nilai yang dimasukkan berupa angka positif.');
+        return;
+      }
+
+      const jumlahMuatanValue = parseFloat(this.jumlahMuatan);
+      if (isNaN(jumlahMuatanValue) || jumlahMuatanValue < 0) {
+        alert('Jumlah muatan tidak valid. Pastikan nilai yang dimasukkan berupa angka positif.');
+        return;
+      }
+
+      if (this.muatanMismatchWarning && !this.notes.trim()) {
+        alert('Catatan wajib diisi karena jumlah muatan berbeda dari sistem.');
+        return;
+      }
+
+      if (this.muatanType === 'CYLINDER' && this.expectedMuatan !== null && jumlahMuatanValue < this.expectedMuatan) {
+        if (!this.muatanLowWarningShown) {
+          this.showMuatanLowWarning = true;
+          this.muatanLowWarningShown = true;
+          return;
+        }
+        this.showMuatanLowWarning = false;
+      } else if (this.muatanType === 'CYLINDER' && this.expectedMuatan !== null && jumlahMuatanValue > this.expectedMuatan) {
+        if (!this.muatanHighWarningShown) {
+          this.showMuatanHighWarning = true;
+          this.muatanHighWarningShown = true;
+          return;
+        }
+        this.showMuatanHighWarning = false;
+      } else {
+        this.showMuatanLowWarning = false;
+        this.showMuatanHighWarning = false;
+      }
+
+      if (this.odometerFromDb !== null && odometerValue < this.odometerFromDb) {
+        if (!this.odometerWarningShown) {
+          this.isOdometerWrong = true;
+          this.showOdometerWarning = true;
+          this.odometerWarningShown = true;
+          return;
+        }
+        this.showOdometerWarning = false;
+      } else {
+        this.showOdometerWarning = false;
+      }
     }
+
+    // Validation for RELASI (masuk/keluar): jumlah muatan + foto muatan
+    if (this.manualTruckPlate === 'RELASI') {
+      if (!this.jumlahMuatan) {
+        alert('Jumlah muatan belum diisi.');
+        return;
+      }
+      if (this.cargoPhotos.length === 0) {
+        alert('Foto muatan wajib diambil sebelum melanjutkan.');
+        return;
+      }
+      
+      // Check notes requirement for OUT trips with mismatch
+      if (this.tripType === 'OUT' && this.muatanMismatchWarning && !this.notes.trim()) {
+        alert('Catatan wajib diisi karena jumlah muatan berbeda dari sistem.');
+        return;
+      }
+    }
+
+    // Validation for LAINNYA (masuk/keluar): foto mobil
+    if (this.manualTruckPlate === 'LAINNYA') {
+      if (this.carPhotos.length === 0) {
+        alert('Foto mobil wajib diambil sebelum melanjutkan.');
+        return;
+      }
+    }
+
+    // Validation for VENDOR (keluar): jumlah muatan + foto muatan
+    if (this.manualTruckPlate === 'TPF-CONT' && this.tripType === 'OUT') {
+      if (!this.jumlahMuatan) {
+        alert('Jumlah muatan belum diisi.');
+        return;
+      }
+      if (this.cargoPhotos.length === 0) {
+        alert('Foto muatan wajib diambil sebelum melanjutkan.');
+        return;
+      }
+      
+      // Check notes requirement for mismatch
+      if (this.muatanMismatchWarning && !this.notes.trim()) {
+        alert('Catatan wajib diisi karena jumlah muatan berbeda dari sistem.');
+        return;
+      }
+    }
+
+    // Validation for VENDOR (masuk): foto mobil
+    if (this.manualTruckPlate === 'TPF-CONT' && this.tripType === 'IN') {
+      if (this.carPhotos.length === 0) {
+        alert('Foto mobil wajib diambil sebelum melanjutkan.');
+        return;
+      }
+    }
+
+    // Proceed to final submission
+    this.finalSubmit();
+  }
+
+  finalSubmit() {
 
     // Get trip data from localStorage (set by checklist component for OUT trips)
     const savedTripData = localStorage.getItem('tripData');
     const tripNumber = localStorage.getItem('tripNumber') || '';
+    const authUser = JSON.parse(localStorage.getItem('smt_auth_user') || '{}');
 
     let tripData: TripData;
+    const odometerValue = this.odometerReading ? parseFloat(this.odometerReading) : 0;
+    const jumlahMuatanValue = this.jumlahMuatan ? parseFloat(this.jumlahMuatan) : 0;
 
     if (savedTripData && this.tripType === 'OUT') {
       // For OUT trips, use data from checklist
@@ -322,84 +423,87 @@ export class OdometerComponent implements OnInit {
         tripData.odometer = odometerValue;
         tripData.note = this.notes || '';
         tripData.jumlahMuatan = jumlahMuatanValue;
+        tripData.manualTruckPlate = this.manualTruckPlate || '';
+        tripData.companyName = this.customerName || '';
+        tripData.fullName = authUser.fullName || '';
+        tripData.empCode = authUser.empCode || '';
+        // tripData.odometerFromDb = this.odometerFromDb || 0;
+        tripData.expectedMuatan = this.expectedMuatan || 0;
       } catch (e) {
         alert('Gagal membaca data perjalanan. Silakan masukkan data secara manual atau hubungi tim support.');
         return;
       }
     } else {
-      // odometer input harus >= odometer dari DB
-      if (this.odometerFromDb !== null && odometerValue < this.odometerFromDb) {
-        if (!this.odometerWarningShown) {
-          this.isOdometerWrong = true;
-          this.showOdometerWarning = true;
-          this.odometerWarningShown = true;
-          return;
-        }
-        // Submit kedua: lanjut meski ada ketidaksesuaian
-        this.showOdometerWarning = false;
-      } else {
-        this.showOdometerWarning = false;
-      }
       // For IN trips or if no saved data, create new trip data
       tripData = {
         odometer: odometerValue,
         type: this.tripType,
-        chk1: false, // For IN trips, all checks are false
+        chk1: false,
         chk2: false,
         tripNum: tripNumber,
         note: this.notes || '',
         tripDriver: this.tripDriver || '',
-        jumlahMuatan: jumlahMuatanValue
+        jumlahMuatan: jumlahMuatanValue,
+        manualTruckPlate: this.manualTruckPlate || '',
+        companyName: this.customerName || '',
+        fullName: authUser.fullName || '',
+        empCode: authUser.empCode || '',
+        // odometerFromDb: this.odometerFromDb || 0,
+        expectedMuatan: this.expectedMuatan || 0
       };
     }
 
-    
-    // Upload foto ke Google Drive via Go backend
-    const tripNum = tripData.tripNum || 'unknown';
-    this.isUploading = true;
-    this.apiService.uploadPhotos(tripNum, this.odometerPhotos, this.cargoPhotos, this.tripType).subscribe({
-      next: () => {
-        // 1. Upload Success!
-        this.isUploading = false;
-
-        // 2. Send Data to API
-        this.sendTripDataToAPI(tripData);
-
-        // 3. Save to Local Storage
-        const localTripData = {
-          truckBarcode: this.truckBarcode,
-          tripType: this.tripType,
-          odometerReading: this.odometerReading,
-          notes: this.notes,
-          odometerPhotos: this.odometerPhotos, // Save array
-          cargoPhotos: this.cargoPhotos,       // Save array
-          timestamp: new Date().toISOString(),
-          checklistData: this.tripType === 'OUT' ? localStorage.getItem('checklistData') : null
-        };
-
-        const existingTrips = JSON.parse(localStorage.getItem('trips') || '[]');
-        existingTrips.push(localTripData);
-        localStorage.setItem('trips', JSON.stringify(existingTrips));
-
-        // 4. Cleanup
-        localStorage.removeItem('currentTruckBarcode');
-        localStorage.removeItem('tripType');
-        localStorage.removeItem('checklistData');
-        localStorage.removeItem('tripData');
-        localStorage.removeItem('tripNumber');
-
-        // 5. Navigate
-        this.router.navigate(['/trip-complete']);
-      },
-      error: (err) => {
-        // Upload Failed!
-        this.isUploading = false;
-        console.error('Upload error', err);
-        this.photoUploadWarning = 'Foto gagal terupload ke Drive. Harap coba lagi.';
-        alert('Gagal mengunggah foto. Periksa koneksi internet Anda dan coba lagi.');
-        // Do NOT navigate away. Let user try again.
-      }
+    // 1. Send Data to API first
+    this.sendTripDataToAPI(tripData, () => {
+      // 2. Upload foto ke Google Drive via Go backend
+      const tripNum = tripData.tripNum || 'unknown';
+      this.apiService.uploadPhotos(tripNum, this.odometerPhotos, this.cargoPhotos, this.carPhotos, this.tripType).subscribe({
+        next: () => {
+          this.isUploading = false;
+          this.continueAfterUpload(tripData, odometerValue, jumlahMuatanValue, authUser);
+        },
+        error: (err) => {
+          this.isUploading = false;
+          this.photoUploadWarning = 'Foto gagal terupload ke Drive. Harap coba lagi.';
+          this.continueAfterUpload(tripData, odometerValue, jumlahMuatanValue, authUser);
+        }
+      });
     });
+  }
+
+  continueAfterUpload(tripData: TripData, odometerValue: number, jumlahMuatanValue: number, authUser: any) {
+    // 3. Save to Local Storage
+    const localTripData = {
+      truckBarcode: this.truckBarcode,
+      tripType: this.tripType,
+      odometerReading: this.odometerReading,
+      notes: this.notes,
+      odometerPhotos: this.odometerPhotos,
+      cargoPhotos: this.cargoPhotos,
+      timestamp: new Date().toISOString(),
+      checklistData: this.tripType === 'OUT' ? localStorage.getItem('checklistData') : null
+    };
+
+    const existingTrips = JSON.parse(localStorage.getItem('trips') || '[]');
+    existingTrips.push(localTripData);
+    localStorage.setItem('trips', JSON.stringify(existingTrips));
+
+    // 4. Save summary data for trip-complete page
+    const summaryData = {
+      tripNumber: tripData.tripNum || '',
+      tripDriver: this.tripDriver || '',
+      jumlahMuatan: jumlahMuatanValue || 0,
+      odometer: odometerValue || 0,
+      fullName: authUser.fullName || '',
+      empCode: authUser.empCode || '',
+      tripType: this.tripType,
+      plateNumber: this.plateNumber || this.newTruckPlate || '',
+      customerName: this.customerName || ''
+    };
+    localStorage.setItem('tripSummary', JSON.stringify(summaryData));
+
+    // 5. Navigate
+    this.router.navigate(['/trip-complete']);
   }
 
   // Method to get button style based on trip type
@@ -420,18 +524,40 @@ export class OdometerComponent implements OnInit {
   }
 
   // Function to send data to API
-  sendTripDataToAPI(tripData: TripData) {
+  sendTripDataToAPI(tripData: TripData, onSuccess: () => void) {
+    this.isUploading = true;
     this.apiService.sendTripData(tripData).subscribe({
       next: (response) => {
-        // For this API, any successful response (even if it has content) is considered success
-        // The API might return error details in response body even for 200 status
         if (response && response.error) {
           alert('Kesalahan dari server: ' + (response.message || response.error || JSON.stringify(response)) + '\n\nSilakan masukkan data secara manual atau hubungi tim support.');
         } else {
-          alert('Data trip berhasil dikirim ke server!');
+          
+          this.processDataToEpicor(tripData.tripNum).subscribe({
+                    next: (epicorResponse) => {
+                        // 3. EPICOR SUCCESS!
+                        alert('Data trip berhasil dikirim ke server dan diproses ke Epicor!');
+                        onSuccess(); // Navigate away
+                    },
+                    error: (error) => {
+                        // 4. EPICOR FAILED (Your Error Logic Goes Here!)
+                        let errorMessage = 'Gagal memproses data ke sistem Epicor';
 
-          // After successful insert to staging table, process the trip data to Epicor
-          this.processDataToEpicor(tripData.tripNum);
+                        if (error.status === 0) {
+                            errorMessage += ' - Periksa koneksi internet.';
+                        } else if (error.status === 400) {
+                            errorMessage += ' - Data tidak valid untuk proses Epicor.';
+                        } else if (error.status === 401) {
+                            errorMessage += ' - Authentication gagal.';
+                        } else if (error.status === 500) {
+                            errorMessage += ' - Server error saat proses ke Epicor.';
+                        } else {
+                            errorMessage += ` - HTTP ${error.status}: ${error.statusText}`;
+                        }
+
+                        alert(errorMessage + '\n\nData gagal disimpan ke sistem.');
+                        
+                    }
+                });
         }
       },
       error: (error) => {
@@ -462,40 +588,52 @@ export class OdometerComponent implements OnInit {
 
   // Function to process trip data to Epicor
   processDataToEpicor(tripNum: string) {
-    this.apiService.processTripData(tripNum).subscribe({
-      next: (response) => {
-        // alert('Data berhasil diproses ke sistem Epicor!');
-      },
-      error: (error) => {
-        let errorMessage = 'Gagal memproses data ke sistem Epicor';
+    return this.apiService.processTripData(tripNum);
+    // this.apiService.processTripData(tripNum).subscribe({
+    //   next: (response) => {
+    //     // alert('Data berhasil diproses ke sistem Epicor!');
+    //   },
+    //   error: (error) => {
+    //     let errorMessage = 'Gagal memproses data ke sistem Epicor';
 
-        if (error.status === 0) {
-          errorMessage += ' - Periksa koneksi internet.';
-        } else if (error.status === 400) {
-          errorMessage += ' - Data tidak valid untuk proses Epicor.';
-        } else if (error.status === 401) {
-          errorMessage += ' - Authentication gagal.';
-        } else if (error.status === 500) {
-          errorMessage += ' - Server error saat proses ke Epicor.';
-        } else {
-          errorMessage += ` - HTTP ${error.status}: ${error.statusText}`;
-        }
+    //     if (error.status === 0) {
+    //       errorMessage += ' - Periksa koneksi internet.';
+    //     } else if (error.status === 400) {
+    //       errorMessage += ' - Data tidak valid untuk proses Epicor.';
+    //     } else if (error.status === 401) {
+    //       errorMessage += ' - Authentication gagal.';
+    //     } else if (error.status === 500) {
+    //       errorMessage += ' - Server error saat proses ke Epicor.';
+    //     } else {
+    //       errorMessage += ` - HTTP ${error.status}: ${error.statusText}`;
+    //     }
 
-        alert(errorMessage + '\n\nData sudah tersimpan di staging table, tapi gagal diproses ke Epicor.');
-      }
-    });
+    //     alert(errorMessage + '\n\nData sudah tersimpan di staging table, tapi gagal diproses ke Epicor.');
+    //   }
+    // });
   }
 
   goBack() {
-    // if (this.tripType === 'OUT') {
-    //   this.router.navigate(['/checklist']);
-    // } else {
-    //   this.router.navigate(['/trip-selection']);
-    // }
-    this.router.navigate(['/scan-barcode']);
+    localStorage.removeItem('checklistData');
+    localStorage.removeItem('tripData');
+
+    if (this.tripType === 'OUT') {
+      this.router.navigate(['/checklist']);
+    } else {
+      this.router.navigate(['/scan-barcode']);
+    }
+    
   }
 
   logout() {
     this.authService.logout();
+  }
+
+  getAuthUser() {
+    try {
+      return JSON.parse(localStorage.getItem('smt_auth_user') || '{}');
+    } catch {
+      return {};
+    }
   }
 }

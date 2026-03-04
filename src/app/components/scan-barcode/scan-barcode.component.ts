@@ -21,11 +21,14 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   @ViewChild('videoElement', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
   
   barcodeInput: string = '';
+  customerName: string ='';
   manualTruckPlate: string = '';
+  newTruckPlate: string = '';
   spkOptions: string[] = [];
   spkDropdownOpen: boolean = false;
   spkSearchQuery: string = '';
   isLoadingSpk: boolean = false;
+  tripType: string = '';
 
   // Truck dropdown properties
   trucks: Truck[] = [];
@@ -38,6 +41,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   isLoadingTripData: boolean = false;
   errorMessage: string = '';
   errorTitle: string = '';
+  isOthers: boolean = false;
 
   private nopolSubject = new Subject<string>();
   private codeReader: BrowserMultiFormatReader;
@@ -56,19 +60,52 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+
+    // remove all to avoid bug
+    localStorage.removeItem('tripNumber');
+    localStorage.removeItem('currentTruckBarcode');
+    localStorage.removeItem('currentTripData');
+    localStorage.removeItem('tripData');
+    localStorage.removeItem('tripSummary');
+    localStorage.removeItem('customerName');
+    localStorage.removeItem('manualTruckPlate');
+    localStorage.removeItem('tripDriver');
+    localStorage.removeItem('checklistData');
+    localStorage.removeItem('newTruckPlate');
+
+
+
     this.checkCameraAvailability();
     this.loadTruckList();
+    this.tripType = localStorage.getItem('tripType') || '';
 
     // Debounce nopol input — tunggu 600ms setelah berhenti ketik baru panggil API
     this.nopolSubject.pipe(
       debounceTime(600),
       distinctUntilChanged()
     ).subscribe(nopol => {
-      if (nopol.length >= 4) {
+      const tripType = localStorage.getItem('tripType');
+      this.isOthers = ['LAINNYA', 'RELASI', 'TPF-CONT'].includes(nopol);
+      this.barcodeInput = '';
+      this.newTruckPlate = '';
+
+      // IN trip: No SPK needed for special nopols
+      if (tripType === 'IN' && this.isOthers) {
+        return;
+      }
+
+      // OUT trip: LAINNYA doesn't need SPK
+      if (tripType === 'OUT' && nopol === 'LAINNYA') {
+        return;
+      }
+
+      // RELASI and TPF-CONT: Try to get SPK from API
+      if ((nopol === 'RELASI' || nopol === 'TPF-CONT') && nopol.length >= 4) {
+        this.getAllTripDataFromAPI(nopol);
+      } else if (!this.isOthers && nopol.length >= 4) {
         this.getAllTripDataFromAPI(nopol);
       } else {
         this.spkOptions = [];
-        this.barcodeInput = '';
       }
     });
   }
@@ -276,10 +313,40 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    if (this.barcodeInput.trim()) {
-      this.getTripDataFromAPI(this.barcodeInput.trim());
+    const tripType = localStorage.getItem('tripType');
+
+    if(this.isOthers) {
+      if (!this.customerName.trim()) {
+        alert('Pastikan semua kolom sudah terisi.');
+        return;
+      }
+
+      // Set defaults if data does not exist from the getTripDataFromAPI method
+      console.log('manual truck plate scan barcode' + this.manualTruckPlate)
+      localStorage.setItem('customerName', this.customerName.trim());
+      localStorage.setItem('manualTruckPlate', this.manualTruckPlate.trim());
+      localStorage.setItem('newTruckPlate', this.newTruckPlate.trim());
+      localStorage.setItem('tripNumber', '-');
+
+      // If SPK is provided, validate and fetch data
+      if (this.barcodeInput.trim()) {
+        this.getTripDataFromAPI(this.barcodeInput.trim());
+        return;
+      }
+
+
+
+      if (tripType === 'OUT') {
+        this.router.navigate(['/checklist']);
+      } else {
+        this.router.navigate(['/odometer']);
+      }
     } else {
-      alert('Nomor SPK belum dipilih. Silakan scan barcode atau pilih nomor SPK secara manual.');
+      if (this.barcodeInput.trim()){
+        this.getTripDataFromAPI(this.barcodeInput.trim());
+      } else {
+        alert('Nomor SPK belum dipilih.');
+      }
     }
   }
 
@@ -324,6 +391,8 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  // setNopol
 
   onNopolChange(value: string) {
     this.manualTruckPlate = value.toUpperCase();
@@ -426,6 +495,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
   goBack() {
     this.stopScanning();
+    console.log('halo')
     this.router.navigate(['/trip-selection']);
   }
 
@@ -475,6 +545,12 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
     this.apiService.getTruckList(tripType).subscribe({
       next: (response) => {
         this.trucks = response.TruckData?.Result ?? [];
+
+        // this.trucks.push({
+        //   truckPlate: 'LAINNYA', 
+        //   truckDesc: 'Input Nopol Manual'
+        // } as Truck);
+
         this.trucksLoading = false;
       },
       error: () => {
@@ -499,11 +575,18 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   }
 
   selectTruck(truck: Truck) {
-    const plate = truck.truckPlate || truck.truckID;
+    const plate = truck.truckPlate || truck.truckID.toUpperCase();
     this.manualTruckPlate = plate;
+    console.log('manual truck plate' + this.manualTruckPlate)
     this.truckDropdownOpen = false;
     this.truckSearchQuery = '';
+    
     this.onNopolChange(plate);
+  }
+
+  getDisplayName(plate: string): string {
+    if (plate === 'TPF-CONT') return 'Vendor';
+    return plate;
   }
 
   @HostListener('document:click', ['$event'])
@@ -515,5 +598,25 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
     if (!target.closest('.nopol-custom-dropdown')) {
       this.truckDropdownOpen = false;
     }
+  }
+
+  onOthersNopolType(value: string) {
+
+    this.newTruckPlate = value.toUpperCase();
+
+  }
+
+  isValidIndonesianPlate(plate: string): boolean {
+    if (!plate || !plate.trim()) return false;
+    // Indonesian plate format: 1-2 letters + 1-4 digits + 1-3 letters
+    // Examples: B1234ABC, AB123CD, D456E
+    const plateRegex = /^[A-Z]{1,2}\s?\d{1,4}\s?[A-Z]{1,3}$/;
+    return plateRegex.test(plate.trim().toUpperCase());
+  }
+
+  onCustomerName(value: string) {
+
+    this.customerName = value.toUpperCase();
+
   }
 }

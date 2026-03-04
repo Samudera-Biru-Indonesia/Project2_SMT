@@ -29,7 +29,12 @@ export class ForceLoginComponent implements OnInit {
       return;
     }
 
-    await this.authService.forceLogin(site);
-    this.router.navigate(['/trip-selection']);
+    try {
+      await this.authService.forceLogin(site);
+      this.router.navigate(['/trip-selection']);
+    } catch (error) {
+      console.error('Force login failed:', error);
+      this.router.navigate(['/login']);
+    }
   }
 }

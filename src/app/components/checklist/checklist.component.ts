@@ -26,6 +26,9 @@ export class ChecklistComponent implements OnInit {
   tripNumber: string = '';
   plateNumber: string = '';
   tripDriver: string = '';
+  customerName: string = '';
+  manualTruckPlate: string = '';
+  newTruckPlate: string = '';
   
   checklistItems: ChecklistItem[] = [
     { id: 'chk1', label: 'Surat Jalan', checked: false, required: true },
@@ -39,24 +42,35 @@ export class ChecklistComponent implements OnInit {
     this.truckBarcode = localStorage.getItem('currentTruckBarcode') || '';
     this.tripType = localStorage.getItem('tripType') || '';
     this.tripNumber = localStorage.getItem('tripNumber') || '';
+    this.customerName = localStorage.getItem('customerName') || '';
+    this.manualTruckPlate = localStorage.getItem('manualTruckPlate') || '';
+    this.newTruckPlate = localStorage.getItem('newTruckPlate') || '';
+
     
     // Get plate number from trip data if available
-    const tripDataString = localStorage.getItem('currentTripData');
-    if (tripDataString) {
-      try {
-        const tripData = JSON.parse(tripDataString);
-        this.plateNumber = tripData?.truckPlate || 'N/A';
-        this.tripDriver = tripData?.driver || 'N/A';
-      } catch (error) {
-        this.plateNumber = 'N/A';
-        this.tripDriver = 'N/A';
-      }
+    if (this.manualTruckPlate === 'LAINNYA' || this.manualTruckPlate === 'RELASI' || this.manualTruckPlate === 'TPF-CONT') {
+      this.plateNumber = this.newTruckPlate;
     } else {
-      this.plateNumber = 'N/A';
-      this.tripDriver = 'N/A';
+    const tripDataString = localStorage.getItem('currentTripData');
+      if (tripDataString) {
+        try {
+          const tripData = JSON.parse(tripDataString);
+          this.plateNumber = tripData?.truckPlate;
+          this.tripDriver = tripData?.driver || '-';
+        } catch (error) {
+          this.plateNumber = '';
+          this.tripDriver = '-';
+        }
+      } else {
+        this.plateNumber = '';
+        this.tripDriver = '-';
+      }
     }
     
-    if (!this.truckBarcode || this.tripType !== 'OUT') {
+    if ((this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'RELASI' && this.manualTruckPlate !== 'TPF-CONT' && !this.truckBarcode) || this.tripType !== 'OUT') {
+      console.log('manual truck plate' + this.manualTruckPlate)
+      console.log('truck barcode' + this.truckBarcode)
+      console.log(this.tripType)
       this.router.navigate(['/trip-selection']);
     }
   }
@@ -100,6 +114,15 @@ export class ChecklistComponent implements OnInit {
   }
 
   goBack() {
+
+    localStorage.removeItem('currentTruckBarcode');
+    localStorage.removeItem('tripNumber');
+    localStorage.removeItem('currentTripData');
+    localStorage.removeItem('customerName');
+    localStorage.removeItem('manualTruckPlate');
+    localStorage.removeItem('newTruckPlate');
+
+
     this.router.navigate(['/scan-barcode']);
   }
 

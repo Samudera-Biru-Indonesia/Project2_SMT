@@ -10,19 +10,37 @@
     <div class="odometer-card" [class]="tripType.toLowerCase() + '-trip'">
       <!-- Trip Header Info -->
       <div class="trip-header-info">
-        <div class="trip-number-display">
-          <span class="trip-label">Nomor SPK:</span>
-          <span class="trip-value">{{ tripNumber }}</span>
-        </div>
+        @if(manualTruckPlate === 'LAINNYA' || manualTruckPlate === 'RELASI' || manualTruckPlate === 'TPF-CONT') {
+          <div class="trip-number-display">
+            <span class="trip-label">Nama Perusahaan:</span>
+            <span class="trip-value">{{ customerName }}</span>
+          </div>
+        }
+        
         <div class="plate-number-display">
           <span class="plate-label">Plat Nomor:</span>
-          <span class="plate-value">{{ plateNumber }}</span>
+          <span class="plate-value">{{ plateNumber || newTruckPlate }}</span>
         </div>
-        <div class="driver-display">
-          <span class="driver-label">Driver:</span>
-          <span class="driver-value">{{ tripDriver || '-' }}</span>
-        </div>
+
+        @if((manualTruckPlate === 'TPF-CONT' || manualTruckPlate === 'RELASI') && tripType === 'OUT') {
+          <div class="trip-number-display">
+            <span class="trip-label">Nomor SPK:</span>
+            <span class="trip-value">{{ tripNumber }}</span>
+          </div>
+        }
+
+        @if(manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI' && manualTruckPlate !== 'TPF-CONT') {
+          <div class="trip-number-display">
+            <span class="trip-label">Nomor SPK:</span>
+            <span class="trip-value">{{ tripNumber }}</span>
+          </div>
+          <div class="driver-display">
+            <span class="driver-label">Driver:</span>
+            <span class="driver-value">{{ tripDriver || '-' }}</span>
+          </div>
+        }
       </div>
+      
 
       <!-- Order Details (hanya OUT trip) -->
       <div class="order-details-section" *ngIf="tripType === 'OUT' && orderDetails.length > 0">
@@ -55,129 +73,314 @@
 
       <form (ngSubmit)="onSubmit()" class="odometer-form">
         <div class="form-section">
-          <div class="form-group">
-            <label for="odometer" class="required" style="margin-right:10px;">Pembacaan Odometer (KM)</label>
-            @if (tripType === 'IN') {
-              <label style="color:#616161;">
-                Odometer sebelumnya adalah 
-                @if (odometerFromDb) {
-                  {{ odometerFromDb }} km.
-                } @else {
-                  <b>tidak diketahui.</b>
-                }
-              </label>
-            }
+          
+          <!-- Regular trucks: Show all fields -->
+          @if (manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI' && manualTruckPlate !== 'TPF-CONT') {
+            <div class="form-group">
+              <label for="odometer" class="required" style="margin-right:10px;">Pembacaan Odometer (KM)</label>
+              @if (tripType === 'IN') {
+                <label style="color:#616161;">
+                  Odometer sebelumnya adalah 
+                  @if (odometerFromDb) {
+                    {{ odometerFromDb }} km.
+                  } @else {
+                    <b>tidak diketahui.</b>
+                  }
+                </label>
+              }
+              
+              <input
+                type="number"
+                id="odometer"
+                [(ngModel)]="odometerReading"
+                (ngModelChange)="onOdometerChange()"
+                name="odometerReading"
+                placeholder="Masukkan pembacaan odometer saat ini"
+                class="odometer-input"
+                [class.input-error]="isOdometerWrong || odometerMismatchWarning"
+                min="0"
+                step="0.1"
+                required
+                autocomplete="off"
+              />
+              <div class="muatan-warning" *ngIf="odometerMismatchWarning && !showOdometerWarning">
+                Odometer lebih kecil dari saat keluar. <br>
+                Saat keluar: <b>{{ odometerFromDb }} km</b>
+                <br>
+                Nilai Anda: <b>{{ odometerReading }} km</b>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="required">Foto Odometer</label>
+              <div class="photo-section">
+                <div class="photo-actions">
+                  <label class="photo-btn camera-btn" style="color: white;">
+                    Kamera
+                    <input type="file" accept="image/*" multiple (change)="onPhotoSelected($event, 'odometer')" hidden />
+                  </label>
+                </div>
+                
+                <div class="photo-preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                  <div *ngFor="let photo of odometerPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                    <img [src]="photo" class="photo-preview" style="max-width: 120px; border-radius: 8px; object-fit: cover;" />
+                    <button type="button" class="remove-badge" (click)="removePhoto('odometer', i)">×</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="required">Foto Muatan</label>
+              <div class="photo-section">
+                <div class="photo-actions">
+                  <label class="photo-btn camera-btn" style="color: white;">
+                    Kamera
+                    <input type="file" accept="image/*" multiple capture="environment" (change)="onPhotoSelected($event, 'cargo')" hidden />
+                  </label>
+                </div>
+                
+                <div class="photo-preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                  <div *ngFor="let photo of cargoPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                    <img [src]="photo" class="photo-preview" style="max-width: 120px; border-radius: 8px; object-fit: cover;" />
+                    <button type="button" class="remove-badge" (click)="removePhoto('cargo', i)">×</button>
+                  </div>
+                </div>
+              </div>
+            </div>
             
-            <input
-              type="number"
-              id="odometer"
-              [(ngModel)]="odometerReading"
-              (ngModelChange)="onOdometerChange()"
-              name="odometerReading"
-              placeholder="Masukkan pembacaan odometer saat ini"
-              class="odometer-input"
-              [class.input-error]="isOdometerWrong || odometerMismatchWarning"
-              min="0"
-              step="0.1"
-              required
-              autocomplete="off"
-            />
-            <div class="muatan-warning" *ngIf="odometerMismatchWarning && !showOdometerWarning">
-              Odometer lebih kecil dari saat keluar. <br>
-              Saat keluar: <b>{{ odometerFromDb }} km</b>
-              <br>
-              Nilai Anda: <b>{{ odometerReading }} km</b>
-            </div>
-          </div>
-
-          <!-- Foto Odometer -->
-          <div class="form-group">
-            <label class="required">Foto Odometer</label>
-            <div class="photo-section">
-              <div class="photo-actions">
-                <label class="photo-btn camera-btn" style="color: white;">
-                  Kamera
-                  <input type="file" accept="image/*" multiple (change)="onPhotoSelected($event, 'odometer')" hidden />
-                </label>
-              </div>
+            <div class="form-group">
               
-              <div class="photo-preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-                <div *ngFor="let photo of odometerPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                  <img [src]="photo" class="photo-preview" style="max-width: 120px; border-radius: 8px; object-fit: cover;" />
-                  <!-- <button type="button" class="remove-photo-btn" style="width: 100%; padding: 4px;" (click)="removePhoto('odometer', i)">Hapus</button> -->
-                  <button type="button" class="remove-badge" (click)="removePhoto('odometer', i)">×</button>
+              <label for="jumlah-muatan" class="required">
+                Jumlah Muatan:
+                <span class="expected-muatan" *ngIf="muatanType === 'CYLINDER' && expectedMuatan !== null">
+                  (Sistem: {{ expectedMuatan }} cylinder)
+                </span> 
+              </label>
+              <input
+                type="number"
+                id="jumlah-muatan"
+                [(ngModel)]="jumlahMuatan"
+                (ngModelChange)="onMuatanChange()"
+                name="jumlahMuatan"
+                placeholder="Masukkan hasil perhitungan jumlah muatan"
+                class="odometer-input"
+                [class.input-error]="muatanMismatchWarning || showMuatanLowWarning"
+                min="0"
+                step="0.1"
+                required
+                autocomplete="off"
+              />
+              <div class="muatan-warning" *ngIf="muatanMismatchWarning && !showMuatanLowWarning">
+                Jumlah muatan tidak sesuai dengan sistem. <br>
+                Di sistem: <b>{{ expectedMuatan }}</b> cylinder
+                <br>
+                Nilai Anda: <b>{{ jumlahMuatan }}</b> cylinder
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="notes" [class.required]="muatanMismatchWarning">
+                Catatan Tambahan
+                <span *ngIf="!muatanMismatchWarning" style="font-weight:400; color:#6c757d;"> (Opsional)</span>
+                <span *ngIf="muatanMismatchWarning" style="font-weight:400; color:#dc3545;"> — wajib diisi jika muatan berbeda</span>
+              </label>
+              <textarea
+                id="notes"
+                [(ngModel)]="notes"
+                name="notes"
+                placeholder="Masukkan catatan atau pengamatan tambahan"
+                class="textarea-input"
+                [class.input-error]="muatanMismatchWarning && !notes"
+                rows="4"
+                autocomplete="off"
+              ></textarea>
+            </div>
+          }
+
+          <!-- RELASI (masuk/keluar): jumlah muatan + foto muatan -->
+          @if (manualTruckPlate === 'RELASI') {
+            <div class="form-group">
+              <label for="jumlah-muatan" class="required">
+                Jumlah Muatan:
+                <span class="expected-muatan" *ngIf="tripType === 'OUT' && muatanType === 'CYLINDER' && expectedMuatan !== null">
+                  (Sistem: {{ expectedMuatan }} cylinder)
+                </span>
+              </label>
+              <input
+                type="number"
+                id="jumlah-muatan"
+                [(ngModel)]="jumlahMuatan"
+                (ngModelChange)="onMuatanChange()"
+                name="jumlahMuatan"
+                placeholder="Masukkan hasil perhitungan jumlah muatan"
+                class="odometer-input"
+                [class.input-error]="tripType === 'OUT' && muatanMismatchWarning"
+                min="0"
+                step="0.1"
+                required
+                autocomplete="off"
+              />
+              <div class="muatan-warning" *ngIf="tripType === 'OUT' && muatanMismatchWarning && !showMuatanLowWarning">
+                Jumlah muatan tidak sesuai dengan sistem. <br>
+                Di sistem: <b>{{ expectedMuatan }}</b> cylinder
+                <br>
+                Nilai Anda: <b>{{ jumlahMuatan }}</b> cylinder
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="required">Foto Muatan</label>
+              <div class="photo-section">
+                <div class="photo-actions">
+                  <label class="photo-btn camera-btn" style="color: white;">
+                    Kamera
+                    <input type="file" accept="image/*" multiple capture="environment" (change)="onPhotoSelected($event, 'cargo')" hidden />
+                  </label>
+                </div>
+                
+                <div class="photo-preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                  <div *ngFor="let photo of cargoPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                    <img [src]="photo" class="photo-preview" style="max-width: 120px; border-radius: 8px; object-fit: cover;" />
+                    <button type="button" class="remove-badge" (click)="removePhoto('cargo', i)">×</button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Foto Muatan -->
-          <div class="form-group">
-            <label class="required">Foto Muatan</label>
-            <div class="photo-section">
-              <div class="photo-actions">
-                <label class="photo-btn camera-btn" style="color: white;">
-                  Kamera
-                  <input type="file" accept="image/*" multiple capture="environment" (change)="onPhotoSelected($event, 'cargo')" hidden />
-                </label>
-              </div>
-              
-              <div class="photo-preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-                <div *ngFor="let photo of cargoPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                  <img [src]="photo" class="photo-preview" style="max-width: 120px; border-radius: 8px; object-fit: cover;" />
-                  <!-- <button type="button" class="remove-photo-btn" style="width: 100%; padding: 4px;" (click)="removePhoto('cargo', i)">Hapus</button> -->
-                  <button type="button" class="remove-badge" (click)="removePhoto('cargo', i)">×</button>
+            <div class="form-group" *ngIf="tripType === 'OUT'">
+              <label for="notes" [class.required]="muatanMismatchWarning">
+                Catatan Tambahan
+                <span *ngIf="!muatanMismatchWarning" style="font-weight:400; color:#6c757d;"> (Opsional)</span>
+                <span *ngIf="muatanMismatchWarning" style="font-weight:400; color:#dc3545;"> — wajib diisi jika muatan berbeda</span>
+              </label>
+              <textarea
+                id="notes"
+                [(ngModel)]="notes"
+                name="notes"
+                placeholder="Masukkan catatan atau pengamatan tambahan"
+                class="textarea-input"
+                [class.input-error]="muatanMismatchWarning && !notes"
+                rows="4"
+                autocomplete="off"
+              ></textarea>
+            </div>
+          }
+
+          <!-- LAINNYA (masuk/keluar): foto mobil -->
+          @if (manualTruckPlate === 'LAINNYA') {
+            <div class="form-group">
+              <label class="required">Foto Mobil</label>
+              <div class="photo-section">
+                <div class="photo-actions">
+                  <label class="photo-btn camera-btn" style="color: white;">
+                    Kamera
+                    <input type="file" accept="image/*" multiple capture="environment" (change)="onPhotoSelected($event, 'car')" hidden />
+                  </label>
+                </div>
+                
+                <div class="photo-preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                  <div *ngFor="let photo of carPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                    <img [src]="photo" class="photo-preview" style="max-width: 120px; border-radius: 8px; object-fit: cover;" />
+                    <button type="button" class="remove-badge" (click)="removePhoto('car', i)">×</button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          }
 
-          <div class="form-group">
-            <label for="jumlah-muatan" class="required">
-              Jumlah Muatan:
-              <span class="expected-muatan" *ngIf="muatanType === 'CYLINDER' && expectedMuatan !== null">
-                (Sistem: {{ expectedMuatan }} cylinder)
-              </span>
-            </label>
-            <input
-              type="number"
-              id="jumlah-muatan"
-              [(ngModel)]="jumlahMuatan"
-              (ngModelChange)="onMuatanChange()"
-              name="jumlahMuatan"
-              placeholder="Masukkan hasil perhitungan jumlah muatan"
-              class="odometer-input"
-              [class.input-error]="muatanMismatchWarning || showMuatanLowWarning"
-              min="0"
-              step="0.1"
-              required
-              autocomplete="off"
-            />
-            <div class="muatan-warning" *ngIf="muatanMismatchWarning && !showMuatanLowWarning">
-              Jumlah muatan tidak sesuai dengan sistem. <br>
-              Di sistem: <b>{{ expectedMuatan }}</b> cylinder
-              <br>
-              Nilai Anda: <b>{{ jumlahMuatan }}</b> cylinder
+          <!-- VENDOR/TPF-CONT (keluar): jumlah muatan + foto muatan -->
+          @if (manualTruckPlate === 'TPF-CONT' && tripType === 'OUT') {
+            <div class="form-group">
+              <label for="jumlah-muatan" class="required">
+                Jumlah Muatan:
+                <span class="expected-muatan" *ngIf="muatanType === 'CYLINDER' && expectedMuatan !== null">
+                  (Sistem: {{ expectedMuatan }} cylinder)
+                </span>
+              </label>
+              <input
+                type="number"
+                id="jumlah-muatan"
+                [(ngModel)]="jumlahMuatan"
+                (ngModelChange)="onMuatanChange()"
+                name="jumlahMuatan"
+                placeholder="Masukkan hasil perhitungan jumlah muatan"
+                class="odometer-input"
+                [class.input-error]="muatanMismatchWarning"
+                min="0"
+                step="0.1"
+                required
+                autocomplete="off"
+              />
+              <div class="muatan-warning" *ngIf="muatanMismatchWarning && !showMuatanLowWarning">
+                Jumlah muatan tidak sesuai dengan sistem. <br>
+                Di sistem: <b>{{ expectedMuatan }}</b> cylinder
+                <br>
+                Nilai Anda: <b>{{ jumlahMuatan }}</b> cylinder
+              </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label for="notes" [class.required]="muatanMismatchWarning">
-              Catatan Tambahan
-              <span *ngIf="!muatanMismatchWarning" style="font-weight:400; color:#6c757d;"> (Opsional)</span>
-              <span *ngIf="muatanMismatchWarning" style="font-weight:400; color:#dc3545;"> — wajib diisi jika muatan berbeda</span>
-            </label>
-            <textarea
-              id="notes"
-              [(ngModel)]="notes"
-              name="notes"
-              placeholder="Masukkan catatan atau pengamatan tambahan"
-              class="textarea-input"
-              [class.input-error]="muatanMismatchWarning && !notes"
-              rows="4"
-              autocomplete="off"
-            ></textarea>
-          </div>
+
+            <div class="form-group">
+              <label class="required">Foto Muatan</label>
+              <div class="photo-section">
+                <div class="photo-actions">
+                  <label class="photo-btn camera-btn" style="color: white;">
+                    Kamera
+                    <input type="file" accept="image/*" multiple capture="environment" (change)="onPhotoSelected($event, 'cargo')" hidden />
+                  </label>
+                </div>
+                
+                <div class="photo-preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                  <div *ngFor="let photo of cargoPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                    <img [src]="photo" class="photo-preview" style="max-width: 120px; border-radius: 8px; object-fit: cover;" />
+                    <button type="button" class="remove-badge" (click)="removePhoto('cargo', i)">×</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="notes" [class.required]="muatanMismatchWarning">
+                Catatan Tambahan
+                <span *ngIf="!muatanMismatchWarning" style="font-weight:400; color:#6c757d;"> (Opsional)</span>
+                <span *ngIf="muatanMismatchWarning" style="font-weight:400; color:#dc3545;"> — wajib diisi jika muatan berbeda</span>
+              </label>
+              <textarea
+                id="notes"
+                [(ngModel)]="notes"
+                name="notes"
+                placeholder="Masukkan catatan atau pengamatan tambahan"
+                class="textarea-input"
+                [class.input-error]="muatanMismatchWarning && !notes"
+                rows="4"
+                autocomplete="off"
+              ></textarea>
+            </div>
+          }
+
+          <!-- VENDOR/TPF-CONT (masuk): foto mobil -->
+          @if (manualTruckPlate === 'TPF-CONT' && tripType === 'IN') {
+            <div class="form-group">
+              <label class="required">Foto Mobil</label>
+              <div class="photo-section">
+                <div class="photo-actions">
+                  <label class="photo-btn camera-btn" style="color: white;">
+                    Kamera
+                    <input type="file" accept="image/*" multiple capture="environment" (change)="onPhotoSelected($event, 'car')" hidden />
+                  </label>
+                </div>
+                
+                <div class="photo-preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                  <div *ngFor="let photo of carPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                    <img [src]="photo" class="photo-preview" style="max-width: 120px; border-radius: 8px; object-fit: cover;" />
+                    <button type="button" class="remove-badge" (click)="removePhoto('car', i)">×</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
         </div>
 
         <div class="photo-upload-warning" *ngIf="photoUploadWarning">
@@ -250,4 +453,28 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal: Summary Confirmation -->
+  <!-- <div class="modal-overlay" *ngIf="showSummaryModal">
+    <div class="modal-alert">
+      <div class="modal-icon">📋</div>
+      <h3 class="modal-title">Konfirmasi Data Perjalanan</h3>
+      <div class="modal-message" style="text-align: left;">
+        <p><strong>Nomor SPK:</strong> {{ tripNumber }}</p>
+        <p><strong>Driver:</strong> {{ tripDriver || '-' }}</p>
+        @if (odometerReading) {
+          <p><strong>Odometer:</strong> {{ odometerReading }}km</p>
+        }
+
+        @if (jumlahMuatan) {
+          <p><strong>Jumlah Muatan:</strong> {{ jumlahMuatan }} cylinder</p>
+        }
+        <p><strong>Diinput oleh:</strong> {{ getAuthUser().fullName || '-' }} ({{ getAuthUser().empCode || '-' }})</p>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" (click)="cancelSubmit()">Batal</button>
+        <button class="modal-btn modal-btn-confirm" (click)="confirmSubmit()">Konfirmasi & Kirim</button>
+      </div>
+    </div>
+  </div> -->
 </div>

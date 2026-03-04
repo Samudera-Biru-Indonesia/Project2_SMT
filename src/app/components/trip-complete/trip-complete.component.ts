@@ -15,25 +15,32 @@ export class TripCompleteComponent implements OnInit {
   plateNumber: string = '';
   truckBarcode: string = '';
   tripType: string = '';
+  tripDriver: string = '';
+  jumlahMuatan: number = 0;
+  odometer: number = 0;
+  fullName: string = '';
+  empCode: string = '';
+  customerName: string = '';
   
   constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit() {
-    this.tripNumber = localStorage.getItem('tripNumber') || 'N/A';
-    this.truckBarcode = localStorage.getItem('currentTruckBarcode') || 'N/A';
-    this.tripType = localStorage.getItem('tripType') || 'N/A';
-    
-    // Get plate number from trip data if available
-    const tripDataString = localStorage.getItem('currentTripData');
-    if (tripDataString) {
+    const summaryDataString = localStorage.getItem('tripSummary');
+    if (summaryDataString) {
       try {
-        const tripData = JSON.parse(tripDataString);
-        this.plateNumber = tripData?.truckPlate || 'N/A';
+        const summaryData = JSON.parse(summaryDataString);
+        this.tripNumber = summaryData.tripNumber || 'N/A';
+        this.tripDriver = summaryData.tripDriver || 'N/A';
+        this.jumlahMuatan = summaryData.jumlahMuatan || 0;
+        this.odometer = summaryData.odometer || 0;
+        this.fullName = summaryData.fullName || 'N/A';
+        this.empCode = summaryData.empCode || 'N/A';
+        this.tripType = summaryData.tripType || 'N/A';
+        this.plateNumber = summaryData.plateNumber || 'N/A';
+        this.customerName = summaryData.customerName || '';
       } catch (error) {
-        this.plateNumber = 'N/A';
+        this.tripNumber = 'N/A';
       }
-    } else {
-      this.plateNumber = 'N/A';
     }
   }
 
@@ -44,6 +51,12 @@ export class TripCompleteComponent implements OnInit {
     localStorage.removeItem('currentTruckBarcode');
     localStorage.removeItem('currentTripData');
     localStorage.removeItem('tripData');
+    localStorage.removeItem('tripSummary');
+    localStorage.removeItem('customerName');
+    localStorage.removeItem('manualTruckPlate');
+    localStorage.removeItem('tripDriver');
+    localStorage.removeItem('checklistData');
+    localStorage.removeItem('newTruckPlate');
     
     this.router.navigate(['/trip-selection']);
   }

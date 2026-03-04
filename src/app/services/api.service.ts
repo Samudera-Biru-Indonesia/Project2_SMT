@@ -15,6 +15,12 @@ export interface TripData {
   note: string;
   tripDriver: string;
   jumlahMuatan?: number;
+  manualTruckPlate?: string;
+  companyName?: string;
+  fullName?: string;
+  empCode?: string;
+  // odometerFromDb?: number;
+  expectedMuatan?: number;
 }
 
 export interface TripInfo {
@@ -162,7 +168,13 @@ export class ApiService {
       chk2: Boolean(data.chk2),
       tripNum: String(data.tripNum || ''),
       note: String(data.note || ''),
-      jumlahMuatan: Number(data.jumlahMuatan) || 0
+      jumlahMuatan: Number(data.jumlahMuatan) || 0,
+      manualTruckPlate: String(data.manualTruckPlate || ''),
+      companyName: String(data.companyName || ''),
+      fullName: String(data.fullName || ''),
+      empCode: String(data.empCode || ''),
+      // odometerFromDb: Number(data.odometerFromDb) || 0,
+      expectedMuatan: Number(data.expectedMuatan) || 0
     };
 
     return this.http.post(url, requestData, { headers });
@@ -343,7 +355,7 @@ export class ApiService {
     return this.http.post<GetOrderDetailsResponse>(url, body, { headers });
   }
 
-  uploadPhotos(tripNum: string, odometerPhotos: string[], cargoPhotos: string[], condition: string): Observable<any> {
+  uploadPhotos(tripNum: string, odometerPhotos: string[], cargoPhotos: string[], carPhotos: string[], condition: string): Observable<any> {
     // Check JWT expiration before making the call
     this.checkJwtAndLogoutIfExpired();
 
@@ -359,7 +371,8 @@ export class ApiService {
     const body = { 
         tripNum, 
         odometerPhotos, 
-        cargoPhotos, 
+        cargoPhotos,
+        carPhotos,
         condition 
     };
 

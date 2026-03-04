@@ -8,16 +8,50 @@
         <p>Data perjalanan Anda telah dicatat dan disimpan.</p>
       </div>
 
+      <!-- Trip Summary Info -->
+      <div class="trip-summary-info">
+        <h3>📋 Ringkasan Perjalanan</h3>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <span class="summary-label">Nomor SPK:</span>
+            <span class="summary-value">{{ tripNumber }}</span>
+          </div>
+          <div class="summary-item" *ngIf="customerName">
+            <span class="summary-label">Nama Perusahaan:</span>
+            <span class="summary-value">{{ customerName }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Plat Nomor:</span>
+            <span class="summary-value">{{ plateNumber }}</span>
+          </div>
+          <div class="summary-item" *ngIf="tripDriver && tripDriver !== 'N/A'">
+            <span class="summary-label">Driver:</span>
+            <span class="summary-value">{{ tripDriver }}</span>
+          </div>
+          <div class="summary-item" *ngIf="odometer > 0">
+            <span class="summary-label">Odometer:</span>
+            <span class="summary-value">{{ odometer }} km</span>
+          </div>
+          <div class="summary-item" *ngIf="jumlahMuatan > 0">
+            <span class="summary-label">Jumlah Muatan:</span>
+            <span class="summary-value">{{ jumlahMuatan }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Diinput oleh:</span>
+            <span class="summary-value">{{ fullName }} ({{ empCode }})</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Jenis Trip:</span>
+            <span class="summary-value trip-type" [class]="tripType.toLowerCase()">{{ tripType }}</span>
+          </div>
+        </div>
+      </div>
+
       <div class="actions-section">
         <button class="action-btn primary" (click)="startNewTrip()">
           <span class="icon">📱</span>
           Mulai Perjalanan Baru
         </button>
-        
-        <!-- <button class="action-btn secondary" (click)="goToLanding()">
-          <span class="icon">🏠</span>
-          Kembali ke Dashboard
-        </button> -->
       </div>
     </div>
   </main>
