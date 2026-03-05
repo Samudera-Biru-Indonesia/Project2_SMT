@@ -81,7 +81,7 @@ export class OdometerComponent implements OnInit {
     }
 
     // Get plate number from trip data if available
-    if (this.manualTruckPlate === 'LAINNYA' || this.manualTruckPlate === 'RELASI' || this.manualTruckPlate === 'TPF-CONT') {
+    if (this.manualTruckPlate === 'LAINNYA' || this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
       this.plateNumber = this.newTruckPlate || '-';
     } else {
       const tripDataString = localStorage.getItem('currentTripData');
@@ -104,8 +104,9 @@ export class OdometerComponent implements OnInit {
 
     const isBarcodeExempt = 
       this.manualTruckPlate === 'LAINNYA' || 
-      this.manualTruckPlate === 'RELASI' || 
-      this.manualTruckPlate === 'TPF-CONT';
+      // this.manualTruckPlate === 'RELASI' || 
+      // this.manualTruckPlate === 'TPF-CONT';
+      this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI';
 
 
       console.log('Current trip type:', this.tripType);
@@ -163,7 +164,7 @@ export class OdometerComponent implements OnInit {
 
           if (matchingTrip) {
             this.odometerFromDb = matchingTrip.Odometer;
-          } else if (!(this.manualTruckPlate === 'TPF-CONT' || this.manualTruckPlate === 'RELASI' || this.manualTruckPlate === 'LAINNYA')) {
+          } else if (!(this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' || this.manualTruckPlate === 'LAINNYA')) {
             alert('Gagal mengambil data odometer, gunakan surat jalan sebagai referensi odometer.');
           }
         },
@@ -276,7 +277,7 @@ export class OdometerComponent implements OnInit {
   }
 
   onSubmit() {
-    const isSpecialTruck = ['LAINNYA', 'RELASI', 'TPF-CONT'].includes(this.manualTruckPlate);
+    const isSpecialTruck = ['LAINNYA', 'RELASI/VENDOR/EKSPEDISI'].includes(this.manualTruckPlate);
 
     // Validation for regular trucks
     if (!isSpecialTruck) {
@@ -350,7 +351,7 @@ export class OdometerComponent implements OnInit {
     }
 
     // Validation for RELASI (masuk/keluar): jumlah muatan + foto muatan
-    if (this.manualTruckPlate === 'RELASI') {
+    if (this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
       if (!this.jumlahMuatan) {
         alert('Jumlah muatan belum diisi.');
         return;
@@ -375,14 +376,14 @@ export class OdometerComponent implements OnInit {
       }
     }
 
-    // Validation for VENDOR (keluar): jumlah muatan + foto muatan
-    if (this.manualTruckPlate === 'TPF-CONT' && this.tripType === 'OUT') {
+    // Validation for VENDOR (keluar): jumlah muatan + foto muatan & mobil
+    if (this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && this.tripType === 'OUT') {
       if (!this.jumlahMuatan) {
         alert('Jumlah muatan belum diisi.');
         return;
       }
       if (this.cargoPhotos.length === 0) {
-        alert('Foto muatan wajib diambil sebelum melanjutkan.');
+        alert('Foto mobil & muatan wajib diambil sebelum melanjutkan.');
         return;
       }
       
@@ -394,12 +395,12 @@ export class OdometerComponent implements OnInit {
     }
 
     // Validation for VENDOR (masuk): foto mobil
-    if (this.manualTruckPlate === 'TPF-CONT' && this.tripType === 'IN') {
-      if (this.carPhotos.length === 0) {
-        alert('Foto mobil wajib diambil sebelum melanjutkan.');
-        return;
-      }
-    }
+    // if (this.manualTruckPlate === 'TPF-CONT' && this.tripType === 'IN') {
+    //   if (this.carPhotos.length === 0) {
+    //     alert('Foto mobil wajib diambil sebelum melanjutkan.');
+    //     return;
+    //   }
+    // }
 
     // Proceed to final submission
     this.finalSubmit();

@@ -10,7 +10,7 @@
     <div class="checklist-card out-trip">
       <!-- Trip Header Info -->
       <div class="trip-header-info">
-        @if(manualTruckPlate === 'LAINNYA' || manualTruckPlate === 'RELASI' || manualTruckPlate === 'TPF-CONT') {
+        @if(manualTruckPlate === 'LAINNYA' || manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
           <div class="trip-number-display">
             <span class="trip-label">Nama Perusahaan:</span>
             <span class="trip-value">{{ customerName }}</span>
@@ -19,17 +19,17 @@
         
         <div class="plate-number-display">
           <span class="plate-label">Plat Nomor:</span>
-          <span class="plate-value">{{ plateNumber || newTruckPlate || 'N/A' }}</span>
+          <span class="plate-value">{{ plateNumber || newTruckPlate || '-' }}</span>
         </div>
 
-        @if((manualTruckPlate === 'TPF-CONT' || manualTruckPlate === 'RELASI') && tripType === 'OUT') {
+        @if((manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') && tripType === 'OUT') {
           <div class="trip-number-display">
             <span class="trip-label">Nomor SPK:</span>
-            <span class="trip-value">{{ tripNumber || 'N/A' }}</span>
+            <span class="trip-value">{{ tripNumber || '-' }}</span>
           </div>
         }
         
-        @if(manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI' && manualTruckPlate !== 'TPF-CONT') {
+        @if(manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI') {
           <div class="trip-number-display">
             <span class="trip-label">Nomor SPK:</span>
             <span class="trip-value">{{ tripNumber }}</span>

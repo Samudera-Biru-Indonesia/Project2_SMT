@@ -10,7 +10,7 @@
     <div class="odometer-card" [class]="tripType.toLowerCase() + '-trip'">
       <!-- Trip Header Info -->
       <div class="trip-header-info">
-        @if(manualTruckPlate === 'LAINNYA' || manualTruckPlate === 'RELASI' || manualTruckPlate === 'TPF-CONT') {
+        @if(manualTruckPlate === 'LAINNYA' || manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
           <div class="trip-number-display">
             <span class="trip-label">Nama Perusahaan:</span>
             <span class="trip-value">{{ customerName }}</span>
@@ -22,14 +22,14 @@
           <span class="plate-value">{{ plateNumber || newTruckPlate }}</span>
         </div>
 
-        @if((manualTruckPlate === 'TPF-CONT' || manualTruckPlate === 'RELASI') && tripType === 'OUT') {
+        @if((manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') && tripType === 'OUT') {
           <div class="trip-number-display">
             <span class="trip-label">Nomor SPK:</span>
             <span class="trip-value">{{ tripNumber }}</span>
           </div>
         }
 
-        @if(manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI' && manualTruckPlate !== 'TPF-CONT') {
+        @if(manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI') {
           <div class="trip-number-display">
             <span class="trip-label">Nomor SPK:</span>
             <span class="trip-value">{{ tripNumber }}</span>
@@ -75,7 +75,7 @@
         <div class="form-section">
           
           <!-- Regular trucks: Show all fields -->
-          @if (manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI' && manualTruckPlate !== 'TPF-CONT') {
+          @if (manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI') {
             <div class="form-group">
               <label for="odometer" class="required" style="margin-right:10px;">Pembacaan Odometer (KM)</label>
               @if (tripType === 'IN') {
@@ -199,7 +199,7 @@
           }
 
           <!-- RELASI (masuk/keluar): jumlah muatan + foto muatan -->
-          @if (manualTruckPlate === 'RELASI') {
+          <!-- @if (manualTruckPlate === 'RELASI') {
             <div class="form-group">
               <label for="jumlah-muatan" class="required">
                 Jumlah Muatan:
@@ -265,7 +265,7 @@
                 autocomplete="off"
               ></textarea>
             </div>
-          }
+          } -->
 
           <!-- LAINNYA (masuk/keluar): foto mobil -->
           @if (manualTruckPlate === 'LAINNYA') {
@@ -289,8 +289,8 @@
             </div>
           }
 
-          <!-- VENDOR/TPF-CONT (keluar): jumlah muatan + foto muatan -->
-          @if (manualTruckPlate === 'TPF-CONT' && tripType === 'OUT') {
+          <!-- RELASI/VENDOR/EKSPEDISI (keluar): jumlah muatan + foto muatan -->
+          @if (manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && tripType === 'OUT') {
             <div class="form-group">
               <label for="jumlah-muatan" class="required">
                 Jumlah Muatan:
@@ -359,8 +359,8 @@
             </div>
           }
 
-          <!-- VENDOR/TPF-CONT (masuk): foto mobil -->
-          @if (manualTruckPlate === 'TPF-CONT' && tripType === 'IN') {
+          <!-- RELASI/VENDOR/EKSPEDISI (masuk): foto mobil -->
+          @if (manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && tripType === 'IN') {
             <div class="form-group">
               <label class="required">Foto Mobil</label>
               <div class="photo-section">

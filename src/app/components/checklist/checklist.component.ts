@@ -48,7 +48,7 @@ export class ChecklistComponent implements OnInit {
 
     
     // Get plate number from trip data if available
-    if (this.manualTruckPlate === 'LAINNYA' || this.manualTruckPlate === 'RELASI' || this.manualTruckPlate === 'TPF-CONT') {
+    if (this.manualTruckPlate === 'LAINNYA' || this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
       this.plateNumber = this.newTruckPlate;
     } else {
     const tripDataString = localStorage.getItem('currentTripData');
@@ -67,7 +67,7 @@ export class ChecklistComponent implements OnInit {
       }
     }
     
-    if ((this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'RELASI' && this.manualTruckPlate !== 'TPF-CONT' && !this.truckBarcode) || this.tripType !== 'OUT') {
+    if ((this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI' && !this.truckBarcode) || this.tripType !== 'OUT') {
       console.log('manual truck plate' + this.manualTruckPlate)
       console.log('truck barcode' + this.truckBarcode)
       console.log(this.tripType)

@@ -83,60 +83,72 @@
             @if (tripType === 'OUT' || (tripType === 'IN' && !isOthers)) {
               <label class="input-label">
                 Nomor SPK
-                @if (manualTruckPlate === 'RELASI' || manualTruckPlate === 'TPF-CONT') {
+                @if (manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
                   <span style="font-weight:400; color:#6c757d;"> (Opsional)</span>
                 }
               </label>
 
-              <!-- Dropdown for all non-LAINNYA trucks -->
-              <div class="spk-custom-dropdown">
-                <div class="spk-dropdown-selected"
-                    [class.open]="spkDropdownOpen"
-                    [class.disabled]="isLoadingTripData || isLoadingSpk"
-                    (click)="!(isLoadingTripData || isLoadingSpk) && toggleSpkDropdown()">
-                  <span [class.placeholder]="!barcodeInput">
-                    {{ barcodeInput || '-- Pilih Nomor SPK --' }}
+              <!-- Free text input for RELASI/VENDOR/EKSPEDISI -->
+              @if (manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
+                <input
+                  type="text"
+                  [(ngModel)]="barcodeInput"
+                  name="spkInput"
+                  placeholder="Ketik nomor SPK"
+                  class="text-input"
+                  autocomplete="off"
+                />
+              } @else {
+                <!-- Dropdown for other trucks -->
+                <div class="spk-custom-dropdown">
+                  <div class="spk-dropdown-selected"
+                      [class.open]="spkDropdownOpen"
+                      [class.disabled]="isLoadingTripData || isLoadingSpk"
+                      (click)="!(isLoadingTripData || isLoadingSpk) && toggleSpkDropdown()">
+                    <span [class.placeholder]="!barcodeInput">
+                      {{ barcodeInput || '-- Pilih Nomor SPK --' }}
+                    </span>
+                    <span class="spk-dropdown-arrow">▼</span>
+                  </div>
+                  <div class="spk-dropdown-panel" [hidden]="!spkDropdownOpen">
+                    <div class="spk-search-wrapper">
+                      <input
+                        type="text"
+                        [(ngModel)]="spkSearchQuery"
+                        name="spkSearch"
+                        placeholder="Cari nomor SPK..."
+                        class="spk-search-input"
+                        (click)="$event.stopPropagation()"
+                      />
+                    </div>
+                    <div class="spk-options-list">
+                      <div
+                        *ngFor="let spk of filteredSpkOptions"
+                        class="spk-option"
+                        [class.selected]="barcodeInput === spk"
+                        (click)="selectSpk(spk)"
+                      >
+                        {{ spk }}
+                      </div>
+                      <div class="spk-no-result" *ngIf="filteredSpkOptions.length === 0">
+                        {{ spkOptions.length === 0 ? 'Tidak ada SPK untuk Nopol yang tertera.' : 'Tidak ditemukan' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="input-validation" *ngIf="barcodeInput.trim()">
+                  <span
+                    class="validation-icon"
+                    [class.valid]="isValidBarcodeInput()"
+                    [class.invalid]="!isValidBarcodeInput()"
+                  >
+                    {{ isValidBarcodeInput() ? '✅' : '❌' }}
                   </span>
-                  <span class="spk-dropdown-arrow">▼</span>
+                  <span class="validation-text">
+                    {{ isValidBarcodeInput() ? 'Format valid' : 'Format tidak valid'  }}
+                  </span>
                 </div>
-                <div class="spk-dropdown-panel" [hidden]="!spkDropdownOpen">
-                  <div class="spk-search-wrapper">
-                    <input
-                      type="text"
-                      [(ngModel)]="spkSearchQuery"
-                      name="spkSearch"
-                      placeholder="Cari nomor SPK..."
-                      class="spk-search-input"
-                      (click)="$event.stopPropagation()"
-                    />
-                  </div>
-                  <div class="spk-options-list">
-                    <div
-                      *ngFor="let spk of filteredSpkOptions"
-                      class="spk-option"
-                      [class.selected]="barcodeInput === spk"
-                      (click)="selectSpk(spk)"
-                    >
-                      {{ spk }}
-                    </div>
-                    <div class="spk-no-result" *ngIf="filteredSpkOptions.length === 0">
-                      {{ spkOptions.length === 0 ? 'Tidak ada SPK untuk Nopol yang tertera.' : 'Tidak ditemukan' }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="input-validation" *ngIf="barcodeInput.trim()">
-                <span
-                  class="validation-icon"
-                  [class.valid]="isValidBarcodeInput()"
-                  [class.invalid]="!isValidBarcodeInput()"
-                >
-                  {{ isValidBarcodeInput() ? '✅' : '❌' }}
-                </span>
-                <span class="validation-text">
-                  {{ isValidBarcodeInput() ? 'Format valid' : 'Format tidak valid'  }}
-                </span>
-              </div>
+              }
             }
           }
 
@@ -176,7 +188,7 @@
           <button 
             type="submit" 
             class="submit-btn"
-            [disabled]="isLoadingTripData || (isOthers && (!customerName.trim() || !isValidIndonesianPlate(newTruckPlate))) || (!isOthers && manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI' && manualTruckPlate !== 'TPF-CONT' && !barcodeInput.trim())"
+            [disabled]="isLoadingTripData || (isOthers && (!customerName.trim() || !isValidIndonesianPlate(newTruckPlate))) || (!isOthers && manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI' && !barcodeInput.trim())"
           >
             {{ isLoadingTripData ? 'Memuat...' : 'Ambil Data Perjalanan' }}
           </button>

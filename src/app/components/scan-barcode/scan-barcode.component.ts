@@ -85,7 +85,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       distinctUntilChanged()
     ).subscribe(nopol => {
       const tripType = localStorage.getItem('tripType');
-      this.isOthers = ['LAINNYA', 'RELASI', 'TPF-CONT'].includes(nopol);
+      this.isOthers = ['LAINNYA', 'RELASI/VENDOR/EKSPEDISI'].includes(nopol);
       this.barcodeInput = '';
       this.newTruckPlate = '';
 
@@ -100,9 +100,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       }
 
       // RELASI and TPF-CONT: Try to get SPK from API
-      if ((nopol === 'RELASI' || nopol === 'TPF-CONT') && nopol.length >= 4) {
-        this.getAllTripDataFromAPI(nopol);
-      } else if (!this.isOthers && nopol.length >= 4) {
+      if (/**(nopol === 'RELASI/VENDOR/EKSPEDISI' && nopol.length >= 3) ||**/ (!this.isOthers && nopol.length >= 3)) {
         this.getAllTripDataFromAPI(nopol);
       } else {
         this.spkOptions = [];
@@ -384,13 +382,35 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
+
         this.isLoadingTripData = false;
 
-        // Show user-friendly error messages based on error type
-        this.handleApiError(error);
+        if (error.status === 400) {
+          // Store trip data and barcode in localStorage
+          localStorage.setItem('currentTruckBarcode', tripCode);
+          // FYI INI CATETAN DARI VERSI SEBELUMNYA IDK: Use the truck barcode as trip number (surat jalan) instead of generating new one
+          localStorage.setItem('tripNumber', tripCode);
+
+          const type = localStorage.getItem('tripType');
+
+          if (type === 'OUT') {
+            // For OUT trips, go to checklist
+            this.router.navigate(['/checklist']);
+          } else {
+            // For IN trips, go directly to odometer
+            this.router.navigate(['/odometer']);
+          }
+
+        } else {
+
+          // Show user-friendly error messages based on error type
+          this.handleApiError(error);
+        }
+        
       }
     });
   }
+
 
   // setNopol
 
@@ -518,7 +538,9 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
     if (!this.barcodeInput || !this.barcodeInput.trim()) {
       return false;
     }
-    return this.validateDetectedBarcodeEnhanced(this.barcodeInput.trim());
+
+    return true;
+    // return this.validateDetectedBarcodeEnhanced(this.barcodeInput.trim());
   }
 
   get filteredSpkOptions(): string[] {
