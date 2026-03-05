@@ -13,7 +13,7 @@
       <div class="manual-input-section">
 
         <div class="input-group">
-          <label class="input-label">Nopol Truck</label>
+          <label class="input-label required" >Nopol Truck</label>
           <div class="nopol-custom-dropdown">
             <div class="spk-dropdown-selected"
                  [class.open]="truckDropdownOpen"
@@ -81,11 +81,11 @@
 
           @if (this.manualTruckPlate !== 'LAINNYA') {
             @if (tripType === 'OUT' || (tripType === 'IN' && !isOthers)) {
-              <label class="input-label">
+              <label class="input-label" [class.required]="manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI'">
                 Nomor SJ
                 @if (manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
                   <span style="font-weight:400; color:#6c757d;"> (Opsional)</span>
-                }
+                } 
               </label>
 
               <!-- Free text input for RELASI/VENDOR/EKSPEDISI -->
@@ -154,7 +154,7 @@
 
 
           @if(isOthers) {
-            <label class="input-label" style="margin-top:15px;">Nama Perusahaan</label>
+            <label class="input-label required" style="margin-top:15px;" >Nama Perusahaan</label>
             <input 
               class="text-input" 
               type="text" 
