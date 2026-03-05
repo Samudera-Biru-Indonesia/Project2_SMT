@@ -154,6 +154,7 @@
   font-weight: 500;
   color: #555;
   font-size: 14px;
+  margin-right: 10px!important;
 }
 
 .trip-value, .plate-value, .driver-value {
