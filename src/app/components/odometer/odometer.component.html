@@ -42,35 +42,6 @@
       </div>
       
 
-      <!-- Order Details (hanya OUT trip) -->
-      <div class="order-details-section" *ngIf="tripType === 'OUT' && orderDetails.length > 0">
-        <h3 class="order-details-title">Detail Order</h3>
-        <div class="order-table-wrapper">
-          <table class="order-table">
-            <thead>
-              <tr>
-                <th>No. Order</th>
-                <th>Customer</th>
-                <th>Qty</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let order of orderDetails">
-                <td>{{ order.orderNum }}</td>
-                <td>{{ order.customerName }}</td>
-                <td>{{ order.totalQty }}</td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr class="total-row">
-                <td colspan="2"><strong>Total</strong></td>
-                <td><strong>{{ expectedMuatan }}</strong></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
-
       <form (ngSubmit)="onSubmit()" class="odometer-form">
         <div class="form-section">
           
@@ -130,25 +101,35 @@
               </div>
             </div>
 
-            <div class="form-group">
-              <label class="required">Foto Muatan</label>
-              <div class="photo-section">
-                <div class="photo-actions">
-                  <label class="photo-btn camera-btn" style="color: white;">
-                    Kamera
-                    <input type="file" accept="image/*" multiple capture="environment" (change)="onPhotoSelected($event, 'cargo')" hidden />
-                  </label>
-                </div>
-                
-                <div class="photo-preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-                  <div *ngFor="let photo of cargoPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                    <img [src]="photo" class="photo-preview" style="max-width: 120px; border-radius: 8px; object-fit: cover;" />
-                    <button type="button" class="remove-badge" (click)="removePhoto('cargo', i)">×</button>
-                  </div>
-                </div>
+            <!-- Order Details (hanya OUT trip) -->
+            <div class="order-details-section" *ngIf="tripType === 'OUT' && orderDetails.length > 0">
+              <h3 class="order-details-title">Detail Order</h3>
+              <div class="order-table-wrapper">
+                <table class="order-table">
+                  <thead>
+                    <tr>
+                      <th>No. Order</th>
+                      <th>Customer</th>
+                      <th>Qty</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let order of orderDetails">
+                      <td>{{ order.orderNum }}</td>
+                      <td>{{ order.customerName }}</td>
+                      <td>{{ order.totalQty }}</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr class="total-row">
+                      <td colspan="2"><strong>Total</strong></td>
+                      <td><strong>{{ expectedMuatan }}</strong></td>
+                    </tr>
+                  </tfoot>
+                </table>
               </div>
             </div>
-            
+
             <div class="form-group">
               
               <label for="jumlah-muatan" class="required">
@@ -178,6 +159,27 @@
                 Nilai Anda: <b>{{ jumlahMuatan }}</b> cylinder
               </div>
             </div>
+
+            <div class="form-group">
+              <label class="required">Foto Muatan</label>
+              <div class="photo-section">
+                <div class="photo-actions">
+                  <label class="photo-btn camera-btn" style="color: white;">
+                    Kamera
+                    <input type="file" accept="image/*" multiple capture="environment" (change)="onPhotoSelected($event, 'cargo')" hidden />
+                  </label>
+                </div>
+                
+                <div class="photo-preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                  <div *ngFor="let photo of cargoPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                    <img [src]="photo" class="photo-preview" style="max-width: 120px; border-radius: 8px; object-fit: cover;" />
+                    <button type="button" class="remove-badge" (click)="removePhoto('cargo', i)">×</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            
 
             <div class="form-group">
               <label for="notes" [class.required]="muatanMismatchWarning">
@@ -291,6 +293,36 @@
 
           <!-- RELASI/VENDOR/EKSPEDISI (keluar): jumlah muatan + foto muatan -->
           @if (manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && tripType === 'OUT') {
+
+            <!-- Order Details (hanya OUT trip) -->
+            <div class="order-details-section" *ngIf="tripType === 'OUT' && orderDetails.length > 0">
+              <h3 class="order-details-title">Detail Order</h3>
+              <div class="order-table-wrapper">
+                <table class="order-table">
+                  <thead>
+                    <tr>
+                      <th>No. Order</th>
+                      <th>Customer</th>
+                      <th>Qty</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let order of orderDetails">
+                      <td>{{ order.orderNum }}</td>
+                      <td>{{ order.customerName }}</td>
+                      <td>{{ order.totalQty }}</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr class="total-row">
+                      <td colspan="2"><strong>Total</strong></td>
+                      <td><strong>{{ expectedMuatan }}</strong></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+
             <div class="form-group">
               <label for="jumlah-muatan" class="required">
                 Jumlah Muatan:
