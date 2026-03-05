@@ -1,3 +1,42 @@
+.success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeOut 2.5s forwards;
+}
+
+@keyframes fadeOut {
+  0%, 80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.success-content {
+  text-align: center;
+  color: white;
+}
+
+.success-content .success-icon {
+  font-size: 80px;
+  margin-bottom: 20px;
+}
+
+.success-content h1 {
+  font-size: 32px;
+  font-weight: 600;
+  margin: 0;
+}
+
 .logout-btn {
   background: #dc3545;
   color: white;

@@ -21,6 +21,7 @@ export class TripCompleteComponent implements OnInit {
   fullName: string = '';
   empCode: string = '';
   customerName: string = '';
+  showOverlay: boolean = true;
   
   constructor(private router: Router, private authService: AuthService) {}
 
@@ -42,6 +43,10 @@ export class TripCompleteComponent implements OnInit {
         this.tripNumber = 'N/A';
       }
     }
+
+    setTimeout(() => {
+      this.showOverlay = false;
+    }, 2500);
   }
 
   startNewTrip() {
