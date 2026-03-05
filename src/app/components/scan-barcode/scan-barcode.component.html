@@ -57,7 +57,7 @@
             </div>
           </div>
           <div class="spk-loading" *ngIf="isLoadingSpk">
-            <span class="loading-dot"></span> Mencari nomor SPK...
+            <span class="loading-dot"></span> Mencari nomor SJ...
           </div>
         </div>
 
@@ -82,7 +82,7 @@
           @if (this.manualTruckPlate !== 'LAINNYA') {
             @if (tripType === 'OUT' || (tripType === 'IN' && !isOthers)) {
               <label class="input-label">
-                Nomor SPK
+                Nomor SJ
                 @if (manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
                   <span style="font-weight:400; color:#6c757d;"> (Opsional)</span>
                 }
@@ -94,7 +94,7 @@
                   type="text"
                   [(ngModel)]="barcodeInput"
                   name="spkInput"
-                  placeholder="Ketik nomor SPK"
+                  placeholder="Ketik nomor SJ"
                   class="text-input"
                   autocomplete="off"
                 />
@@ -106,7 +106,7 @@
                       [class.disabled]="isLoadingTripData || isLoadingSpk"
                       (click)="!(isLoadingTripData || isLoadingSpk) && toggleSpkDropdown()">
                     <span [class.placeholder]="!barcodeInput">
-                      {{ barcodeInput || '-- Pilih Nomor SPK --' }}
+                      {{ barcodeInput || '-- Pilih Nomor SJ --' }}
                     </span>
                     <span class="spk-dropdown-arrow">▼</span>
                   </div>
@@ -116,7 +116,7 @@
                         type="text"
                         [(ngModel)]="spkSearchQuery"
                         name="spkSearch"
-                        placeholder="Cari nomor SPK..."
+                        placeholder="Cari nomor SJ..."
                         class="spk-search-input"
                         (click)="$event.stopPropagation()"
                       />
@@ -131,7 +131,7 @@
                         {{ spk }}
                       </div>
                       <div class="spk-no-result" *ngIf="filteredSpkOptions.length === 0">
-                        {{ spkOptions.length === 0 ? 'Tidak ada SPK untuk Nopol yang tertera.' : 'Tidak ditemukan' }}
+                        {{ spkOptions.length === 0 ? 'Tidak ada SJ untuk Nopol yang tertera.' : 'Tidak ditemukan' }}
                       </div>
                     </div>
                   </div>

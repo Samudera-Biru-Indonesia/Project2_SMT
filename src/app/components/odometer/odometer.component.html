@@ -24,14 +24,14 @@
 
         @if((manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') && tripType === 'OUT') {
           <div class="trip-number-display">
-            <span class="trip-label">Nomor SPK:</span>
+            <span class="trip-label">Nomor SJ:</span>
             <span class="trip-value">{{ tripNumber }}</span>
           </div>
         }
 
         @if(manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI') {
           <div class="trip-number-display">
-            <span class="trip-label">Nomor SPK:</span>
+            <span class="trip-label">Nomor SJ:</span>
             <span class="trip-value">{{ tripNumber }}</span>
           </div>
           <div class="driver-display">
@@ -460,7 +460,7 @@
       <div class="modal-icon">📋</div>
       <h3 class="modal-title">Konfirmasi Data Perjalanan</h3>
       <div class="modal-message" style="text-align: left;">
-        <p><strong>Nomor SPK:</strong> {{ tripNumber }}</p>
+        <p><strong>Nomor SJ:</strong> {{ tripNumber }}</p>
         <p><strong>Driver:</strong> {{ tripDriver || '-' }}</p>
         @if (odometerReading) {
           <p><strong>Odometer:</strong> {{ odometerReading }}km</p>

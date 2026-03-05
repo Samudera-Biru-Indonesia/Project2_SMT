@@ -89,17 +89,17 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       this.barcodeInput = '';
       this.newTruckPlate = '';
 
-      // IN trip: No SPK needed for special nopols
+      // IN trip: No SJ needed for special nopols
       if (tripType === 'IN' && this.isOthers) {
         return;
       }
 
-      // OUT trip: LAINNYA doesn't need SPK
+      // OUT trip: LAINNYA doesn't need SJ
       if (tripType === 'OUT' && nopol === 'LAINNYA') {
         return;
       }
 
-      // RELASI and TPF-CONT: Try to get SPK from API
+      // RELASI and TPF-CONT: Try to get SJ from API
       if (/**(nopol === 'RELASI/VENDOR/EKSPEDISI' && nopol.length >= 3) ||**/ (!this.isOthers && nopol.length >= 3)) {
         this.getAllTripDataFromAPI(nopol);
       } else {
@@ -326,7 +326,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       localStorage.setItem('newTruckPlate', this.newTruckPlate.trim());
       localStorage.setItem('tripNumber', '-');
 
-      // If SPK is provided, validate and fetch data
+      // If SJ is provided, validate and fetch data
       if (this.barcodeInput.trim()) {
         this.getTripDataFromAPI(this.barcodeInput.trim());
         return;
@@ -343,7 +343,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       if (this.barcodeInput.trim()){
         this.getTripDataFromAPI(this.barcodeInput.trim());
       } else {
-        alert('Nomor SPK belum dipilih.');
+        alert('Nomor SJ belum dipilih.');
       }
     }
   }
@@ -481,9 +481,9 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
    */
   handleApiError(error: any) {
     if (error.status === 400) {
-      this.showError('Nomor SPK Tidak Valid', 'Nomor SPK yang dimasukkan tidak valid atau tidak ditemukan. Silakan periksa kembali barcode kendaraan.');
+      this.showError('NomorJ SJ Tidak Valid', 'Nomor SJ yang dimasukkan tidak valid atau tidak ditemukan. Silakan periksa kembali barcode kendaraan.');
     } else if (error.status === 404) {
-      this.showError('Nomor SPK Tidak Ditemukan', 'Nomor SPK tidak ditemukan dalam sistem. Pastikan barcode yang Anda scan atau input sudah benar.');
+      this.showError('Nomor SJ Tidak Ditemukan', 'Nomor SJ tidak ditemukan dalam sistem. Pastikan barcode yang Anda scan atau input sudah benar.');
     } else if (error.status === 0) {
       this.showError('Koneksi Bermasalah', 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda dan coba lagi.');
     } else if (error.status === 401) {
@@ -493,7 +493,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
     } else if (error.status >= 500) {
       this.showError('Kesalahan Server', 'Terjadi kesalahan pada server. Silakan coba lagi dalam beberapa saat.');
     } else {
-      this.showError('Nomor SPK Tidak Ditemukan', `Nomor SPK tidak ditemukan atau tidak valid. Silakan periksa kembali barcode kendaraan.`);
+      this.showError('Nomor SJ Tidak Ditemukan', `Nomor SJ tidak ditemukan atau tidak valid. Silakan periksa kembali barcode kendaraan.`);
     }
   }
 

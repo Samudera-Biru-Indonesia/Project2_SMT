@@ -24,14 +24,14 @@
 
         @if((manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') && tripType === 'OUT') {
           <div class="trip-number-display">
-            <span class="trip-label">Nomor SPK:</span>
+            <span class="trip-label">Nomor SJ:</span>
             <span class="trip-value">{{ tripNumber || '-' }}</span>
           </div>
         }
         
         @if(manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI') {
           <div class="trip-number-display">
-            <span class="trip-label">Nomor SPK:</span>
+            <span class="trip-label">Nomor SJ:</span>
             <span class="trip-value">{{ tripNumber }}</span>
           </div>
           <div class="driver-display">

@@ -77,7 +77,7 @@ export class OdometerComponent implements OnInit {
         this.fetchOdometer();
       }
     } else {
-      alert('Mohon ulangi isi nomor SPK. Sistem gagal mendapatkan nomor SPK.');
+      alert('Mohon ulangi isi nomor SJ. Sistem gagal mendapatkan nomor SJ.');
     }
 
     // Get plate number from trip data if available
@@ -115,7 +115,7 @@ export class OdometerComponent implements OnInit {
       console.log('Current truck barcode:', this.truckBarcode);
     if (!this.tripType || (!isBarcodeExempt && !this.truckBarcode)) {
       console.log('manual truck plate:' + this.manualTruckPlate)
-      console.log('truck barcode/SPK' + this.truckBarcode)
+      console.log('truck barcode/SJ' + this.truckBarcode)
 
       this.router.navigate(['/trip-selection']);
       

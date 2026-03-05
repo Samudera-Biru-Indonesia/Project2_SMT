@@ -781,7 +781,7 @@
   }
 }
 
-/* SPK Loading Indicator */
+/* SJ Loading Indicator */
 .spk-loading {
   display: flex;
   align-items: center;
@@ -801,7 +801,7 @@
   animation: spin 0.8s linear infinite;
 }
 
-/* SPK Custom Dropdown */
+/* SJ Custom Dropdown */
 .spk-custom-dropdown {
   position: relative;
   width: 100%;
