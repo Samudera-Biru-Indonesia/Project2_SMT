@@ -39,19 +39,26 @@ export class ChecklistComponent implements OnInit {
   constructor(private router: Router, private apiService: ApiService, private authService: AuthService) {}
 
   ngOnInit() {
+
+    this.manualTruckPlate = localStorage.getItem('manualTruckPlate') || '';
+
+    // Lainnya g perlu checklist
+    if(this.manualTruckPlate === 'LAINNYA') {
+      this.onSubmit();
+    }
+
     this.truckBarcode = localStorage.getItem('currentTruckBarcode') || '';
     this.tripType = localStorage.getItem('tripType') || '';
     this.tripNumber = localStorage.getItem('tripNumber') || '';
     this.customerName = localStorage.getItem('customerName') || '';
-    this.manualTruckPlate = localStorage.getItem('manualTruckPlate') || '';
     this.newTruckPlate = localStorage.getItem('newTruckPlate') || '';
 
     
     // Get plate number from trip data if available
-    if (this.manualTruckPlate === 'LAINNYA' || this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
+    if (/**this.manualTruckPlate === 'LAINNYA' ||**/ this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
       this.plateNumber = this.newTruckPlate;
     } else {
-    const tripDataString = localStorage.getItem('currentTripData');
+      const tripDataString = localStorage.getItem('currentTripData');
       if (tripDataString) {
         try {
           const tripData = JSON.parse(tripDataString);
@@ -89,16 +96,35 @@ export class ChecklistComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.requiredItemsCompleted) {
+
+    let ck1 = null;
+    let ck2 = null;
+
+
+    if (this.manualTruckPlate === 'LAINNYA') {
+
+      ck1 = false;
+      ck2 = false;
+
+    } else if (this.requiredItemsCompleted) {
       // Save checklist data
       localStorage.setItem('checklistData', JSON.stringify(this.checklistItems));
+
+      ck1 = this.checklistItems.find(item => item.id === 'chk1')?.checked || false;
+      ck2 = this.checklistItems.find(item => item.id === 'chk2')?.checked || false;
       
-      // Prepare data for API
+      
+    } else {
+      alert('Semua item checklist wajib harus dicentang sebelum melanjutkan.');
+      return;
+    }
+
+    // Prepare data for API
       const tripData: TripData = {
         odometer: 0, // Will be filled in odometer component
         type: this.tripType, // 'OUT' or 'IN'
-        chk1: this.checklistItems.find(item => item.id === 'chk1')?.checked || false,
-        chk2: this.checklistItems.find(item => item.id === 'chk2')?.checked || false,
+        chk1: ck1 || false,
+        chk2: ck2 || false,
         tripNum: localStorage.getItem('tripNumber') || '',
         note: '', // Will be filled in odometer component
         tripDriver: localStorage.getItem('tripDriver') || ''
@@ -108,9 +134,6 @@ export class ChecklistComponent implements OnInit {
       localStorage.setItem('tripData', JSON.stringify(tripData));
       
       this.router.navigate(['/odometer']);
-    } else {
-      alert('Semua item checklist wajib harus dicentang sebelum melanjutkan.');
-    }
   }
 
   goBack() {
