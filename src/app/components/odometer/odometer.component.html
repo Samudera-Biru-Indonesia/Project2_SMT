@@ -283,7 +283,6 @@
               </div>
             </div>
 
-
             <div class="form-group">
               <label class="required">Foto Muatan & Mobil</label>
               <div class="photo-section">
@@ -322,22 +321,51 @@
             </div>
           }
 
-          <!-- RELASI/VENDOR/EKSPEDISI (masuk): foto mobil -->
+          <!-- RELASI/VENDOR/EKSPEDISI (masuk): jumlah muatan + foto muatan & mobil -->
           @if (manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && tripType === 'IN') {
+            <div class="form-group">
+              <label for="jumlah-muatan" class="required">
+                Jumlah Muatan:
+                <span class="expected-muatan" *ngIf="muatanType === 'CYLINDER' && expectedMuatan && expectedMuatan > 0">
+                  (Sistem: {{ expectedMuatan }} cylinder)
+                </span>
+              </label>
+              <input
+                type="number"
+                id="jumlah-muatan"
+                [(ngModel)]="jumlahMuatan"
+                (ngModelChange)="onMuatanChange()"
+                name="jumlahMuatan"
+                placeholder="Masukkan hasil perhitungan jumlah muatan"
+                class="odometer-input"
+                [class.input-error]="muatanMismatchWarning"
+                min="0"
+                step="0.1"
+                required
+                autocomplete="off"
+              />
+              <div class="muatan-warning" *ngIf="muatanMismatchWarning && !showMuatanLowWarning">
+                Jumlah muatan tidak sesuai dengan sistem. <br>
+                Di sistem: <b>{{ expectedMuatan }}</b> cylinder
+                <br>
+                Nilai Anda: <b>{{ jumlahMuatan }}</b> cylinder
+              </div>
+            </div>
+
             <div class="form-group">
               <label class="required">Foto Muatan & Mobil</label>
               <div class="photo-section">
                 <div class="photo-actions">
                   <label class="photo-btn camera-btn" style="color: white;">
                     <img src="https://uxwing.com/wp-content/themes/uxwing/download/video-photography-multimedia/camera-white-icon.png" style="height:15px; width:15px; margin-right:8px; " alt=""> Kamera
-                    <input type="file" accept="image/*" multiple capture="environment" (change)="onPhotoSelected($event, 'car')" hidden />
+                    <input type="file" accept="image/*" multiple capture="environment" (change)="onPhotoSelected($event, 'cargo')" hidden />
                   </label>
                 </div>
                 
                 <div class="photo-preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-                  <div *ngFor="let photo of carPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                  <div *ngFor="let photo of cargoPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
                     <img [src]="photo" class="photo-preview" style="max-width: 120px; border-radius: 8px; object-fit: cover;" />
-                    <button type="button" class="remove-badge" (click)="removePhoto('car', i)">×</button>
+                    <button type="button" class="remove-badge" (click)="removePhoto('cargo', i)">×</button>
                   </div>
                 </div>
               </div>

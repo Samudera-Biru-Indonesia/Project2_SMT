@@ -356,8 +356,10 @@ export class OdometerComponent implements OnInit {
         alert('Jumlah muatan belum diisi.');
         return;
       }
+      
+      // Check for photos in cargoPhotos array (single input field for both IN/OUT)
       if (this.cargoPhotos.length === 0) {
-        alert('Foto muatan wajib diambil sebelum melanjutkan.');
+        alert('Foto muatan & mobil wajib diambil sebelum melanjutkan.');
         return;
       }
 
