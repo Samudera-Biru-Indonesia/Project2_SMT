@@ -101,12 +101,7 @@ export class ChecklistComponent implements OnInit {
     let ck2 = null;
 
 
-    if (this.manualTruckPlate === 'LAINNYA') {
-
-      ck1 = false;
-      ck2 = false;
-
-    } else if (this.requiredItemsCompleted) {
+    if (this.requiredItemsCompleted) {
       // Save checklist data
       localStorage.setItem('checklistData', JSON.stringify(this.checklistItems));
 
@@ -123,8 +118,8 @@ export class ChecklistComponent implements OnInit {
       const tripData: TripData = {
         odometer: 0, // Will be filled in odometer component
         type: this.tripType, // 'OUT' or 'IN'
-        chk1: ck1 || false,
-        chk2: ck2 || false,
+        chk1: ck1,
+        chk2: ck2,
         tripNum: localStorage.getItem('tripNumber') || '',
         note: '', // Will be filled in odometer component
         tripDriver: localStorage.getItem('tripDriver') || ''
