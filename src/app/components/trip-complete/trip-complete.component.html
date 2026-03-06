@@ -20,7 +20,7 @@
           </div> -->
           <div class="summary-item" *ngIf="tripNumber !== null">
             <span class="summary-label">Nomor SJ:</span>
-            <span class="summary-value">{{ tripNumber }}
+            <span class="summary-value">{{ tripNumber==='RELASI/VENDOR/EKSPEDISI' ? 'REL/VEN/EKS' : tripNumber }}
               <span class="summary-value trip-type" [class]="tripType.toLowerCase()">{{ tripType }}</span>
             </span>
           </div>
