@@ -642,8 +642,6 @@ export class OdometerComponent implements OnInit {
   }
 
   goBack() {
-    localStorage.removeItem('checklistData');
-    localStorage.removeItem('tripData');
 
     if (this.tripType === 'OUT') {
       if (this.manualTruckPlate === 'LAINNYA') {

@@ -40,6 +40,9 @@ export class ChecklistComponent implements OnInit {
 
   ngOnInit() {
 
+    localStorage.removeItem('checklistData');
+    localStorage.removeItem('tripData');
+
     this.manualTruckPlate = localStorage.getItem('manualTruckPlate') || '';
 
     // Lainnya g perlu checklist
@@ -133,15 +136,6 @@ export class ChecklistComponent implements OnInit {
   }
 
   goBack() {
-
-    localStorage.removeItem('currentTruckBarcode');
-    localStorage.removeItem('tripNumber');
-    localStorage.removeItem('currentTripData');
-    localStorage.removeItem('customerName');
-    localStorage.removeItem('manualTruckPlate');
-    localStorage.removeItem('newTruckPlate');
-
-
     this.router.navigate(['/scan-barcode']);
   }
 

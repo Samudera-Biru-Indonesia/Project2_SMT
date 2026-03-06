@@ -515,7 +515,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
   goBack() {
     this.stopScanning();
-    console.log('halo')
     this.router.navigate(['/trip-selection']);
   }
 
