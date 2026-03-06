@@ -30,21 +30,25 @@
             <span class="summary-label">Plat Nomor:</span>
             <span class="summary-value">{{ plateNumber }}</span>
           </div>
-          <div class="summary-item" *ngIf="tripDriver && tripDriver !== 'N/A'">
+          <div class="summary-item" *ngIf="tripDriver && tripDriver !== '-'">
             <span class="summary-label">Driver:</span>
             <span class="summary-value">{{ tripDriver }}</span>
           </div>
-          <div class="summary-item" *ngIf="odometer > 0">
+          <div class="summary-item" *ngIf="odometer!==null || odometer!==undefined || odometer!==''">
             <span class="summary-label">Odometer:</span>
             <span class="summary-value">{{ odometer }} km</span>
           </div>
-          <div class="summary-item" *ngIf="jumlahMuatan > 0">
+          <div class="summary-item" *ngIf="jumlahMuatan!==null || jumlahMuatan!==undefined || jumlahMuatan!==''">
             <span class="summary-label">Jumlah Muatan:</span>
             <span class="summary-value">{{ jumlahMuatan }}</span>
           </div>
           <div class="summary-item">
             <span class="summary-label">Diinput oleh:</span>
             <span class="summary-value">{{ fullName }} ({{ empCode }})</span>
+          </div>
+          <div class="summary-item" *ngIf="notes !== null">
+            <span class="summary-label">Catatan:</span>
+            <span class="summary-value">{{ notes }}</span>
           </div>
           <!-- <div class="summary-item">
             <span class="summary-label">Jenis Trip:</span>

@@ -350,7 +350,7 @@ export class OdometerComponent implements OnInit {
       }
     }
 
-    // Validation for RELASI (masuk/keluar): jumlah muatan + foto muatan
+    // Validation for RELASI/VENDOR/EKSPEDISI (masuk/keluar): jumlah muatan + foto muatan
     if (this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
       if (this.jumlahMuatan === null || this.jumlahMuatan === undefined || this.jumlahMuatan === '') {
         alert('Jumlah muatan belum diisi.');
@@ -360,11 +360,33 @@ export class OdometerComponent implements OnInit {
         alert('Foto muatan wajib diambil sebelum melanjutkan.');
         return;
       }
-      
-      // Check notes requirement for OUT trips with mismatch
+
+      const jumlahMuatanValue = parseFloat(this.jumlahMuatan);
+      if (isNaN(jumlahMuatanValue) || jumlahMuatanValue < 0) {
+        alert('Jumlah muatan tidak valid. Pastikan nilai yang dimasukkan berupa angka positif.');
+        return;
+      }
+
       if (this.tripType === 'OUT' && this.muatanMismatchWarning && !this.notes.trim()) {
         alert('Catatan wajib diisi karena jumlah muatan berbeda dari sistem.');
         return;
+      }
+
+      // Show muatan mismatch modals for RELASI/VENDOR/EKSPEDISI
+      if (this.muatanType === 'CYLINDER' && this.expectedMuatan !== null && jumlahMuatanValue < this.expectedMuatan) {
+        if (!this.muatanLowWarningShown) {
+          this.showMuatanLowWarning = true;
+          this.muatanLowWarningShown = true;
+          return;
+        }
+        this.showMuatanLowWarning = false;
+      } else if (this.muatanType === 'CYLINDER' && this.expectedMuatan !== null && jumlahMuatanValue > this.expectedMuatan) {
+        if (!this.muatanHighWarningShown) {
+          this.showMuatanHighWarning = true;
+          this.muatanHighWarningShown = true;
+          return;
+        }
+        this.showMuatanHighWarning = false;
       }
     }
 
@@ -377,22 +399,22 @@ export class OdometerComponent implements OnInit {
     }
 
     // Validation for VENDOR (keluar): jumlah muatan + foto muatan & mobil
-    if (this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && this.tripType === 'OUT') {
-      if (this.jumlahMuatan === null || this.jumlahMuatan === undefined || this.jumlahMuatan === '') {
-        alert('Jumlah muatan belum diisi.');
-        return;
-      }
-      if (this.cargoPhotos.length === 0) {
-        alert('Foto mobil & muatan wajib diambil sebelum melanjutkan.');
-        return;
-      }
+    // if (this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && this.tripType === 'OUT') {
+    //   if (this.jumlahMuatan === null || this.jumlahMuatan === undefined || this.jumlahMuatan === '') {
+    //     alert('Jumlah muatan belum diisi.');
+    //     return;
+    //   }
+    //   if (this.cargoPhotos.length === 0) {
+    //     alert('Foto mobil & muatan wajib diambil sebelum melanjutkan.');
+    //     return;
+    //   }
       
-      // Check notes requirement for mismatch
-      if (this.muatanMismatchWarning && !this.notes.trim()) {
-        alert('Catatan wajib diisi karena jumlah muatan berbeda dari sistem.');
-        return;
-      }
-    }
+    //   // Check notes requirement for mismatch
+    //   if (this.muatanMismatchWarning && !this.notes.trim()) {
+    //     alert('Catatan wajib diisi karena jumlah muatan berbeda dari sistem.');
+    //     return;
+    //   }
+    // }
 
     // Validation for VENDOR (masuk): foto mobil
     // if (this.manualTruckPlate === 'TPF-CONT' && this.tripType === 'IN') {
@@ -490,6 +512,9 @@ export class OdometerComponent implements OnInit {
     localStorage.setItem('trips', JSON.stringify(existingTrips));
 
     // 4. Save summary data for trip-complete page
+    const hasNotesField = this.manualTruckPlate !== 'LAINNYA' && 
+                          !(this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && this.tripType === 'IN');
+    
     const summaryData = {
       tripNumber: tripData.tripNum || '',
       tripDriver: this.tripDriver || '',
@@ -499,7 +524,8 @@ export class OdometerComponent implements OnInit {
       empCode: authUser.empCode || '',
       tripType: this.tripType,
       plateNumber: this.plateNumber || this.newTruckPlate || '',
-      customerName: this.customerName || ''
+      customerName: this.customerName || '',
+      notes: hasNotesField ? (this.notes || '-') : null,
     };
     localStorage.setItem('tripSummary', JSON.stringify(summaryData));
 
@@ -620,7 +646,12 @@ export class OdometerComponent implements OnInit {
     localStorage.removeItem('tripData');
 
     if (this.tripType === 'OUT') {
-      this.router.navigate(['/checklist']);
+      if (this.manualTruckPlate === 'LAINNYA') {
+        this.router.navigate(['/scan-barcode']);
+      } else {
+        this.router.navigate(['/checklist']);
+      }
+      
     } else {
       this.router.navigate(['/scan-barcode']);
     }

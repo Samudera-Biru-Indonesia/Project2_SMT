@@ -21,6 +21,7 @@ export class TripCompleteComponent implements OnInit {
   fullName: string = '';
   empCode: string = '';
   customerName: string = '';
+  notes: string | null = null;
   showOverlay: boolean = true;
   
   constructor(private router: Router, private authService: AuthService) {}
@@ -39,6 +40,7 @@ export class TripCompleteComponent implements OnInit {
         this.tripType = summaryData.tripType || 'N/A';
         this.plateNumber = summaryData.plateNumber || 'N/A';
         this.customerName = summaryData.customerName || '';
+        this.notes = summaryData.notes !== undefined ? summaryData.notes : null;
       } catch (error) {
         this.tripNumber = 'N/A';
       }
