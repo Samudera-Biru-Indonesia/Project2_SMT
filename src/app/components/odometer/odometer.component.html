@@ -102,7 +102,7 @@
             </div>
 
             <!-- Order Details (hanya OUT trip) -->
-            <div class="order-details-section" *ngIf="tripType === 'OUT' && orderDetails.length > 0">
+            <div class="order-details-section" *ngIf="tripType === 'OUT' && orderDetails.length > 0 && expectedMuatan && expectedMuatan > 0">
               <h3 class="order-details-title">Detail Order</h3>
               <div class="order-table-wrapper">
                 <table class="order-table">
@@ -134,7 +134,7 @@
               
               <label for="jumlah-muatan" class="required">
                 Jumlah Muatan:
-                <span class="expected-muatan" *ngIf="muatanType === 'CYLINDER' && expectedMuatan !== null">
+                <span class="expected-muatan" *ngIf="muatanType === 'CYLINDER' && expectedMuatan && expectedMuatan > 0">
                   (Sistem: {{ expectedMuatan }} cylinder)
                 </span> 
               </label>
@@ -200,75 +200,6 @@
             </div>
           }
 
-          <!-- RELASI (masuk/keluar): jumlah muatan + foto muatan -->
-          <!-- @if (manualTruckPlate === 'RELASI') {
-            <div class="form-group">
-              <label for="jumlah-muatan" class="required">
-                Jumlah Muatan:
-                <span class="expected-muatan" *ngIf="tripType === 'OUT' && muatanType === 'CYLINDER' && expectedMuatan !== null">
-                  (Sistem: {{ expectedMuatan }} cylinder)
-                </span>
-              </label>
-              <input
-                type="number"
-                id="jumlah-muatan"
-                [(ngModel)]="jumlahMuatan"
-                (ngModelChange)="onMuatanChange()"
-                name="jumlahMuatan"
-                placeholder="Masukkan hasil perhitungan jumlah muatan"
-                class="odometer-input"
-                [class.input-error]="tripType === 'OUT' && muatanMismatchWarning"
-                min="0"
-                step="0.1"
-                required
-                autocomplete="off"
-              />
-              <div class="muatan-warning" *ngIf="tripType === 'OUT' && muatanMismatchWarning && !showMuatanLowWarning">
-                Jumlah muatan tidak sesuai dengan sistem. <br>
-                Di sistem: <b>{{ expectedMuatan }}</b> cylinder
-                <br>
-                Nilai Anda: <b>{{ jumlahMuatan }}</b> cylinder
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="required">Foto Muatan & Mobil</label>
-              <div class="photo-section">
-                <div class="photo-actions">
-                  <label class="photo-btn camera-btn" style="color: white;">
-                    <img src="https://uxwing.com/wp-content/themes/uxwing/download/video-photography-multimedia/camera-white-icon.png" style="height:15px; width:15px; margin-right:8px; " alt=""> Kamera
-                    <input type="file" accept="image/*" multiple capture="environment" (change)="onPhotoSelected($event, 'cargo')" hidden />
-                  </label>
-                </div>
-                
-                <div class="photo-preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-                  <div *ngFor="let photo of cargoPhotos; let i = index" class="photo-item" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                    <img [src]="photo" class="photo-preview" style="max-width: 120px; border-radius: 8px; object-fit: cover;" />
-                    <button type="button" class="remove-badge" (click)="removePhoto('cargo', i)">×</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group" *ngIf="tripType === 'OUT'">
-              <label for="notes" [class.required]="muatanMismatchWarning">
-                Catatan Tambahan
-                <span *ngIf="!muatanMismatchWarning" style="font-weight:400; color:#6c757d;"> (Opsional)</span>
-                <span *ngIf="muatanMismatchWarning" style="font-weight:400; color:#dc3545;"> — wajib diisi jika muatan berbeda</span>
-              </label>
-              <textarea
-                id="notes"
-                [(ngModel)]="notes"
-                name="notes"
-                placeholder="Masukkan catatan atau pengamatan tambahan"
-                class="textarea-input"
-                [class.input-error]="muatanMismatchWarning && !notes"
-                rows="4"
-                autocomplete="off"
-              ></textarea>
-            </div>
-          } -->
-
           <!-- LAINNYA (masuk/keluar): foto mobil -->
           @if (manualTruckPlate === 'LAINNYA') {
             <div class="form-group">
@@ -295,7 +226,7 @@
           @if (manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && tripType === 'OUT') {
 
             <!-- Order Details (hanya OUT trip) -->
-            <div class="order-details-section" *ngIf="tripType === 'OUT' && orderDetails.length > 0">
+            <div class="order-details-section" *ngIf="orderDetails.length > 0 && expectedMuatan && expectedMuatan > 0">
               <h3 class="order-details-title">Detail Order</h3>
               <div class="order-table-wrapper">
                 <table class="order-table">
@@ -326,7 +257,7 @@
             <div class="form-group">
               <label for="jumlah-muatan" class="required">
                 Jumlah Muatan:
-                <span class="expected-muatan" *ngIf="muatanType === 'CYLINDER' && expectedMuatan !== null">
+                <span class="expected-muatan" *ngIf="muatanType === 'CYLINDER' && expectedMuatan && expectedMuatan > 0">
                   (Sistem: {{ expectedMuatan }} cylinder)
                 </span>
               </label>
@@ -447,7 +378,6 @@
       </p>
       <div class="modal-actions">
         <button class="modal-btn modal-btn-cancel" (click)="dismissOdometerWarning()">Kembali & Perbaiki</button>
-        <!-- <button class="modal-btn modal-btn-confirm" (click)="confirmOdometerWarning()">Tetap Lanjutkan</button> -->
       </div>
     </div>
   </div>
@@ -485,28 +415,4 @@
       </div>
     </div>
   </div>
-
-  <!-- Modal: Summary Confirmation -->
-  <!-- <div class="modal-overlay" *ngIf="showSummaryModal">
-    <div class="modal-alert">
-      <div class="modal-icon">📋</div>
-      <h3 class="modal-title">Konfirmasi Data Perjalanan</h3>
-      <div class="modal-message" style="text-align: left;">
-        <p><strong>Nomor SJ:</strong> {{ tripNumber }}</p>
-        <p><strong>Driver:</strong> {{ tripDriver || '-' }}</p>
-        @if (odometerReading) {
-          <p><strong>Odometer:</strong> {{ odometerReading }}km</p>
-        }
-
-        @if (jumlahMuatan) {
-          <p><strong>Jumlah Muatan:</strong> {{ jumlahMuatan }} cylinder</p>
-        }
-        <p><strong>Diinput oleh:</strong> {{ getAuthUser().fullName || '-' }} ({{ getAuthUser().empCode || '-' }})</p>
-      </div>
-      <div class="modal-actions">
-        <button class="modal-btn modal-btn-cancel" (click)="cancelSubmit()">Batal</button>
-        <button class="modal-btn modal-btn-confirm" (click)="confirmSubmit()">Konfirmasi & Kirim</button>
-      </div>
-    </div>
-  </div> -->
 </div>

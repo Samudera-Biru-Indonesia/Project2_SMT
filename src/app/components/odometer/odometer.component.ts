@@ -37,13 +37,13 @@ export class OdometerComponent implements OnInit {
   newTruckPlate: string = '';
 
   get odometerMismatchWarning(): boolean {
-    if (this.tripType !== 'IN' || this.odometerFromDb === null || !this.odometerReading) return false;
+    if (this.tripType !== 'IN' || this.odometerFromDb === null || (this.odometerReading === null || this.odometerReading === undefined || this.odometerReading === '')) return false;
     const entered = parseFloat(this.odometerReading);
     return !isNaN(entered) && entered < this.odometerFromDb;
   }
 
   get muatanMismatchWarning(): boolean {
-    if (this.muatanType !== 'CYLINDER' || this.expectedMuatan === null || !this.jumlahMuatan) return false;
+    if (this.muatanType !== 'CYLINDER' || this.expectedMuatan === null || this.expectedMuatan <= 0 || (this.jumlahMuatan === null || this.jumlahMuatan === undefined || this.jumlahMuatan === '')) return false;
     const entered = parseFloat(this.jumlahMuatan);
     return !isNaN(entered) && entered !== this.expectedMuatan;
   }
@@ -281,7 +281,7 @@ export class OdometerComponent implements OnInit {
 
     // Validation for regular trucks
     if (!isSpecialTruck) {
-      if (!this.odometerReading) {
+      if (this.odometerReading === null || this.odometerReading === undefined || this.odometerReading === '') {
         alert('Pembacaan odometer belum diisi. Silakan masukkan angka odometer terlebih dahulu.');
         return;
       }
@@ -296,7 +296,7 @@ export class OdometerComponent implements OnInit {
         return;
       }
 
-      if (!this.jumlahMuatan) {
+      if (this.jumlahMuatan === null || this.jumlahMuatan === undefined || this.jumlahMuatan === '') {
         alert('Jumlah muatan belum diisi. Silakan masukkan jumlah muatan terlebih dahulu.');
         return;
       }
@@ -352,7 +352,7 @@ export class OdometerComponent implements OnInit {
 
     // Validation for RELASI (masuk/keluar): jumlah muatan + foto muatan
     if (this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
-      if (!this.jumlahMuatan) {
+      if (this.jumlahMuatan === null || this.jumlahMuatan === undefined || this.jumlahMuatan === '') {
         alert('Jumlah muatan belum diisi.');
         return;
       }
@@ -378,7 +378,7 @@ export class OdometerComponent implements OnInit {
 
     // Validation for VENDOR (keluar): jumlah muatan + foto muatan & mobil
     if (this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && this.tripType === 'OUT') {
-      if (!this.jumlahMuatan) {
+      if (this.jumlahMuatan === null || this.jumlahMuatan === undefined || this.jumlahMuatan === '') {
         alert('Jumlah muatan belum diisi.');
         return;
       }
