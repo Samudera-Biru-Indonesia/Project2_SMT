@@ -97,21 +97,22 @@ export class ChecklistComponent implements OnInit {
 
   onSubmit() {
 
-    let ck1 = null;
-    let ck2 = null;
+    let ck1 = false;
+    let ck2 = false;
 
+    if (this.manualTruckPlate!=='LAINNYA') {
+      if (this.requiredItemsCompleted) {
+        // Save checklist data
+        localStorage.setItem('checklistData', JSON.stringify(this.checklistItems));
 
-    if (this.requiredItemsCompleted) {
-      // Save checklist data
-      localStorage.setItem('checklistData', JSON.stringify(this.checklistItems));
-
-      ck1 = this.checklistItems.find(item => item.id === 'chk1')?.checked || false;
-      ck2 = this.checklistItems.find(item => item.id === 'chk2')?.checked || false;
-      
-      
-    } else {
-      alert('Semua item checklist wajib harus dicentang sebelum melanjutkan.');
-      return;
+        ck1 = this.checklistItems.find(item => item.id === 'chk1')?.checked || false;
+        ck2 = this.checklistItems.find(item => item.id === 'chk2')?.checked || false;
+        
+        
+      } else {
+        alert('Semua item checklist wajib harus dicentang sebelum melanjutkan.');
+        return;
+      }
     }
 
     // Prepare data for API
