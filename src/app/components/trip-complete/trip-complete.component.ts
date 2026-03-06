@@ -11,16 +11,16 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./trip-complete.component.css']
 })
 export class TripCompleteComponent implements OnInit {
-  tripNumber: string = '';
+  tripNumber: string | null = null;
   plateNumber: string = '';
   truckBarcode: string = '';
   tripType: string = '';
-  tripDriver: string = '';
-  jumlahMuatan: number = 0;
-  odometer: number = 0;
+  tripDriver: string | null = null;
+  jumlahMuatan: number | null = null;
+  odometer: number | null = null;
   fullName: string = '';
   empCode: string = '';
-  customerName: string = '';
+  customerName: string | null = null;
   notes: string | null = null;
   showOverlay: boolean = true;
   
@@ -31,15 +31,15 @@ export class TripCompleteComponent implements OnInit {
     if (summaryDataString) {
       try {
         const summaryData = JSON.parse(summaryDataString);
-        this.tripNumber = summaryData.tripNumber || 'N/A';
-        this.tripDriver = summaryData.tripDriver || 'N/A';
-        this.jumlahMuatan = summaryData.jumlahMuatan || 0;
-        this.odometer = summaryData.odometer || 0;
+        this.tripNumber = summaryData.tripNumber !== undefined ? summaryData.tripNumber : null;
+        this.tripDriver = summaryData.tripDriver !== undefined ? summaryData.tripDriver : null;
+        this.jumlahMuatan = summaryData.jumlahMuatan !== undefined ? summaryData.jumlahMuatan : null;
+        this.odometer = summaryData.odometer !== undefined ? summaryData.odometer : null;
         this.fullName = summaryData.fullName || 'N/A';
         this.empCode = summaryData.empCode || 'N/A';
         this.tripType = summaryData.tripType || 'N/A';
         this.plateNumber = summaryData.plateNumber || 'N/A';
-        this.customerName = summaryData.customerName || '';
+        this.customerName = summaryData.customerName !== undefined ? summaryData.customerName : null;
         this.notes = summaryData.notes !== undefined ? summaryData.notes : null;
       } catch (error) {
         this.tripNumber = 'N/A';

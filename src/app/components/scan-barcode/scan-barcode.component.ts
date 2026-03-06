@@ -320,11 +320,10 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       }
 
       // Set defaults if data does not exist from the getTripDataFromAPI method
-      console.log('manual truck plate scan barcode' + this.manualTruckPlate)
       localStorage.setItem('customerName', this.customerName.trim());
       localStorage.setItem('manualTruckPlate', this.manualTruckPlate.trim());
       localStorage.setItem('newTruckPlate', this.newTruckPlate.trim());
-      localStorage.setItem('tripNumber', '-');
+      localStorage.setItem('tripNumber', this.manualTruckPlate);
 
       // If SJ is provided, validate and fetch data
       if (this.barcodeInput.trim()) {

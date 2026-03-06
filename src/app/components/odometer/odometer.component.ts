@@ -514,17 +514,22 @@ export class OdometerComponent implements OnInit {
     // 4. Save summary data for trip-complete page
     const hasNotesField = this.manualTruckPlate !== 'LAINNYA' && 
                           !(this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && this.tripType === 'IN');
+    const hasOdometerField = this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI';
+    const hasMuatanField = this.manualTruckPlate !== 'LAINNYA';
+    const hasDriverField = this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI';
+    const hasCustomerName = this.manualTruckPlate === 'LAINNYA' || this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI';
+    const hasTripNumber = this.tripNumber && this.tripNumber !== '-';
     
     const summaryData = {
-      tripNumber: tripData.tripNum || '',
-      tripDriver: this.tripDriver || '',
-      jumlahMuatan: jumlahMuatanValue || 0,
-      odometer: odometerValue || 0,
+      tripNumber: hasTripNumber ? tripData.tripNum : null,
+      tripDriver: hasDriverField ? (this.tripDriver || '-') : null,
+      jumlahMuatan: hasMuatanField ? (jumlahMuatanValue || 0) : null,
+      odometer: hasOdometerField ? (odometerValue || 0) : null,
       fullName: authUser.fullName || '',
       empCode: authUser.empCode || '',
       tripType: this.tripType,
       plateNumber: this.plateNumber || this.newTruckPlate || '',
-      customerName: this.customerName || '',
+      customerName: hasCustomerName ? this.customerName : null,
       notes: hasNotesField ? (this.notes || '-') : null,
     };
     localStorage.setItem('tripSummary', JSON.stringify(summaryData));
