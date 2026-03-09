@@ -176,6 +176,10 @@ export class OdometerComponent implements OnInit {
       });
   }
 
+  onNotesChange() {
+    this.saveOdometerData();
+  }
+
   onOdometerChange() {
     this.saveOdometerData();
     this.showOdometerWarning = false;

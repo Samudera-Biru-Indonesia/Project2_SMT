@@ -199,6 +199,7 @@
                 [class.input-error]="muatanMismatchWarning && !notes"
                 rows="4"
                 autocomplete="off"
+                (ngModelChange)="onNotesChange()"
               ></textarea>
             </div>
           }
@@ -320,6 +321,7 @@
                 [class.input-error]="muatanMismatchWarning && !notes"
                 rows="4"
                 autocomplete="off"
+                (ngModelChange)="onNotesChange()"
               ></textarea>
             </div>
           }
