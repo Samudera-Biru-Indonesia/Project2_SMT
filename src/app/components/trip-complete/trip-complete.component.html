@@ -13,6 +13,11 @@
       <!-- Trip Summary Info -->
       <div class="trip-summary-info">
         <h3>📋 Ringkasan Perjalanan</h3>
+        <div class="summary-value" style="text-align:center!important; width:100%!important; margin-bottom:16px;">{{ photoTimestamp ?? "Gagal memuat waktu " }}</div>
+        <!-- <div class="summary-item" *ngIf="photoTimestamp !== null">
+            <span class="summary-label">Waktu Upload Foto:</span>
+            
+          </div> -->
         <div class="summary-grid">
           <!-- <div class="summary-item">
             <span class="summary-label">Jenis Trip:</span>

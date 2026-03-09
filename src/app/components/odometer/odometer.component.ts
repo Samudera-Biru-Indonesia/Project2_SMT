@@ -483,8 +483,12 @@ export class OdometerComponent implements OnInit {
       // 2. Upload foto ke Google Drive via Go backend
       const tripNum = tripData.tripNum || 'unknown';
       this.apiService.uploadPhotos(tripNum, this.odometerPhotos, this.cargoPhotos, this.carPhotos, this.tripType).subscribe({
-        next: () => {
+        next: (response) => {
           this.isUploading = false;
+          // Save timestamp from photo upload
+          if (response.timestamp) {
+            localStorage.setItem('photoTimestamp', response.timestamp);
+          }
           this.continueAfterUpload(tripData, odometerValue, jumlahMuatanValue, authUser);
         },
         error: (err) => {
@@ -533,6 +537,7 @@ export class OdometerComponent implements OnInit {
       plateNumber: this.plateNumber || this.newTruckPlate || '',
       customerName: hasCustomerName ? this.customerName : null,
       notes: hasNotesField ? (this.notes || '-') : null,
+      photoTimestamp: localStorage.getItem('photoTimestamp') || null,
     };
     localStorage.setItem('tripSummary', JSON.stringify(summaryData));
 

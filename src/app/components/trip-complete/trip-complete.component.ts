@@ -22,6 +22,7 @@ export class TripCompleteComponent implements OnInit {
   empCode: string = '';
   customerName: string | null = null;
   notes: string | null = null;
+  photoTimestamp: string | null = null;
   showOverlay: boolean = true;
   
   constructor(private router: Router, private authService: AuthService) {}
@@ -41,6 +42,7 @@ export class TripCompleteComponent implements OnInit {
         this.plateNumber = summaryData.plateNumber || 'N/A';
         this.customerName = summaryData.customerName !== undefined ? summaryData.customerName : null;
         this.notes = summaryData.notes !== undefined ? summaryData.notes : null;
+        this.photoTimestamp = summaryData.photoTimestamp || this.generateCurrentTimestamp();
       } catch (error) {
         this.tripNumber = 'N/A';
       }
@@ -64,13 +66,23 @@ export class TripCompleteComponent implements OnInit {
     localStorage.removeItem('tripDriver');
     localStorage.removeItem('checklistData');
     localStorage.removeItem('newTruckPlate');
+    localStorage.removeItem('photoTimestamp');
     
     this.router.navigate(['/trip-selection']);
   }
 
-  // goToLanding() {
-  //   this.router.navigate(['/trip-selection']);
-  // }
+  generateCurrentTimestamp(): string {
+    const now = new Date();
+    
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed (Jan = 0)
+    const yyyy = now.getFullYear();
+    
+    const hh = String(now.getHours()).padStart(2, '0'); // getHours() is naturally 24-hour
+    const min = String(now.getMinutes()).padStart(2, '0');
+    
+    return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+  }
 
   logout() {
     this.authService.logout();

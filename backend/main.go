@@ -20,15 +20,17 @@ import (
 )
 
 type UploadRequest struct {
-	TripNum       string `json:"tripNum"`
-	OdometerPhotos []string `json:"odometerPhotos"` 
-    CargoPhotos    []string `json:"cargoPhotos"`
-	Condition	  string `json:"condition"`		
+	TripNum        string   `json:"tripNum"`
+	OdometerPhotos []string `json:"odometerPhotos"`
+	CargoPhotos    []string `json:"cargoPhotos"`
+	CarPhotos      []string `json:"carPhotos"`
+	Condition      string   `json:"condition"`
 }
 
 type UploadResponse struct {
-	Success bool     `json:"success"`
-	FileIDs []string `json:"fileIds"`
+	Success   bool     `json:"success"`
+	FileIDs   []string `json:"fileIds"`
+	Timestamp string   `json:"timestamp"`
 }
 
 type Claims struct {
@@ -174,35 +176,42 @@ func decodeBase64Image(data string) ([]byte, error) {
 	}
 	return base64.StdEncoding.DecodeString(data)
 }
-
+  
 func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
+		log.Printf("Method not allowed")
+		// return
 	}
+
+	// Generate timestamp immediately
+	timestamp := time.Now().Format("02/01/2006 15:04")
 
 	r.Body = http.MaxBytesReader(w, r.Body, 5<<20) // limit 20MB
 
 	var req UploadRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
-		return
+		log.Printf("Invalid request body")
+		// return
 	}
 
 	if req.TripNum == "" {
-		http.Error(w, "tripNum is required", http.StatusBadRequest)
-		return
+		// http.Error(w, "tripNum is required", http.StatusBadRequest)
+		log.Printf("tripNum is required")
+		// return
 	}
 
 	if req.Condition == "" {
-		http.Error(w, "Truck IN/OUT status is required", http.StatusBadRequest)
-		return
+		// http.Error(w, "Truck IN/OUT status is required", http.StatusBadRequest)
+		log.Printf("Truck IN/OUT status is required")
+		// return
 	}
 
 	rootFolderID := os.Getenv("DRIVE_FOLDER_ID")
 	if rootFolderID == "" {
-		http.Error(w, "DRIVE_FOLDER_ID environment variable not set", http.StatusInternalServerError)
-		return
+		// http.Error(w, "DRIVE_FOLDER_ID environment variable not set", http.StatusInternalServerError)
+		// return
+		log.Printf("DRIVE_FOLDER_ID environment variable not set")
 	}
 
 	var fileIDs []string
@@ -214,8 +223,10 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		
 		imgBytes, err := decodeBase64Image(photoData)
 		if err != nil {
-			http.Error(w, "Failed to decode odometer photo: "+err.Error(), http.StatusBadRequest)
-			return
+			// http.Error(w, "Failed to decode odometer photo: "+err.Error(), http.StatusBadRequest)
+			// return
+			log.Printf("Failed to decode odometer photo")
+			break
 		}
 		
 		// 3. Append the index (i+1) to make the filename unique (e.g., TRP123_IN_odometer_1.jpg)
@@ -224,8 +235,9 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		id, err := uploadFileToDrive(filename, imgBytes, rootFolderID)
 		if err != nil {
 			log.Printf("Failed to upload odometer photo: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			break
+			// http.Error(w, err.Error(), http.StatusInternalServerError)
+			// return
 		}
 		
 		fileIDs = append(fileIDs, id)
@@ -240,8 +252,9 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		
 		imgBytes, err := decodeBase64Image(photoData)
 		if err != nil {
-			http.Error(w, "Failed to decode cargo photo: "+err.Error(), http.StatusBadRequest)
-			return
+			// http.Error(w, "Failed to decode cargo photo: "+err.Error(), http.StatusBadRequest)
+			log.Printf("Failed to decode cargo photo")
+			break
 		}
 		
 		// Append the index (i+1) to make the filename unique
@@ -250,8 +263,9 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		id, err := uploadFileToDrive(filename, imgBytes, rootFolderID)
 		if err != nil {
 			log.Printf("Failed to upload cargo photo: %v", err)
-			http.Error(w, "Failed to upload cargo photo to Drive", http.StatusInternalServerError)
-			return
+			break
+			// http.Error(w, "Failed to upload cargo photo to Drive", http.StatusInternalServerError)
+			// return
 		}
 		
 		fileIDs = append(fileIDs, id)
@@ -259,9 +273,11 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	log.Printf("TIMESTAMP %s", timestamp)
 	json.NewEncoder(w).Encode(UploadResponse{
-		Success: true,
-		FileIDs: fileIDs,
+		Success:   true,
+		FileIDs:   fileIDs,
+		Timestamp: timestamp,
 	})
 }
 
