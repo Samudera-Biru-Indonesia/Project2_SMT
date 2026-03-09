@@ -717,4 +717,11 @@ export class OdometerComponent implements OnInit {
     };
     localStorage.setItem('odometerData', JSON.stringify(data));
   }
+
+  preventDecimals(event: KeyboardEvent) {
+    // Block period, comma, exponential 'e', plus, and minus signs
+    if (['.', ',', 'e', 'E', '+', '-'].includes(event.key)) {
+      event.preventDefault();
+    }
+  }
 }

@@ -146,12 +146,13 @@
                 id="jumlah-muatan"
                 [(ngModel)]="jumlahMuatan"
                 (ngModelChange)="onMuatanChange()"
+                (keydown)="preventDecimals($event)"
                 name="jumlahMuatan"
                 placeholder="Masukkan hasil perhitungan jumlah muatan"
                 class="odometer-input"
                 [class.input-error]="muatanMismatchWarning || showMuatanLowWarning"
                 min="0"
-                step="0.1"
+                step="1"
                 required
                 autocomplete="off"
               />
@@ -270,12 +271,13 @@
                 id="jumlah-muatan"
                 [(ngModel)]="jumlahMuatan"
                 (ngModelChange)="onMuatanChange()"
+                (keydown)="preventDecimals($event)"
                 name="jumlahMuatan"
                 placeholder="Masukkan hasil perhitungan jumlah muatan"
                 class="odometer-input"
                 [class.input-error]="muatanMismatchWarning"
                 min="0"
-                step="0.1"
+                step="1"
                 required
                 autocomplete="off"
               />
@@ -340,12 +342,13 @@
                 id="jumlah-muatan"
                 [(ngModel)]="jumlahMuatan"
                 (ngModelChange)="onMuatanChange()"
+                (keydown)="preventDecimals($event)"
                 name="jumlahMuatan"
                 placeholder="Masukkan hasil perhitungan jumlah muatan"
                 class="odometer-input"
                 [class.input-error]="muatanMismatchWarning"
                 min="0"
-                step="0.1"
+                step="1"
                 required
                 autocomplete="off"
               />
