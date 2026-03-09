@@ -10,17 +10,12 @@
     <div class="odometer-card" [class]="tripType.toLowerCase() + '-trip'">
       <!-- Trip Header Info -->
       <div class="trip-header-info">
-        @if(manualTruckPlate === 'LAINNYA' || manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
-          <div class="trip-number-display">
-            <span class="trip-label">Nama Perusahaan:</span>
-            <span class="trip-value">{{ customerName }}</span>
-          </div>
-        }
-        
+
         <div class="plate-number-display">
           <span class="plate-label">Plat Nomor:</span>
           <span class="plate-value">{{ plateNumber || newTruckPlate }}</span>
         </div>
+
 
         @if((manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') && tripType === 'OUT') {
           <div class="trip-number-display">
@@ -28,6 +23,7 @@
             <span class="trip-value">{{ tripNumber }}</span>
           </div>
         }
+
 
         @if(manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI') {
           <div class="trip-number-display">
@@ -37,6 +33,13 @@
           <div class="driver-display">
             <span class="driver-label">Driver:</span>
             <span class="driver-value">{{ tripDriver || '-' }}</span>
+          </div>
+        }
+
+        @if(manualTruckPlate === 'LAINNYA' || manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
+          <div class="trip-number-display">
+            <span class="trip-label">Nama Perusahaan:</span>
+            <span class="trip-value">{{ customerName }}</span>
           </div>
         }
       </div>
