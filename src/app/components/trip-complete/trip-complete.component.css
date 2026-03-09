@@ -1,3 +1,5 @@
+@import url('https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css');
+
 .success-overlay {
   position: fixed;
   top: 0;
@@ -183,8 +185,8 @@
 
 
 .actions-section {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+   grid-template-columns: auto auto;
   gap: 12px;
 }
 
@@ -244,7 +246,7 @@
 }
 
 .action-btn .icon {
-  font-size: 18px;
+  font-size: 22px;
 }
 
 .success-section p {
@@ -254,8 +256,8 @@
 }
 
 .actions-section {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: auto auto;
   gap: 15px;
 }
 
@@ -287,15 +289,20 @@
   color: white;
 }
 
+.action-btn.share {
+  background: linear-gradient(135deg, #2881a7 0%, #2088c9 100%);
+  color: white;
+}
+
 .action-btn .icon {
-  font-size: 20px;
+  font-size: 24px;
 }
 
 /* Enhanced Mobile Responsiveness */
 @media (max-width: 768px) {
   .complete-container {
     padding: 24px 16px;
-    padding-top: 30px;
+    /* padding-top: 30px; */
   }
   
   .complete-card {
@@ -331,14 +338,14 @@
   }
   
   .action-btn .icon {
-    font-size: 18px;
+    font-size: 22px;
   }
 }
 
 @media (max-width: 480px) {
   .complete-container {
     padding: 20px 12px;
-    padding-top: 25px;
+    /* padding-top: 25px; */
   }
   
   .complete-card {
@@ -374,6 +381,6 @@
   }
   
   .action-btn .icon {
-    font-size: 16px;
+    font-size: 20px;
   }
 }

@@ -1,3 +1,5 @@
+<link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+
 <div class="success-overlay" *ngIf="showOverlay">
   <div class="success-content">
     <div class="success-icon">✅</div>
@@ -61,9 +63,13 @@
       </div>
 
       <div class="actions-section">
+        <button class="action-btn share" (click)="startNewTrip()">
+          <span class="icon"><i class="fi fi-sr-share" style="color:white;"></i></span>
+          Bagikan Ringkasan
+        </button>
         <button class="action-btn primary" (click)="startNewTrip()">
-          <span class="icon">📱</span>
-          Mulai Perjalanan Baru
+          <span class="icon">🚛</span>
+          Perjalanan Baru
         </button>
       </div>
     </div>
