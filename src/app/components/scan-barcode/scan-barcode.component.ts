@@ -61,7 +61,9 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.loadSavedData();
+
+
+
     this.checkCameraAvailability();
     this.loadTruckList();
     this.tripType = localStorage.getItem('tripType') || '';
@@ -69,7 +71,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
     // Debounce nopol input — tunggu 600ms setelah berhenti ketik baru panggil API
     this.nopolSubject.pipe(
       debounceTime(600),
-      
       distinctUntilChanged()
     ).subscribe(nopol => {
       const tripType = localStorage.getItem('tripType');
@@ -299,12 +300,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    // Save current form data
-    localStorage.setItem('savedBarcodeInput', this.barcodeInput);
-    localStorage.setItem('savedCustomerName', this.customerName);
-    localStorage.setItem('savedManualTruckPlate', this.manualTruckPlate);
-    localStorage.setItem('savedNewTruckPlate', this.newTruckPlate);
-
+    console.log("HALO HALO BANDUNG" + this.isOthers)
     const tripType = localStorage.getItem('tripType');
 
     if(this.isOthers) {
@@ -318,6 +314,10 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       localStorage.setItem('manualTruckPlate', this.manualTruckPlate.trim());
       localStorage.setItem('newTruckPlate', this.newTruckPlate.trim());
       localStorage.setItem('tripNumber', this.manualTruckPlate);
+
+      console.log("BROOO")
+      localStorage.removeItem('currentTruckBarcode')
+
 
       // If SJ is provided, validate and fetch data
       if (this.barcodeInput.trim()) {
@@ -334,6 +334,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       }
     } else {
       if (this.barcodeInput.trim()){
+        localStorage.removeItem('manualTruckPlate')
         this.getTripDataFromAPI(this.barcodeInput.trim());
       } else {
         alert('Nomor SJ belum dipilih.');
@@ -408,10 +409,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   // setNopol
 
   onNopolChange(value: string) {
-    const shouldClearData = this.manualTruckPlate !== value;
-    if (shouldClearData) {
-      this.clearRelatedData();
-    }
     this.manualTruckPlate = value.toUpperCase();
     this.nopolSubject.next(this.manualTruckPlate);
   }
@@ -451,7 +448,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
               if (this.spkOptions.length === 1) {
                 this.barcodeInput = this.spkOptions[0].tripNumber;
               } else {
-                this.loadSavedBarcodeIfExists();
+                this.barcodeInput = '';
               }
 
               this.isLoadingSpk = false;
@@ -469,7 +466,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
           if (this.spkOptions.length === 1) {
             this.barcodeInput = this.spkOptions[0].tripNumber;
           } else {
-            this.loadSavedBarcodeIfExists();
+            this.barcodeInput = '';
           }
 
           this.isLoadingSpk = false;
@@ -530,7 +527,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   }
 
   onBarcodeInputChange() {
-    this.clearRelatedData();
     // Clear input as user types for better validation
     if (this.barcodeInput) {
       // Remove any unwanted characters and normalize
@@ -562,7 +558,6 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   }
 
   selectSpk(spk: string) {
-    this.clearRelatedData();
     this.barcodeInput = spk;
     this.spkDropdownOpen = false;
     this.spkSearchQuery = '';
@@ -645,8 +640,9 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   }
 
   onCustomerName(value: string) {
-    this.clearRelatedData();
+
     this.customerName = value.toUpperCase();
+
   }
 
   formatWaktuKeluar(waktuKeluar: string): string {
@@ -667,33 +663,5 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   getSpkDataByNumber(tripNumber: string): any {
     console.log(this.filteredSpkOptions)
     return this.spkOptionsWithData.find(spk => spk.tripNumber === tripNumber);
-  }
-
-  loadSavedData() {
-    this.barcodeInput = localStorage.getItem('savedBarcodeInput') || '';
-    this.customerName = localStorage.getItem('savedCustomerName') || '';
-    this.manualTruckPlate = localStorage.getItem('savedManualTruckPlate') || '';
-    this.newTruckPlate = localStorage.getItem('savedNewTruckPlate') || '';
-    
-    // Trigger SJ dropdown loading if nopol exists
-    if (this.manualTruckPlate) {
-      setTimeout(() => {
-        this.onNopolChange(this.manualTruckPlate);
-      }, 100);
-    }
-  }
-
-  clearRelatedData() {
-    localStorage.removeItem('checklistData');
-    localStorage.removeItem('odometerData');
-  }
-
-  loadSavedBarcodeIfExists() {
-    const savedBarcode = localStorage.getItem('savedBarcodeInput');
-    if (savedBarcode && this.spkOptions.some(option => 
-      typeof option === 'string' ? option === savedBarcode : option.tripNumber === savedBarcode
-    )) {
-      this.barcodeInput = savedBarcode;
-    }
   }
 }
