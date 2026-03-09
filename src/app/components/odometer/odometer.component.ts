@@ -62,6 +62,7 @@ export class OdometerComponent implements OnInit {
   constructor(private router: Router, private apiService: ApiService, private authService: AuthService) {}
 
   ngOnInit() {
+    this.loadSavedOdometerData();
     this.truckBarcode = localStorage.getItem('currentTruckBarcode') || '';
     this.tripType = localStorage.getItem('tripType') || '';
     this.tripNumber = localStorage.getItem('tripNumber') || '';
@@ -176,11 +177,13 @@ export class OdometerComponent implements OnInit {
   }
 
   onOdometerChange() {
+    this.saveOdometerData();
     this.showOdometerWarning = false;
     this.odometerWarningShown = false;
   }
 
   onMuatanChange() {
+    this.saveOdometerData();
     this.showMuatanLowWarning = false;
     this.muatanLowWarningShown = false;
     this.showMuatanHighWarning = false;
@@ -257,6 +260,7 @@ export class OdometerComponent implements OnInit {
           } else {
             this.carPhotos.push(compressed);
           }
+          this.saveOdometerData();
         };
         img.src = reader.result as string;
       };
@@ -274,6 +278,7 @@ export class OdometerComponent implements OnInit {
     } else {
       this.carPhotos.splice(index, 1);
     }
+    this.saveOdometerData();
   }
 
   onSubmit() {
@@ -678,5 +683,34 @@ export class OdometerComponent implements OnInit {
     } catch {
       return {};
     }
+  }
+
+  loadSavedOdometerData() {
+    const savedData = localStorage.getItem('odometerData');
+    if (savedData) {
+      try {
+        const data = JSON.parse(savedData);
+        this.odometerReading = data.odometerReading || '';
+        this.jumlahMuatan = data.jumlahMuatan || '';
+        this.notes = data.notes || '';
+        this.odometerPhotos = data.odometerPhotos || [];
+        this.cargoPhotos = data.cargoPhotos || [];
+        this.carPhotos = data.carPhotos || [];
+      } catch (error) {
+        console.error('Error loading odometer data:', error);
+      }
+    }
+  }
+
+  saveOdometerData() {
+    const data = {
+      odometerReading: this.odometerReading,
+      jumlahMuatan: this.jumlahMuatan,
+      notes: this.notes,
+      odometerPhotos: this.odometerPhotos,
+      cargoPhotos: this.cargoPhotos,
+      carPhotos: this.carPhotos
+    };
+    localStorage.setItem('odometerData', JSON.stringify(data));
   }
 }

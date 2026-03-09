@@ -82,7 +82,7 @@ func getJwtHandler(w http.ResponseWriter, r *http.Request) {
 		EmpCode:  req.EmpCode,
 		Site:     req.Site,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(3 * time.Hour)), // 3 hours
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(3 * time.Hour)), // 8 hours
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}

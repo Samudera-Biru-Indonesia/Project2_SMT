@@ -39,9 +39,10 @@ export class ChecklistComponent implements OnInit {
   constructor(private router: Router, private apiService: ApiService, private authService: AuthService) {}
 
   ngOnInit() {
+    this.loadSavedChecklistData();
 
-    localStorage.removeItem('checklistData');
-    localStorage.removeItem('tripData');
+    // localStorage.removeItem('checklistData');
+    // localStorage.removeItem('tripData');
 
     this.manualTruckPlate = localStorage.getItem('manualTruckPlate') || '';
 
@@ -141,5 +142,26 @@ export class ChecklistComponent implements OnInit {
 
   logout() {
     this.authService.logout();
+  }
+
+  loadSavedChecklistData() {
+    const savedData = localStorage.getItem('checklistData');
+    if (savedData) {
+      try {
+        const savedItems = JSON.parse(savedData);
+        savedItems.forEach((savedItem: ChecklistItem) => {
+          const item = this.checklistItems.find(i => i.id === savedItem.id);
+          if (item) {
+            item.checked = savedItem.checked;
+          }
+        });
+      } catch (error) {
+        console.error('Error loading checklist data:', error);
+      }
+    }
+  }
+
+  onChecklistChange() {
+    localStorage.setItem('checklistData', JSON.stringify(this.checklistItems));
   }
 }

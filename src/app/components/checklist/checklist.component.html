@@ -76,6 +76,7 @@
                 type="checkbox"
                 [(ngModel)]="item.checked"
                 [name]="item.id"
+                (ngModelChange)="onChecklistChange()"
               />
               <span class="checkmark"></span>
               <span class="item-text">

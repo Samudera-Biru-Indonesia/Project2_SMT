@@ -609,7 +609,8 @@ export class AuthService {
    * Check JWT expiration and logout if expired
    */
   private checkJwtExpiration(): void {
-    if (this.isJwtExpired()) {
+    if (this.isAuthenticated() && this.isJwtExpired()) {
+      console.log('JWT expired, logging out...');
       this.logout();
     }
   }

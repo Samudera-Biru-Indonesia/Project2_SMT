@@ -24,6 +24,22 @@ export class TripSelectionComponent implements OnInit {
   ngOnInit() {
     // this.truckBarcode = localStorage.getItem('currentTruckBarcode') || '';
     localStorage.removeItem('tripType'); // supaya g ngebug waktu bolak balik halaman. better setiap kali masuk ke halaman ini jadi ke-reset aja.
+    // remove all to avoid bug
+    localStorage.removeItem('tripNumber');
+    localStorage.removeItem('currentTruckBarcode');
+    localStorage.removeItem('currentTripData');
+    localStorage.removeItem('tripData');
+    localStorage.removeItem('tripSummary');
+    localStorage.removeItem('customerName');
+    localStorage.removeItem('manualTruckPlate');
+    localStorage.removeItem('tripDriver');
+    localStorage.removeItem('checklistData');
+    localStorage.removeItem('newTruckPlate');
+    localStorage.removeItem('savedBarcodeInput');
+    localStorage.removeItem('savedCustomerName');
+    localStorage.removeItem('savedManualTruckPlate');
+    localStorage.removeItem('savedNewTruckPlate');
+    localStorage.removeItem('odometerData');
 
     // if (!this.truckBarcode) {
     //   this.router.navigate(['/scan-barcode']);
