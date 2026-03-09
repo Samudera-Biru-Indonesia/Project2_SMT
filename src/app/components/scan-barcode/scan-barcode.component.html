@@ -125,10 +125,18 @@
                       <div
                         *ngFor="let spk of filteredSpkOptions"
                         class="spk-option"
-                        [class.selected]="barcodeInput === spk"
-                        (click)="selectSpk(spk)"
+                        [class.selected]="barcodeInput === (spk.tripNumber || spk)"
+                        (click)="selectSpk(spk.tripNumber || spk)"
                       >
-                        {{ spk }}
+                        {{ spk.tripNumber ?? spk }}
+                        @if (tripType === 'IN') {
+                          <div style="margin-left:auto; text-align:right; color:gray;">
+                            Keluar
+                            <br>
+                            {{ spk.waktuKeluar !== '0001-01-01T00:00:00' ? (spk.waktuKeluar | date:'dd/MM/YYYY, HH:mm') : '-' }}
+                          </div>
+                        }
+                        
                       </div>
                       <div class="spk-no-result" *ngIf="filteredSpkOptions.length === 0">
                         {{ spkOptions.length === 0 ? 'Tidak ada SJ untuk Nopol yang tertera.' : 'Tidak ditemukan' }}

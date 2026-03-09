@@ -24,7 +24,8 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   customerName: string ='';
   manualTruckPlate: string = '';
   newTruckPlate: string = '';
-  spkOptions: string[] = [];
+  spkOptions: { tripNumber: string, waktuKeluar: string }[] = [];
+  spkOptionsWithData: any[] = [];
   spkDropdownOpen: boolean = false;
   spkSearchQuery: string = '';
   isLoadingSpk: boolean = false;
@@ -437,11 +438,21 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
               const tripOutSet = new Set(tripOut.map((t: any) => t.TripNum));
 
               this.spkOptions = trips
-                .map((t: any) => t.tripNumber ?? '')
-                .filter((tripNum: string) => tripNum.length > 0 && tripOutSet.has(tripNum));
+                .filter((t: any) => {
+                    const num = t.tripNumber ?? '';
+                    return num.length > 0 && tripOutSet.has(num);
+                })
+                // 2. MAP TO A NEW OBJECT (keeping both properties)
+                .map((t: any) => {
+                    return {
+                        tripNumber: t.tripNumber,
+                        waktuKeluar: t.waktuKeluar
+                    };
+                });
+                
 
               if (this.spkOptions.length === 1) {
-                this.barcodeInput = this.spkOptions[0];
+                this.barcodeInput = this.spkOptions[0].tripNumber;
               } else {
                 this.barcodeInput = '';
               }
@@ -459,7 +470,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
             .filter((tripNum: string) => tripNum.length > 0);
 
           if (this.spkOptions.length === 1) {
-            this.barcodeInput = this.spkOptions[0];
+            this.barcodeInput = this.spkOptions[0].tripNumber;
           } else {
             this.barcodeInput = '';
           }
@@ -541,10 +552,10 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
     // return this.validateDetectedBarcodeEnhanced(this.barcodeInput.trim());
   }
 
-  get filteredSpkOptions(): string[] {
+  get filteredSpkOptions(): any[] {
     if (!this.spkSearchQuery.trim()) return this.spkOptions;
     const q = this.spkSearchQuery.trim().toUpperCase();
-    return this.spkOptions.filter(s => s.toUpperCase().includes(q));
+    return this.spkOptions.filter(s => s.tripNumber.toUpperCase().includes(q));
   }
 
   toggleSpkDropdown() {
@@ -638,5 +649,25 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
     this.customerName = value.toUpperCase();
 
+  }
+
+  formatWaktuKeluar(waktuKeluar: string): string {
+    if (!waktuKeluar || waktuKeluar === '0001-01-01T00:00:00') return '';
+    try {
+      const date = new Date(waktuKeluar);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      return `${day}/${month}/${year} ${hours}:${minutes}`;
+    } catch {
+      return '';
+    }
+  }
+
+  getSpkDataByNumber(tripNumber: string): any {
+    console.log(this.filteredSpkOptions)
+    return this.spkOptionsWithData.find(spk => spk.tripNumber === tripNumber);
   }
 }

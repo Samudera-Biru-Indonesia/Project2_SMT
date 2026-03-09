@@ -901,6 +901,8 @@ label.required::after {
   cursor: pointer;
   text-align: left;
   transition: background 0.15s ease;
+  display: flex;
+  align-items: center;
 }
 
 .spk-option:hover {
