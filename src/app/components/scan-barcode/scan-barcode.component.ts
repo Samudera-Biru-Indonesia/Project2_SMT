@@ -325,6 +325,11 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
       // If SJ is provided, validate and fetch data
       if (this.barcodeInput.trim()) {
+        // Set flag for freetext SJ if RELASI/VENDOR/EKSPEDISI with SJ input
+        if (this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
+          localStorage.setItem('isFreetextSJ', 'true');
+          localStorage.setItem('freetextSJValue', this.barcodeInput.trim());
+        }
         this.getTripDataFromAPI(this.barcodeInput.trim());
         return;
       }

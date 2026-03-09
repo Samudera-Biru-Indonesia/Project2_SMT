@@ -333,7 +333,7 @@ export class ApiService {
     return this.http.post<GetTotalFromTripNumberResponse>(url, { tripNumber }, { headers });
   }
 
-  getOrderDetails(company: string, plant: string, tripNumber: string): Observable<GetOrderDetailsResponse> {
+  getOrderDetails(company: string, plant: string, tripNumber: string, sjNumber: string): Observable<GetOrderDetailsResponse> {
     const currentEnv = this.environmentService.getCurrentEnvironment();
     const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
     const url = currentEnv.baseUrl + this.endpoints.getOrderDetails;
@@ -346,10 +346,15 @@ export class ApiService {
       'x-api-key': currentEnv.apiKey
     });
 
+    if (sjNumber) {
+      tripNumber = '';
+    }
+
     const body = {
       Company: company,
       Plant: plant,
-      TripNumber: tripNumber
+      TripNumber: tripNumber,
+      SJNumber: sjNumber
     };
 
     return this.http.post<GetOrderDetailsResponse>(url, body, { headers });

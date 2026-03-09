@@ -128,8 +128,9 @@ export class OdometerComponent implements OnInit {
     this.isLoading = true;
     const company = localStorage.getItem('currentCompany') || '';
     const plant = localStorage.getItem('currentPlant') || '';
+    const sjNumber = localStorage.getItem('isFreetextSJ') === 'true' ? localStorage.getItem('freetextSJValue') || '' : '';
 
-    this.apiService.getOrderDetails(company, plant, tripNumberStr)
+    this.apiService.getOrderDetails(company, plant, tripNumberStr, sjNumber)
       .pipe(timeout(30000))
       .subscribe({
         next: (response: GetOrderDetailsResponse) => {
@@ -145,7 +146,7 @@ export class OdometerComponent implements OnInit {
           if (err.name === 'TimeoutError') {
             alert('Koneksi ke server lambat, data order tidak dapat dimuat. Anda tetap dapat melanjutkan pengisian.');
           } else {
-            alert('Error connecting to server.');
+            // alert('Error connecting to server.');
           }
         },
       });
@@ -457,7 +458,13 @@ export class OdometerComponent implements OnInit {
         tripData.odometer = odometerValue;
         tripData.note = this.notes || '';
         tripData.jumlahMuatan = jumlahMuatanValue;
-        tripData.manualTruckPlate = this.manualTruckPlate || '';
+
+        if(this.newTruckPlate) {
+          tripData.manualTruckPlate = this.newTruckPlate || '';
+        } else {
+          tripData.manualTruckPlate = this.manualTruckPlate || '';
+        }
+        
         tripData.companyName = this.customerName || '';
         tripData.fullName = authUser.fullName || '';
         tripData.empCode = authUser.empCode || '';
@@ -478,7 +485,7 @@ export class OdometerComponent implements OnInit {
         note: this.notes || '',
         tripDriver: this.tripDriver || '',
         jumlahMuatan: jumlahMuatanValue,
-        manualTruckPlate: this.manualTruckPlate || '',
+        manualTruckPlate: this.newTruckPlate || this.manualTruckPlate || '',
         companyName: this.customerName || '',
         fullName: authUser.fullName || '',
         empCode: authUser.empCode || '',
@@ -552,7 +559,7 @@ export class OdometerComponent implements OnInit {
 
     // 5. Navigate
     this.router.navigate(['/trip-complete']).then(() => {
-      alert('Data trip berhasil dikirim ke server dan diproses ke Epicor!');
+      // alert('Data trip berhasil dikirim ke server dan diproses ke Epicor!');
     });
   }
 
