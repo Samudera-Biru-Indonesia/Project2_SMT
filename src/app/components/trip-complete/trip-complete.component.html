@@ -79,14 +79,17 @@
 
 <!-- Share Modal -->
 <div class="modal-overlay" *ngIf="showShareModal" (click)="closeShareModal()">
-  <div class="modal-alert" (click)="$event.stopPropagation()">
+  <div class="modal-alert" (click)="$event.stopPropagation()" style="position:relative;">
+    <button (click)="closeShareModal()" style="color:black; background:transparent; border-color: transparent; position:absolute; right: 25px; top:15px; font-size: 40px;">×</button>
+    <!-- <div style="display:flex; width:100%; justify-content: center;"> -->
     <h3 class="modal-title">Bagikan Ringkasan</h3>
+    <!-- </div> -->
     <div class="modal-actions">
-      <button class="action-btn share" style="width:100%; margin:10px 0;" (click)="downloadSummary()">
-        📥 Unduh
-      </button>
       <button class="action-btn primary" style="width:100%; align-items: center;" (click)="shareToWhatsApp()">
         <i class="fi fi-brands-whatsapp"></i> Kirim ke WhatsApp
+      </button>
+      <button class="action-btn share" style="width:100%; margin:18px 0;" (click)="downloadSummary()">
+        <i class="fi fi-sr-download"></i> Unduh
       </button>
     </div>
   </div>

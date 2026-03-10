@@ -79,6 +79,11 @@
   text-align: center;
 }
 
+.action-btn.cancel {
+  background: #dc3545;
+  color: white;
+}
+
 /* OUT trip style - red background */
 .complete-card.out-trip {
   background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
@@ -177,8 +182,8 @@
 .modal-title {
   font-size: 18px;
   font-weight: 700;
-  color: #dc3545;
-  margin: 0 0 12px 0;
+  color: #3c3c3c;
+  margin: 15px 0 30px 0;
 }
 
 .modal-alert {
@@ -239,10 +244,10 @@
   color: #333;
 }
 
-.action-btn:hover {
+/* .action-btn:hover {
   border-color: #999;
   background: #f8f9fa;
-}
+} */
 
 .action-btn.primary {
   background: #007bff;
@@ -250,10 +255,10 @@
   color: white;
 }
 
-.action-btn.primary:hover {
+/* .action-btn.primary:hover {
   background: #0056b3;
   border-color: #0056b3;
-}
+} */
 
 /* OUT trip button - red */
 .complete-card.out-trip .action-btn.primary {
