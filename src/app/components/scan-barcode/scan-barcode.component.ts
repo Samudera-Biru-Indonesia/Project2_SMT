@@ -772,18 +772,23 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   }
 
   confirmSJChange() {
+    // Right button: "Ubah SJ" - erase data and change SJ
     this.applySJChange(this.pendingSJValue, this.pendingSJType);
     this.showConfirmModal = false;
     this.pendingSJValue = '';
   }
 
   cancelSJChange() {
+    // Left button: "SJ salah ketik" - keep data, but still change SJ
+    this.barcodeInput = this.pendingSJValue;
+    
+    if (this.pendingSJType === 'dropdown') {
+      this.spkDropdownOpen = false;
+      this.spkSearchQuery = '';
+    }
+    
     this.showConfirmModal = false;
     this.pendingSJValue = '';
-    
-    if (this.pendingSJType === 'freetext') {
-      const savedValue = localStorage.getItem('savedBarcodeInput') || '';
-      this.barcodeInput = savedValue;
-    }
+    this.clearError();
   }
 }
