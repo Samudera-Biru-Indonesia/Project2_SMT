@@ -43,6 +43,9 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
   errorTitle: string = '';
   isOthers: boolean = false;
+  showConfirmModal: boolean = false;
+  pendingSJValue: string = '';
+  pendingSJType: 'dropdown' | 'freetext' = 'dropdown';
 
   private nopolSubject = new Subject<string>();
   private codeReader: BrowserMultiFormatReader;
@@ -577,18 +580,13 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   }
 
   selectSpk(spk: string) {
-    localStorage.removeItem('checklistData');
-    localStorage.removeItem('odometerData');
-    localStorage.removeItem('savedBarcodeInput');
-    localStorage.removeItem('savedCustomerName');
-    localStorage.removeItem('savedManualTruckPlate');
-    localStorage.removeItem('savedNewTruckPlate');
-    localStorage.removeItem('isFreetextSJ');
-    localStorage.removeItem('freetextSJValue');
-    this.barcodeInput = spk;
-    this.spkDropdownOpen = false;
-    this.spkSearchQuery = '';
-    this.clearError();
+    if (this.hasExistingData()) {
+      this.pendingSJValue = spk;
+      this.pendingSJType = 'dropdown';
+      this.showConfirmModal = true;
+      return;
+    }
+    this.applySJChange(spk, 'dropdown');
   }
 
   loadTruckList() {
@@ -710,6 +708,82 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       typeof option === 'string' ? option === savedBarcode : option.tripNumber === savedBarcode
     )) {
       this.barcodeInput = savedBarcode;
+    }
+  }
+
+  getSubmitDisabledMessage(): string {
+    if (this.isLoadingTripData) return 'Sedang memuat data...';
+    if (this.isOthers) {
+      if (!this.customerName.trim()) return 'Nama perusahaan belum diisi';
+      if (!this.isValidIndonesianPlate(this.newTruckPlate)) return 'Format plat nomor tidak valid';
+    } else {
+      if (this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI' && !this.barcodeInput.trim()) {
+        return 'Nomor SJ belum dipilih';
+      }
+    }
+    return 'Form belum lengkap';
+  }
+
+  onButtonClick(event: Event): boolean {
+    const button = event.target as HTMLButtonElement;
+    const isDisabled = this.isLoadingTripData || (this.isOthers && (!this.customerName.trim() || !this.isValidIndonesianPlate(this.newTruckPlate))) || (!this.isOthers && this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI' && !this.barcodeInput.trim());
+    
+    if (isDisabled) {
+      event.preventDefault();
+      event.stopPropagation();
+      alert(this.getSubmitDisabledMessage());
+      return false;
+    }
+    return true;
+  }
+
+  onFreetextSJChange(value: string) {
+    if (this.hasExistingData()) {
+      this.pendingSJValue = value;
+      this.pendingSJType = 'freetext';
+      this.showConfirmModal = true;
+      return;
+    }
+    this.applySJChange(value, 'freetext');
+  }
+
+  hasExistingData(): boolean {
+    return !!(localStorage.getItem('checklistData') || localStorage.getItem('odometerData'));
+  }
+
+  applySJChange(value: string, type: 'dropdown' | 'freetext') {
+    localStorage.removeItem('checklistData');
+    localStorage.removeItem('odometerData');
+    localStorage.removeItem('savedBarcodeInput');
+    localStorage.removeItem('savedCustomerName');
+    localStorage.removeItem('savedManualTruckPlate');
+    localStorage.removeItem('savedNewTruckPlate');
+    localStorage.removeItem('isFreetextSJ');
+    localStorage.removeItem('freetextSJValue');
+    
+    this.barcodeInput = value;
+    
+    if (type === 'dropdown') {
+      this.spkDropdownOpen = false;
+      this.spkSearchQuery = '';
+    }
+    
+    this.clearError();
+  }
+
+  confirmSJChange() {
+    this.applySJChange(this.pendingSJValue, this.pendingSJType);
+    this.showConfirmModal = false;
+    this.pendingSJValue = '';
+  }
+
+  cancelSJChange() {
+    this.showConfirmModal = false;
+    this.pendingSJValue = '';
+    
+    if (this.pendingSJType === 'freetext') {
+      const savedValue = localStorage.getItem('savedBarcodeInput') || '';
+      this.barcodeInput = savedValue;
     }
   }
 }

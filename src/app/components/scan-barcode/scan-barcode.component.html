@@ -97,6 +97,7 @@
                   placeholder="Ketik nomor SJ"
                   class="text-input"
                   autocomplete="off"
+                  (ngModelChange)="onFreetextSJChange($event)"
                 />
               } @else {
                 <!-- Dropdown for other trucks -->
@@ -205,4 +206,19 @@
       </div>
     </div>
   </main>
+
+  <!-- Modal: Konfirmasi Ganti SJ -->
+  <div class="modal-overlay" *ngIf="showConfirmModal">
+    <div class="modal-alert">
+      <div class="modal-icon">⚠️</div>
+      <h3 class="modal-title">Ganti Nomor SJ?</h3>
+      <p class="modal-message">
+        Data checklist dan odometer yang sudah diisi akan hilang jika Anda mengganti nomor SJ.
+      </p>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" (click)="cancelSJChange()">Batal</button>
+        <button class="modal-btn modal-btn-confirm" (click)="confirmSJChange()">Tetap Lanjutkan</button>
+      </div>
+    </div>
+  </div>
 </div>
