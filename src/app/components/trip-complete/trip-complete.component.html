@@ -81,8 +81,13 @@
 <div class="modal-overlay" *ngIf="showShareModal" (click)="closeShareModal()">
   <div class="modal-alert" (click)="$event.stopPropagation()" style="position:relative;">
     <button (click)="closeShareModal()" style="color:black; background:transparent; border-color: transparent; position:absolute; right: 25px; top:15px; font-size: 40px;">×</button>
-    <!-- <div style="display:flex; width:100%; justify-content: center;"> -->
-    <h3 class="modal-title">Bagikan Ringkasan</h3>
+    <div style="display:flex; width:100%; justify-content: center; margin: 30px 0 30px 0;">
+      <span class="icon modal-title" style="margin-right:15px;"><i class="fi fi-sr-share"></i></span>
+      <h3 class="modal-title">Bagikan Ringkasan</h3>
+    </div>
+    <div *ngIf="summaryCanvas" style="margin: 20px 0; text-align: center;">
+      <img [src]="summaryCanvas.toDataURL()" style="max-height: 40vh; width: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+    
     <!-- </div> -->
     <div class="modal-actions">
       <button class="action-btn primary" style="width:100%; align-items: center;" (click)="shareToWhatsApp()">

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-trip-complete',
@@ -25,6 +26,7 @@ export class TripCompleteComponent implements OnInit {
   photoTimestamp: string | null = null;
   showOverlay: boolean = true;
   showShareModal: boolean = false;
+  summaryCanvas: HTMLCanvasElement | null = null;
   
   constructor(private router: Router, private authService: AuthService) {}
 
@@ -105,7 +107,13 @@ export class TripCompleteComponent implements OnInit {
   }
 
   openShareModal() {
-    this.showShareModal = true;
+    const summaryElement = document.querySelector('.trip-summary-info') as HTMLElement;
+    if (summaryElement) {
+      html2canvas(summaryElement).then((canvas: HTMLCanvasElement) => {
+        this.summaryCanvas = canvas;
+        this.showShareModal = true;
+      });
+    }
   }
 
   closeShareModal() {
@@ -113,14 +121,34 @@ export class TripCompleteComponent implements OnInit {
   }
 
   downloadSummary() {
-    // TODO: Implement download functionality
-    console.log('Download summary');
+    if (this.summaryCanvas) {
+      const link = document.createElement('a');
+      link.download = 'ringkasan-perjalanan.png';
+      link.href = this.summaryCanvas.toDataURL();
+      link.click();
+    }
     this.closeShareModal();
   }
 
   shareToWhatsApp() {
-    // TODO: Implement WhatsApp sharing
-    console.log('Share to WhatsApp');
+    if (this.summaryCanvas) {
+      this.summaryCanvas.toBlob((blob) => {
+        if (blob && navigator.share) {
+          const file = new File([blob], 'ringkasan-perjalanan.png', { type: 'image/png' });
+          navigator.share({
+            files: [file],
+            title: 'Ringkasan Perjalanan',
+            text: 'Ringkasan perjalanan truck'
+          }).catch(console.error);
+        } else if (this.summaryCanvas) {
+          // Fallback: download the image
+          const link = document.createElement('a');
+          link.download = 'ringkasan-perjalanan.png';
+          link.href = this.summaryCanvas.toDataURL();
+          link.click();
+        }
+      });
+    }
     this.closeShareModal();
   }
 }
