@@ -1,4 +1,5 @@
 <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+<link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-brands/css/uicons-brands.css'>
 
 <div class="success-overlay" *ngIf="showOverlay">
   <div class="success-content">
@@ -63,7 +64,7 @@
       </div>
 
       <div class="actions-section">
-        <button class="action-btn share" (click)="startNewTrip()">
+        <button class="action-btn share" (click)="openShareModal()">
           <span class="icon"><i class="fi fi-sr-share" style="color:white;"></i></span>
           Bagikan Ringkasan
         </button>
@@ -74,4 +75,19 @@
       </div>
     </div>
   </main>
+</div>
+
+<!-- Share Modal -->
+<div class="modal-overlay" *ngIf="showShareModal" (click)="closeShareModal()">
+  <div class="modal-alert" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">Bagikan Ringkasan</h3>
+    <div class="modal-actions">
+      <button class="action-btn share" style="width:100%; margin:10px 0;" (click)="downloadSummary()">
+        📥 Unduh
+      </button>
+      <button class="action-btn primary" style="width:100%; align-items: center;" (click)="shareToWhatsApp()">
+        <i class="fi fi-brands-whatsapp"></i> Kirim ke WhatsApp
+      </button>
+    </div>
+  </div>
 </div>

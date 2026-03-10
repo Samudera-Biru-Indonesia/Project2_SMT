@@ -540,6 +540,12 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   onBarcodeInputChange() {
     localStorage.removeItem('checklistData');
     localStorage.removeItem('odometerData');
+    localStorage.removeItem('savedBarcodeInput');
+    localStorage.removeItem('savedCustomerName');
+    localStorage.removeItem('savedManualTruckPlate');
+    localStorage.removeItem('savedNewTruckPlate');
+    localStorage.removeItem('isFreetextSJ');
+    localStorage.removeItem('freetextSJValue');
     // Clear input as user types for better validation
     if (this.barcodeInput) {
       // Remove any unwanted characters and normalize
@@ -573,6 +579,12 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
   selectSpk(spk: string) {
     localStorage.removeItem('checklistData');
     localStorage.removeItem('odometerData');
+    localStorage.removeItem('savedBarcodeInput');
+    localStorage.removeItem('savedCustomerName');
+    localStorage.removeItem('savedManualTruckPlate');
+    localStorage.removeItem('savedNewTruckPlate');
+    localStorage.removeItem('isFreetextSJ');
+    localStorage.removeItem('freetextSJValue');
     this.barcodeInput = spk;
     this.spkDropdownOpen = false;
     this.spkSearchQuery = '';

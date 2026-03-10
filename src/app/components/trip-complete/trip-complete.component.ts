@@ -24,6 +24,7 @@ export class TripCompleteComponent implements OnInit {
   notes: string | null = null;
   photoTimestamp: string | null = null;
   showOverlay: boolean = true;
+  showShareModal: boolean = false;
   
   constructor(private router: Router, private authService: AuthService) {}
 
@@ -47,6 +48,21 @@ export class TripCompleteComponent implements OnInit {
         this.tripNumber = 'N/A';
       }
     }
+
+    localStorage.removeItem('tripNumber');
+    localStorage.removeItem('tripType');
+    localStorage.removeItem('currentTruckBarcode');
+    localStorage.removeItem('currentTripData');
+    localStorage.removeItem('tripData');
+    localStorage.removeItem('tripSummary');
+    localStorage.removeItem('customerName');
+    localStorage.removeItem('manualTruckPlate');
+    localStorage.removeItem('tripDriver');
+    localStorage.removeItem('checklistData');
+    localStorage.removeItem('newTruckPlate');
+    localStorage.removeItem('photoTimestamp');
+    // localStorage.removeItem('trips');
+    // localStorage.removeItem('odometerData');
 
     setTimeout(() => {
       this.showOverlay = false;
@@ -86,5 +102,25 @@ export class TripCompleteComponent implements OnInit {
 
   logout() {
     this.authService.logout();
+  }
+
+  openShareModal() {
+    this.showShareModal = true;
+  }
+
+  closeShareModal() {
+    this.showShareModal = false;
+  }
+
+  downloadSummary() {
+    // TODO: Implement download functionality
+    console.log('Download summary');
+    this.closeShareModal();
+  }
+
+  shareToWhatsApp() {
+    // TODO: Implement WhatsApp sharing
+    console.log('Share to WhatsApp');
+    this.closeShareModal();
   }
 }
