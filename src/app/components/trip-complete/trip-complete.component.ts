@@ -27,6 +27,9 @@ export class TripCompleteComponent implements OnInit {
   showOverlay: boolean = true;
   showShareModal: boolean = false;
   summaryCanvas: HTMLCanvasElement | null = null;
+  odometerPhotos: string[] = [];
+  cargoPhotos: string[] = [];
+  isShowImages: boolean = false;
   
   constructor(private router: Router, private authService: AuthService) {}
 
@@ -46,6 +49,8 @@ export class TripCompleteComponent implements OnInit {
         this.customerName = summaryData.customerName !== undefined ? summaryData.customerName : null;
         this.notes = summaryData.notes !== undefined ? summaryData.notes : null;
         this.photoTimestamp = summaryData.photoTimestamp || this.generateCurrentTimestamp();
+        this.odometerPhotos = summaryData.odometerPhotos || [];
+        this.cargoPhotos = summaryData.cargoPhotos || [];
       } catch (error) {
         this.tripNumber = 'N/A';
       }
@@ -107,16 +112,20 @@ export class TripCompleteComponent implements OnInit {
   }
 
   openShareModal() {
-    const summaryElement = document.querySelector('.trip-summary-info') as HTMLElement;
-    if (summaryElement) {
-      html2canvas(summaryElement).then((canvas: HTMLCanvasElement) => {
-        this.summaryCanvas = canvas;
-        this.showShareModal = true;
-      });
-    }
+    this.isShowImages = true;
+    setTimeout(() => {
+      const summaryElement = document.querySelector('.trip-summary-info') as HTMLElement;
+      if (summaryElement) {
+        html2canvas(summaryElement).then((canvas: HTMLCanvasElement) => {
+          this.summaryCanvas = canvas;
+          this.showShareModal = true;
+        });
+      }
+    }, 100)
   }
 
   closeShareModal() {
+    this.isShowImages = false;
     this.showShareModal = false;
   }
 
@@ -127,7 +136,7 @@ export class TripCompleteComponent implements OnInit {
       link.href = this.summaryCanvas.toDataURL();
       link.click();
     }
-    this.closeShareModal();
+    // this.closeShareModal();
   }
 
   shareToWhatsApp() {
@@ -149,6 +158,6 @@ export class TripCompleteComponent implements OnInit {
         }
       });
     }
-    this.closeShareModal();
+    // this.closeShareModal();
   }
 }

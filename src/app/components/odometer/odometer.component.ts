@@ -129,7 +129,8 @@ export class OdometerComponent implements OnInit {
     this.isLoading = true;
     const company = localStorage.getItem('currentCompany') || '';
     const plant = localStorage.getItem('currentPlant') || '';
-    const sjNumber = localStorage.getItem('isFreetextSJ') === 'true' ? localStorage.getItem('freetextSJValue') || '' : '';
+    const sjNumber ='';
+    // const sjNumber = localStorage.getItem('isFreetextSJ') === 'true' ? localStorage.getItem('freetextSJValue') || '' : '';
 
     this.apiService.getOrderDetails(company, plant, tripNumberStr, sjNumber)
       .pipe(timeout(30000))
@@ -555,6 +556,8 @@ export class OdometerComponent implements OnInit {
       customerName: hasCustomerName ? this.customerName : null,
       notes: hasNotesField ? (this.notes || '-') : null,
       photoTimestamp: localStorage.getItem('photoTimestamp') || null,
+      odometerPhotos: this.odometerPhotos || [],
+      cargoPhotos: this.cargoPhotos || []
     };
     localStorage.setItem('tripSummary', JSON.stringify(summaryData));
 

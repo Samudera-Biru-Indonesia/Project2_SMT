@@ -165,6 +165,24 @@
   background: #28a745;
 }
 
+.photo-section {
+  margin-top: 8px;
+}
+
+.photo-grid {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.photo-thumbnail {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;

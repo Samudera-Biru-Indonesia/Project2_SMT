@@ -48,9 +48,19 @@
             <span class="summary-label">Odometer:</span>
             <span class="summary-value">{{ odometer }} km</span>
           </div>
+          <div class="photo-section" *ngIf="odometerPhotos.length > 0 && isShowImages">
+            <div class="photo-grid">
+              <img *ngFor="let photo of odometerPhotos" [src]="photo" class="photo-thumbnail" />
+            </div>
+          </div>
           <div class="summary-item" *ngIf="jumlahMuatan !== null">
             <span class="summary-label">Jumlah Muatan:</span>
             <span class="summary-value">{{ jumlahMuatan }}</span>
+          </div>
+          <div class="photo-section" *ngIf="cargoPhotos.length > 0 && isShowImages">
+            <div class="photo-grid">
+              <img *ngFor="let photo of cargoPhotos" [src]="photo" class="photo-thumbnail" />
+            </div>
           </div>
           <div class="summary-item" *ngIf="notes !== null">
             <span class="summary-label">Catatan:</span>
@@ -86,7 +96,7 @@
       <h3 class="modal-title">Bagikan Ringkasan</h3>
     </div>
     <div *ngIf="summaryCanvas" style="margin: 20px 0; text-align: center;">
-      <img [src]="summaryCanvas.toDataURL()" style="max-height: 40vh; width: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+      <img [src]="summaryCanvas.toDataURL()" style="max-height: 40vh; max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
     
     <!-- </div> -->
     <div class="modal-actions">
