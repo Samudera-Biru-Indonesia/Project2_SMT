@@ -129,7 +129,7 @@
                         (click)="selectSpk(spk.tripNumber || spk)"
                       >
                         {{ spk.tripNumber ?? spk }}
-                        @if (tripType === 'IN') {
+                        @if (tripType === 'IN' && spk.waktuKeluar) {
                           <div style="margin-left:auto; text-align:right; color:gray;">
                             Keluar
                             <br>
