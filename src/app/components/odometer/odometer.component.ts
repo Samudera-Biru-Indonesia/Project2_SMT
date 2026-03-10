@@ -78,7 +78,8 @@ export class OdometerComponent implements OnInit {
         this.fetchOdometer();
       }
     } else {
-      alert('Mohon ulangi isi nomor SJ. Sistem gagal mendapatkan nomor SJ.');
+      alert('Silahkan memulai perjalanan baru.');
+      this.router.navigate(['/trip-selection']);
     }
 
     // Get plate number from trip data if available
