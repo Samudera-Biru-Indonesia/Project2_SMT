@@ -147,7 +147,7 @@ export class TripCompleteComponent implements OnInit {
           navigator.share({
             files: [file],
             title: 'Ringkasan Perjalanan',
-            text: 'Ringkasan perjalanan truck'
+            text: `LKLMK ${this.tripType} ${this.plateNumber} ${this.photoTimestamp}`
           }).catch(console.error);
         } else if (this.summaryCanvas) {
           // Fallback: download the image
