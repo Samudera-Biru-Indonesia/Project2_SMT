@@ -662,6 +662,8 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
   isValidIndonesianPlate(plate: string): boolean {
     if (!plate || !plate.trim()) return false;
+
+    if(this.manualTruckPlate === 'LAINNYA') return true;
     // Indonesian plate format: 1-2 letters + 1-4 digits + 1-3 letters
     // Examples: B1234ABC, AB123CD, D456E
     const plateRegex = /^[A-Z]{1,2}\s?\d{1,4}\s?[A-Z]{1,3}$/;
