@@ -631,6 +631,11 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
     this.truckDropdownOpen = false;
     this.truckSearchQuery = '';
     
+    // Clear SJ when switching trucks
+    this.barcodeInput = '';
+    this.spkOptions = [];
+    localStorage.removeItem('savedBarcodeInput');
+    
     this.onNopolChange(plate);
   }
 
