@@ -474,13 +474,18 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
           });
         } else {
           this.spkOptions = trips
-            .map((t: any) => t.tripNumber ?? '')
-            .filter((tripNum: string) => tripNum.length > 0);
+            .map((t: any) => ({
+              tripNumber: t.tripNumber ?? '',
+              waktuKeluar: t.waktuKeluar ?? ''
+            }))
+            .filter((item: any) => item.tripNumber.length > 0);
 
           if (this.spkOptions.length === 1) {
             this.barcodeInput = this.spkOptions[0].tripNumber;
-          } else {
+          } else if (this.spkOptions.length > 1) {
             this.loadSavedBarcodeIfExists();
+          } else {
+            this.barcodeInput = '';
           }
 
           this.isLoadingSpk = false;
@@ -716,6 +721,8 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
     )) {
       this.barcodeInput = savedBarcode;
     }
+
+    console.log(this.spkOptions)
   }
 
   getSubmitDisabledMessage(): string {
