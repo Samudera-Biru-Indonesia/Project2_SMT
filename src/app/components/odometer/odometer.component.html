@@ -91,7 +91,7 @@
                 <div class="photo-actions">
                   <label class="photo-btn camera-btn" style="color: white;">
                     <img src="https://uxwing.com/wp-content/themes/uxwing/download/video-photography-multimedia/camera-white-icon.png" style="height:15px; width:15px; margin-right:8px; " alt=""> Kamera
-                    <input type="file" accept="image/*" multiple (change)="onPhotoSelected($event, 'odometer')" hidden />
+                    <input type="file" accept="image/*" multiple capture="environment" (change)="onPhotoSelected($event, 'odometer')" hidden />
                   </label>
                 </div>
                 
