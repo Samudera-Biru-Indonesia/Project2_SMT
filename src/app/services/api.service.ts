@@ -77,6 +77,7 @@ export interface Truck {
   truckPlate: string;
   truckDesc: string;
   plantList: string;
+  waktuKeluar: string;
 }
 
 export interface GetTruckListResponse {
