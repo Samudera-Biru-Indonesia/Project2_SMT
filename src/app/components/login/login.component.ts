@@ -31,6 +31,7 @@ export class LoginComponent {
   dropdownOpen: boolean = false;
   selectedPlantText: string = '';
   siteWarning: string = '';
+  siteSearchQuery: string = '';
 
   // Environment selection properties
   environments: ApiEnvironment[] = [];
@@ -220,9 +221,19 @@ export class LoginComponent {
     });
   }
 
+  get filteredAccessiblePlants(): Plant[] {
+    if (!this.siteSearchQuery.trim()) return this.accessiblePlants;
+    const q = this.siteSearchQuery.trim().toUpperCase();
+    return this.accessiblePlants.filter(plant => 
+      plant.Plant.toUpperCase().includes(q) || 
+      plant.Name.toUpperCase().includes(q)
+    );
+  }
+
   // Custom dropdown methods
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;
+    if (this.dropdownOpen) this.siteSearchQuery = '';
   }
 
   selectSite(plantCode: string, displayText: string) {

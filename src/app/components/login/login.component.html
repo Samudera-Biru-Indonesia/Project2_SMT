@@ -26,11 +26,26 @@
             <span class="dropdown-arrow">▼</span>
           </div>
           <div class="dropdown-options" [hidden]="!dropdownOpen">
-            <div class="dropdown-option"
-                 *ngFor="let plant of accessiblePlants"
-                 [class.selected]="site === plant.Plant"
-                 (click)="selectSite(plant.Plant, plant.Name)">
-              <div class="option-name">{{ plant.Name }}</div>
+            <div class="search-wrapper">
+              <input
+                type="text"
+                [(ngModel)]="siteSearchQuery"
+                name="siteSearch"
+                placeholder="Cari site..."
+                class="search-input"
+                (click)="$event.stopPropagation()"
+              />
+            </div>
+            <div class="options-list">
+              <div class="dropdown-option"
+                   *ngFor="let plant of filteredAccessiblePlants"
+                   [class.selected]="site === plant.Plant"
+                   (click)="selectSite(plant.Plant, plant.Name)">
+                <div class="option-name">{{ plant.Name }}</div>
+              </div>
+              <div class="no-result" *ngIf="filteredAccessiblePlants.length === 0">
+                {{ accessiblePlants.length === 0 ? 'Tidak ada site tersedia' : 'Tidak ditemukan' }}
+              </div>
             </div>
           </div>
         </div>
