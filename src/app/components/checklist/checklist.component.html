@@ -16,7 +16,7 @@
           <span class="plate-value">{{ plateNumber || newTruckPlate || '-' }}</span>
         </div>
 
-        @if((manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') && tripType === 'OUT') {
+        @if((manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI') && tripType === 'OUT') {
           <div class="trip-number-display">
             <span class="trip-label">Nomor SJ:</span>
             <span class="trip-value">{{ tripNumber || '-' }}</span>
@@ -24,7 +24,7 @@
         }
         
         
-        @if(manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI') {
+        @if(manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'GROUP/RELASI/VENDOR/EKSPEDISI') {
           <div class="trip-number-display">
             <span class="trip-label">Nomor SJ:</span>
             <span class="trip-value">{{ tripNumber }}</span>
@@ -35,7 +35,7 @@
           </div>
         }
 
-        @if(manualTruckPlate === 'LAINNYA' || manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
+        @if(manualTruckPlate === 'LAINNYA' || manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI') {
           <div class="trip-number-display">
             <span class="trip-label">Nama Perusahaan:</span>
             <span class="trip-value">{{ customerName }}</span>

@@ -76,7 +76,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       distinctUntilChanged()
     ).subscribe(nopol => {
       const tripType = localStorage.getItem('tripType');
-      this.isOthers = ['LAINNYA', 'RELASI/VENDOR/EKSPEDISI'].includes(nopol);
+      this.isOthers = ['LAINNYA', 'GROUP/RELASI/VENDOR/EKSPEDISI'].includes(nopol);
       // this.barcodeInput = '';
       // this.newTruckPlate = '';
 
@@ -91,7 +91,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       }
 
       // RELASI and TPF-CONT: Try to get SJ from API
-      if (/**(nopol === 'RELASI/VENDOR/EKSPEDISI' && nopol.length >= 3) ||**/ (!this.isOthers && nopol.length >= 3)) {
+      if (/**(nopol === 'GROUP/RELASI/VENDOR/EKSPEDISI' && nopol.length >= 3) ||**/ (!this.isOthers && nopol.length >= 3)) {
         this.getAllTripDataFromAPI(nopol);
       } else {
         this.spkOptions = [];
@@ -328,8 +328,8 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
       // If SJ is provided, validate and fetch data
       if (this.barcodeInput.trim()) {
-        // Set flag for freetext SJ if RELASI/VENDOR/EKSPEDISI with SJ input
-        if (this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
+        // Set flag for freetext SJ if GROUP/RELASI/VENDOR/EKSPEDISI with SJ input
+        if (this.manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI') {
           localStorage.setItem('isFreetextSJ', 'true');
           localStorage.setItem('freetextSJValue', this.barcodeInput.trim());
         }
@@ -731,7 +731,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
       if (!this.customerName.trim()) return 'Nama perusahaan belum diisi';
       if (!this.isValidIndonesianPlate(this.newTruckPlate)) return 'Format plat nomor tidak valid';
     } else {
-      if (this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI' && !this.barcodeInput.trim()) {
+      if (this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'GROUP/RELASI/VENDOR/EKSPEDISI' && !this.barcodeInput.trim()) {
         return 'Nomor SJ belum dipilih';
       }
     }
@@ -740,7 +740,7 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
 
   onButtonClick(event: Event): boolean {
     const button = event.target as HTMLButtonElement;
-    const isDisabled = this.isLoadingTripData || (this.isOthers && (!this.customerName.trim() || !this.isValidIndonesianPlate(this.newTruckPlate))) || (!this.isOthers && this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI' && !this.barcodeInput.trim());
+    const isDisabled = this.isLoadingTripData || (this.isOthers && (!this.customerName.trim() || !this.isValidIndonesianPlate(this.newTruckPlate))) || (!this.isOthers && this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'GROUP/RELASI/VENDOR/EKSPEDISI' && !this.barcodeInput.trim());
     
     if (isDisabled) {
       event.preventDefault();

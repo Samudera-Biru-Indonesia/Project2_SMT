@@ -17,7 +17,7 @@
         </div>
 
 
-        @if((manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') && tripType === 'OUT') {
+        @if((manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI') && tripType === 'OUT') {
           <div class="trip-number-display">
             <span class="trip-label">Nomor SJ:</span>
             <span class="trip-value">{{ tripNumber }}</span>
@@ -25,7 +25,7 @@
         }
 
 
-        @if(manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI') {
+        @if(manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'GROUP/RELASI/VENDOR/EKSPEDISI') {
           <div class="trip-number-display">
             <span class="trip-label">Nomor SJ:</span>
             <span class="trip-value">{{ tripNumber }}</span>
@@ -36,7 +36,7 @@
           </div>
         }
 
-        @if(manualTruckPlate === 'LAINNYA' || manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
+        @if(manualTruckPlate === 'LAINNYA' || manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI') {
           <div class="trip-number-display">
             <span class="trip-label">Nama Perusahaan:</span>
             <span class="trip-value">{{ customerName }}</span>
@@ -49,7 +49,7 @@
         <div class="form-section">
           
           <!-- Regular trucks: Show all fields -->
-          @if (manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI') {
+          @if (manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'GROUP/RELASI/VENDOR/EKSPEDISI') {
             <div class="form-group">
               <label for="odometer" class="required" style="margin-right:10px;">Pembacaan Odometer (KM)</label>
               @if (tripType === 'IN') {
@@ -231,8 +231,8 @@
             </div>
           }
 
-          <!-- RELASI/VENDOR/EKSPEDISI (keluar): jumlah muatan + foto muatan -->
-          @if (manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && tripType === 'OUT') {
+          <!-- GROUP/RELASI/VENDOR/EKSPEDISI (keluar): jumlah muatan + foto muatan -->
+          @if (manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI' && tripType === 'OUT') {
 
             <!-- Order Details (hanya OUT trip) -->
             <div class="order-details-section" *ngIf="orderDetails.length > 0 && expectedMuatan && expectedMuatan > 0">
@@ -332,8 +332,8 @@
             </div>
           }
 
-          <!-- RELASI/VENDOR/EKSPEDISI (masuk): jumlah muatan + foto muatan & mobil -->
-          @if (manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && tripType === 'IN') {
+          <!-- GROUP/RELASI/VENDOR/EKSPEDISI (masuk): jumlah muatan + foto muatan & mobil -->
+          @if (manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI' && tripType === 'IN') {
             <div class="form-group">
               <label for="jumlah-muatan" class="required">
                 Jumlah Muatan:

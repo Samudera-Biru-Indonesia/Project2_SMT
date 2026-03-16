@@ -87,15 +87,15 @@
 
           @if (this.manualTruckPlate !== 'LAINNYA') {
             @if (tripType === 'OUT' || (tripType === 'IN' && !isOthers)) {
-              <label class="input-label" [class.required]="manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI'">
+              <label class="input-label" [class.required]="manualTruckPlate !== 'GROUP/RELASI/VENDOR/EKSPEDISI'">
                 Nomor SJ
-                @if (manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
+                @if (manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI') {
                   <span style="font-weight:400; color:#6c757d;"> (Opsional)</span>
                 } 
               </label>
 
-              <!-- Free text input for RELASI/VENDOR/EKSPEDISI -->
-              @if (manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
+              <!-- Free text input for GROUP/RELASI/VENDOR/EKSPEDISI -->
+              @if (manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI') {
                 <input
                   type="text"
                   [(ngModel)]="barcodeInput"
@@ -203,7 +203,7 @@
           <button 
             type="submit" 
             class="submit-btn"
-            [disabled]="isLoadingTripData || (isOthers && (!customerName.trim() || !isValidIndonesianPlate(newTruckPlate))) || (!isOthers && manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI' && !barcodeInput.trim())"
+            [disabled]="isLoadingTripData || (isOthers && (!customerName.trim() || !isValidIndonesianPlate(newTruckPlate))) || (!isOthers && manualTruckPlate !== 'LAINNYA' && manualTruckPlate !== 'GROUP/RELASI/VENDOR/EKSPEDISI' && !barcodeInput.trim())"
           >
             {{ isLoadingTripData ? 'Memuat...' : 'Ambil Data Perjalanan' }}
           </button>

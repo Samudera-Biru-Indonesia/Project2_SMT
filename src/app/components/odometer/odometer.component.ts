@@ -88,7 +88,7 @@ export class OdometerComponent implements OnInit {
     }
 
     // Get plate number from trip data if available
-    if (this.manualTruckPlate === 'LAINNYA' || this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
+    if (this.manualTruckPlate === 'LAINNYA' || this.manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI') {
       this.plateNumber = this.newTruckPlate || '-';
     } else {
       const tripDataString = localStorage.getItem('currentTripData');
@@ -113,7 +113,7 @@ export class OdometerComponent implements OnInit {
       this.manualTruckPlate === 'LAINNYA' || 
       // this.manualTruckPlate === 'RELASI' || 
       // this.manualTruckPlate === 'TPF-CONT';
-      this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI';
+      this.manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI';
 
 
       console.log('Current trip type:', this.tripType);
@@ -173,7 +173,7 @@ export class OdometerComponent implements OnInit {
 
           if (matchingTrip) {
             this.odometerFromDb = matchingTrip.Odometer;
-          } else if (!(this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' || this.manualTruckPlate === 'LAINNYA')) {
+          } else if (!(this.manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI' || this.manualTruckPlate === 'LAINNYA')) {
             alert('Gagal mengambil data odometer, gunakan surat jalan sebagai referensi odometer.');
           }
         },
@@ -309,7 +309,7 @@ export class OdometerComponent implements OnInit {
   }
 
   onSubmit() {
-    const isSpecialTruck = ['LAINNYA', 'RELASI/VENDOR/EKSPEDISI'].includes(this.manualTruckPlate);
+    const isSpecialTruck = ['LAINNYA', 'GROUP/RELASI/VENDOR/EKSPEDISI'].includes(this.manualTruckPlate);
 
     // Validation for regular trucks
     if (!isSpecialTruck) {
@@ -388,8 +388,8 @@ export class OdometerComponent implements OnInit {
       }
     }
 
-    // Validation for RELASI/VENDOR/EKSPEDISI (masuk/keluar): jumlah muatan + foto muatan
-    if (this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI') {
+    // Validation for GROUP/RELASI/VENDOR/EKSPEDISI (masuk/keluar): jumlah muatan + foto muatan
+    if (this.manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI') {
       if (this.jumlahMuatan === null || this.jumlahMuatan === undefined || this.jumlahMuatan === '') {
         alert('Jumlah muatan belum diisi.');
         return;
@@ -412,7 +412,7 @@ export class OdometerComponent implements OnInit {
         return;
       }
 
-      // Show muatan mismatch modals for RELASI/VENDOR/EKSPEDISI
+      // Show muatan mismatch modals for GROUP/RELASI/VENDOR/EKSPEDISI
       if (this.muatanType === 'CYLINDER' && this.expectedMuatan !== null && jumlahMuatanValue < this.expectedMuatan) {
         if (!this.muatanLowWarningShown) {
           this.showMuatanLowWarning = true;
@@ -439,7 +439,7 @@ export class OdometerComponent implements OnInit {
     }
 
     // Validation for VENDOR (keluar): jumlah muatan + foto muatan & mobil
-    // if (this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && this.tripType === 'OUT') {
+    // if (this.manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI' && this.tripType === 'OUT') {
     //   if (this.jumlahMuatan === null || this.jumlahMuatan === undefined || this.jumlahMuatan === '') {
     //     alert('Jumlah muatan belum diisi.');
     //     return;
@@ -563,11 +563,11 @@ export class OdometerComponent implements OnInit {
 
     // 4. Save summary data for trip-complete page
     const hasNotesField = this.manualTruckPlate !== 'LAINNYA' && 
-                          !(this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI' && this.tripType === 'IN');
-    const hasOdometerField = this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI';
+                          !(this.manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI' && this.tripType === 'IN');
+    const hasOdometerField = this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'GROUP/RELASI/VENDOR/EKSPEDISI';
     const hasMuatanField = this.manualTruckPlate !== 'LAINNYA';
-    const hasDriverField = this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'RELASI/VENDOR/EKSPEDISI';
-    const hasCustomerName = this.manualTruckPlate === 'LAINNYA' || this.manualTruckPlate === 'RELASI/VENDOR/EKSPEDISI';
+    const hasDriverField = this.manualTruckPlate !== 'LAINNYA' && this.manualTruckPlate !== 'GROUP/RELASI/VENDOR/EKSPEDISI';
+    const hasCustomerName = this.manualTruckPlate === 'LAINNYA' || this.manualTruckPlate === 'GROUP/RELASI/VENDOR/EKSPEDISI';
     const hasTripNumber = this.tripNumber && this.tripNumber !== '-';
     
     const summaryData = {
