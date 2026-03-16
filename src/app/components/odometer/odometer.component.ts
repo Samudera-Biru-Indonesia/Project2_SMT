@@ -35,6 +35,7 @@ export class OdometerComponent implements OnInit {
   manualTruckPlate: string = '';
   customerName: string = '';
   newTruckPlate: string = '';
+  odometerTooLargeWarning: boolean = false;
 
   get odometerMismatchWarning(): boolean {
     if (this.tripType !== 'IN' || this.odometerFromDb === null || (this.odometerReading === null || this.odometerReading === undefined || this.odometerReading === '')) return false;
@@ -58,6 +59,7 @@ export class OdometerComponent implements OnInit {
   showMuatanHighWarning: boolean = false;
   muatanHighWarningShown: boolean = false;
   showSummaryModal: boolean = false;
+  showOdometerTooLargeWarning: boolean = false;
 
   constructor(private router: Router, private apiService: ApiService, private authService: AuthService) {}
 
@@ -192,6 +194,17 @@ export class OdometerComponent implements OnInit {
     this.odometerWarningShown = false;
   }
 
+  onOdometerInput() {
+    const odometerNumb = parseFloat(this.odometerReading);
+    console.log('odometerNumb' + odometerNumb);
+    if (odometerNumb && odometerNumb > 9999999) {
+      this.odometerTooLargeWarning = true;
+    } else {
+      this.odometerTooLargeWarning = false;
+    }
+    this.saveOdometerData();
+  }
+
   onMuatanChange() {
     this.saveOdometerData();
     this.showMuatanLowWarning = false;
@@ -228,6 +241,10 @@ export class OdometerComponent implements OnInit {
   dismissMuatanHighWarning() {
     this.showMuatanHighWarning = false;
     this.muatanHighWarningShown = false;
+  }
+
+  dismissOdometerTooLargeWarning() {
+    this.showOdometerTooLargeWarning = false;
   }
 
   onPhotoSelected(event: Event, type: 'odometer' | 'cargo' | 'car') {
@@ -301,6 +318,18 @@ export class OdometerComponent implements OnInit {
         return;
       }
 
+      const odometerValue = parseFloat(this.odometerReading);
+      if (isNaN(odometerValue) || odometerValue < 0) {
+        alert('Pembacaan odometer tidak valid. Pastikan nilai yang dimasukkan berupa angka positif.');
+        return;
+      }
+
+      const roundedOdometer = Math.floor(odometerValue);
+      if (roundedOdometer > 9999999) {
+        this.showOdometerTooLargeWarning = true;
+        return;
+      }
+
       if (this.odometerPhotos.length === 0) {
         alert('Foto odometer wajib diambil sebelum melanjutkan.');
         return;
@@ -313,12 +342,6 @@ export class OdometerComponent implements OnInit {
 
       if (this.jumlahMuatan === null || this.jumlahMuatan === undefined || this.jumlahMuatan === '') {
         alert('Jumlah muatan belum diisi. Silakan masukkan jumlah muatan terlebih dahulu.');
-        return;
-      }
-
-      const odometerValue = parseFloat(this.odometerReading);
-      if (isNaN(odometerValue) || odometerValue < 0) {
-        alert('Pembacaan odometer tidak valid. Pastikan nilai yang dimasukkan berupa angka positif.');
         return;
       }
 

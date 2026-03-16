@@ -68,15 +68,19 @@
                 id="odometer"
                 [(ngModel)]="odometerReading"
                 (ngModelChange)="onOdometerChange()"
+                (input)="onOdometerInput()"
                 name="odometerReading"
                 placeholder="Masukkan pembacaan odometer saat ini"
                 class="odometer-input"
-                [class.input-error]="isOdometerWrong || odometerMismatchWarning"
+                [class.input-error]="isOdometerWrong || odometerMismatchWarning || odometerTooLargeWarning"
                 min="0"
                 step="0.1"
                 required
                 autocomplete="off"
               />
+              <div class="muatan-warning" *ngIf="odometerTooLargeWarning">
+                Nilai odometer anda terlalu besar. Mohon cek kembali. <br>
+              </div>
               <div class="muatan-warning" *ngIf="odometerMismatchWarning && !showOdometerWarning">
                 Odometer lebih kecil dari saat keluar. <br>
                 Saat keluar: <b>{{ odometerFromDb }} km</b>
@@ -431,6 +435,17 @@
       <div class="modal-actions">
         <button class="modal-btn modal-btn-cancel" (click)="dismissMuatanHighWarning()">Perbaiki</button>
         <button class="modal-btn modal-btn-confirm" (click)="confirmMuatanHighWarning()">Tetap Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Peringatan Odometer Terlalu Besar -->
+  <div class="modal-overlay" *ngIf="showOdometerTooLargeWarning">
+    <div class="modal-alert">
+      <div class="modal-icon">⚠️</div>
+      <h3 class="modal-title">Nilai odometer terlalu besar. Mohon cek kembali.</h3>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" (click)="dismissOdometerTooLargeWarning()">Kembali & Perbaiki</button>
       </div>
     </div>
   </div>
