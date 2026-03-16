@@ -62,6 +62,9 @@ export class OdometerComponent implements OnInit {
   constructor(private router: Router, private apiService: ApiService, private authService: AuthService) {}
 
   ngOnInit() {
+
+    localStorage.removeItem('tripSummary');
+    
     this.loadSavedOdometerData();
     this.truckBarcode = localStorage.getItem('currentTruckBarcode') || '';
     this.tripType = localStorage.getItem('tripType') || '';
@@ -557,7 +560,8 @@ export class OdometerComponent implements OnInit {
       notes: hasNotesField ? (this.notes || '-') : null,
       photoTimestamp: localStorage.getItem('photoTimestamp') || null,
       odometerPhotos: this.odometerPhotos || [],
-      cargoPhotos: this.cargoPhotos || []
+      cargoPhotos: this.cargoPhotos || [],
+      carPhotos: this.carPhotos || []
     };
     localStorage.setItem('tripSummary', JSON.stringify(summaryData));
 

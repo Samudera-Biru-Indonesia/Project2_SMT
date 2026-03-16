@@ -29,7 +29,6 @@ export class TripSelectionComponent implements OnInit {
     localStorage.removeItem('currentTruckBarcode');
     localStorage.removeItem('currentTripData');
     localStorage.removeItem('tripData');
-    localStorage.removeItem('tripSummary');
     localStorage.removeItem('customerName');
     localStorage.removeItem('manualTruckPlate');
     localStorage.removeItem('tripDriver');

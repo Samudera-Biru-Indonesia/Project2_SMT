@@ -62,6 +62,11 @@
               <img *ngFor="let photo of cargoPhotos" [src]="photo" class="photo-thumbnail" />
             </div>
           </div>
+          <div class="photo-section" *ngIf="carPhotos.length > 0 && isShowImages">
+            <div class="photo-grid">
+              <img *ngFor="let photo of carPhotos" [src]="photo" class="photo-thumbnail" />
+            </div>
+          </div>
           <div class="summary-item" *ngIf="notes !== null">
             <span class="summary-label">Catatan:</span>
             <span class="summary-value">{{ notes }}</span>

@@ -29,6 +29,7 @@ export class TripCompleteComponent implements OnInit {
   summaryCanvas: HTMLCanvasElement | null = null;
   odometerPhotos: string[] = [];
   cargoPhotos: string[] = [];
+  carPhotos: string[] = [];
   isShowImages: boolean = false;
   
   constructor(private router: Router, private authService: AuthService) {}
@@ -51,6 +52,7 @@ export class TripCompleteComponent implements OnInit {
         this.photoTimestamp = summaryData.photoTimestamp || this.generateCurrentTimestamp();
         this.odometerPhotos = summaryData.odometerPhotos || [];
         this.cargoPhotos = summaryData.cargoPhotos || [];
+        this.carPhotos = summaryData.carPhotos || [];
       } catch (error) {
         this.tripNumber = 'N/A';
       }
@@ -61,7 +63,7 @@ export class TripCompleteComponent implements OnInit {
     localStorage.removeItem('currentTruckBarcode');
     localStorage.removeItem('currentTripData');
     localStorage.removeItem('tripData');
-    localStorage.removeItem('tripSummary');
+    // localStorage.removeItem('tripSummary');
     localStorage.removeItem('customerName');
     localStorage.removeItem('manualTruckPlate');
     localStorage.removeItem('tripDriver');

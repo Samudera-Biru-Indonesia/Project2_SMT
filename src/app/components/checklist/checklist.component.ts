@@ -40,6 +40,7 @@ export class ChecklistComponent implements OnInit {
 
   ngOnInit() {
     this.loadSavedChecklistData();
+    localStorage.removeItem('tripSummary');
 
     // localStorage.removeItem('checklistData');
     // localStorage.removeItem('tripData');
