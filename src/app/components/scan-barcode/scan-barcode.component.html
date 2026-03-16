@@ -44,11 +44,17 @@
                 >
                   <ng-container *ngIf="truck.truckPlate; else specialTruck">
                     <span class="truck-plate">{{ truck.truckPlate }}</span>
-                    <span class="truck-desc" *ngIf="truck.truckDesc"> — {{ truck.truckDesc }}</span>
+
                   </ng-container>
                   <ng-template #specialTruck>
-                    <span class="truck-plate">{{ truck.truckDesc || truck.truckID }}</span>
+                    <span class="truck-plate" style="font-size: small;">{{ truck.truckDesc || truck.truckID }}</span>
                   </ng-template>
+                      @if (tripType === 'IN' && truck.waktuKeluar) {
+                        <div style="margin-left:auto; text-align:right; color:gray; font-size: small;">
+                          {{truck.waktuKeluar !== '0001-01-01T00:00:00' ? "Keluar" : ""}}
+                          {{ truck.waktuKeluar !== '0001-01-01T00:00:00' ?  (truck.waktuKeluar | date:'dd/MM/YYYY, HH:mm') : '-' }}
+                        </div>
+                  }
                 </div>
                 <div class="spk-no-result" *ngIf="filteredTruckOptions.length === 0">
                   {{ trucks.length === 0 ? 'Tidak ada data truck' : 'Tidak ditemukan' }}
