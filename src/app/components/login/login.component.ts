@@ -47,12 +47,14 @@ export class LoginComponent {
   ) {}
 
   ngOnInit() {
-    // Initialize environments and ALWAYS set to LIVE by default
     this.environments = this.environmentService.getEnvironments();
-
-    // Force set to LIVE environment on every login page load
     this.environmentService.setEnvironment('live');
     this.selectedEnvironment = 'live';
+
+    const savedEmpCode = localStorage.getItem('lastLoginEmpCode');
+    if (savedEmpCode) {
+      this.empCode = savedEmpCode;
+    }
 
     this.getCurrentLocation();
     this.loadPlantList();
@@ -76,7 +78,6 @@ export class LoginComponent {
   async onLogin() {
     this.errorMessage = '';
 
-    // Validasi input
     if (!this.empCode.trim()) {
       this.errorMessage = 'Silakan masukkan kode karyawan Anda';
       return;
@@ -102,12 +103,13 @@ export class LoginComponent {
       );
 
       if (result.success) {
-        // Simpan plant dan company ke localStorage
+        localStorage.setItem('lastLoginSite', this.site.trim());
+        localStorage.setItem('lastLoginEmpCode', this.empCode.trim());
+        
         const plant = this.site.trim().toUpperCase();
         const company = plant.substring(0, 3);
         localStorage.setItem('currentPlant', plant);
         localStorage.setItem('currentCompany', company);
-        // Redirect ke landing page
         this.router.navigate(['/trip-selection']);
       } else {
         this.errorMessage = result.message || 'Login gagal. Silakan coba lagi.';
@@ -130,18 +132,22 @@ export class LoginComponent {
     try {
       const response = await firstValueFrom(this.apiService.getPlantList());
 
-      // Handle different response structures
       if (response) {
         if (response.Result && response.Result.Plant && Array.isArray(response.Result.Plant)) {
           this.plants = response.Result.Plant.sort((a: Plant, b: Plant) => {
-            // Sort by Name alphabetically (ascending)
             return a.Name.localeCompare(b.Name);
           });
         } else {
           this.plants = [];
         }
 
-        this.autoSelectSite();
+        // After plants are loaded, try to set saved site
+        const savedSite = localStorage.getItem('lastLoginSite');
+        if (savedSite) {
+          this.setSiteIfExists(savedSite);
+        } else {
+          this.autoSelectSite();
+        }
       } else {
         this.plants = [];
       }
@@ -240,6 +246,13 @@ export class LoginComponent {
     this.site = plantCode;
     this.selectedPlantText = displayText;
     this.dropdownOpen = false;
+  }
+
+  setSiteIfExists(plantCode: string) {
+    const plant = this.plants.find(p => p.Plant === plantCode);
+    if (plant) {
+      this.selectSite(plant.Plant, plant.Name);
+    }
   }
 
   getSelectedPlantText(): string {

@@ -377,7 +377,16 @@ export class AuthService {
   logout(): void {
     this.currentUserSubject.next(null);
     // localStorage.removeItem(this.STORAGE_KEY);
+
+
+    const savedSite = localStorage.getItem('lastLoginSite');
+    const savedEmpCode = localStorage.getItem('lastLoginEmpCode');
+
     localStorage.clear();
+
+    if (savedSite) localStorage.setItem('lastLoginSite', savedSite);
+    if (savedEmpCode) localStorage.setItem('lastLoginEmpCode', savedEmpCode);
+
     this.stopSessionMonitoring();
     this.stopJwtMonitoring();
     
