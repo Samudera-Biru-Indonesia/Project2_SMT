@@ -600,11 +600,11 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
     this.apiService.getTruckList(tripType).subscribe({
       next: (response) => {
         this.trucks = response.TruckData?.Result ?? [];
-
-        // this.trucks.push({
-        //   truckPlate: 'LAINNYA', 
-        //   truckDesc: 'Input Nopol Manual'
-        // } as Truck);
+        this.trucks = this.trucks.map(truck => ({
+          ...truck,
+          truckPlate: truck.truckPlate === 'GROUP/RELASI/EKSPEDISI/VENDOR' ? 'GROUP/RELASI/VENDOR/EKSPEDISI' : truck.truckPlate,
+          truckID: truck.truckID === 'GROUP/RELASI/EKSPEDISI/VENDOR' ? 'GROUP/RELASI/VENDOR/EKSPEDISI' : truck.truckID
+        }));
 
         this.trucksLoading = false;
       },

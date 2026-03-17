@@ -65,6 +65,8 @@ export class OdometerComponent implements OnInit {
 
   ngOnInit() {
 
+    this.isUploading = false;
+
     localStorage.removeItem('tripSummary');
     
     this.loadSavedOdometerData();
