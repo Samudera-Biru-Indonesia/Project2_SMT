@@ -38,6 +38,9 @@ export class LoginComponent {
   selectedEnvironment: string = 'live';
   showSettings: boolean = false;
 
+  // Role
+  role: string = '';
+
   constructor(
     private router: Router,
     private authService: AuthService,
@@ -50,6 +53,8 @@ export class LoginComponent {
     this.environments = this.environmentService.getEnvironments();
     this.environmentService.setEnvironment('live');
     this.selectedEnvironment = 'live';
+
+    this.role = localStorage.getItem('savedRole') || '';
 
     const savedEmpCode = localStorage.getItem('lastLoginEmpCode');
     if (savedEmpCode) {
@@ -105,6 +110,7 @@ export class LoginComponent {
       if (result.success) {
         localStorage.setItem('lastLoginSite', this.site.trim());
         localStorage.setItem('lastLoginEmpCode', this.empCode.trim());
+        localStorage.setItem('savedRole', this.role.trim());
         
         const plant = this.site.trim().toUpperCase();
         const company = plant.substring(0, 3);
@@ -274,5 +280,15 @@ export class LoginComponent {
     if (!target.closest('.custom-dropdown')) {
       this.dropdownOpen = false;
     }
+  }
+
+
+
+  setRole(role: string) {
+    this.role = role;
+  }
+
+  delRole() {
+    this.role = '';
   }
 }

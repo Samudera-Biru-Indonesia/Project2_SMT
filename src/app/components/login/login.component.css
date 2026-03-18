@@ -70,6 +70,37 @@
   text-align: center;
 }
 
+.role-buttons > button {
+  width: 100%;
+  padding: 18px 5px;
+  border-radius: 8px;
+  font-weight: 700;
+
+  color: white;
+  
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.role-buttons .satpam {
+  background-color: #193161;
+  color: white;
+
+  margin-bottom: 12px;
+  border: none;
+
+}
+
+.role-buttons .admin {
+    background-color: white;
+    color: #193161;
+
+    border-color: #193161;
+}
+
 .env-toggle {
   display: flex;
   border-radius: 8px;
@@ -109,7 +140,7 @@
 }
 
 .env-btn.pilot.active {
-  background: #007bff;
+  background: #193161;
 }
 
 .env-btn.live.active {
@@ -181,7 +212,7 @@
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: #193161;
 }
 
 .form-group input.error,
@@ -367,7 +398,7 @@
 }
 
 .login-btn {
-  background: #007bff;
+  background: #193161;
   color: white;
   border: none;
   border-radius: 4px;
@@ -423,7 +454,7 @@
   width: 16px;
   height: 16px;
   border: 2px solid #f3f3f3;
-  border-top: 2px solid #007bff;
+  border-top: 2px solid #193161;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -508,7 +539,7 @@
   width: 32px;
   height: 32px;
   border: 3px solid #f3f3f3;
-  border-top: 3px solid #007bff;
+  border-top: 3px solid #193161;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 16px;

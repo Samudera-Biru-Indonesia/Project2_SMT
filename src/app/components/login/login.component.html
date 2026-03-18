@@ -3,7 +3,8 @@
     <div class="logo-section">
       <img src="assets/images/samator.jpg" alt="Samator Logo" class="company-logo" />
       <h1>Sistem Manajemen Truk</h1>
-      <p>Silakan login untuk melanjutkan</p>
+      <p *ngIf="!role.trim()">Silakan pilih hak akses</p>
+      <p *ngIf="role.trim()">Silakan login untuk melanjutkan</p>
     </div>
 
     <!-- Loading State -->
@@ -12,8 +13,14 @@
       <p class="loading-text">Memproses login...</p>
     </div>
 
+    <!-- set role -->
+    <div *ngIf="!isLoading && !role.trim()" class="role-buttons">
+      <button (click)="setRole('satpam')" class="satpam">SATPAM</button>
+      <button (click)="setRole('admin')" class="admin">ADMIN</button>
+    </div>
+
     <!-- Login Form -->
-    <form (ngSubmit)="onLogin()" class="login-form" *ngIf="!isLoading">
+    <form (ngSubmit)="onLogin()" class="login-form" *ngIf="!isLoading && role.trim()">
       <div class="form-group">
         <label for="site">Kode Site</label>
         <div class="custom-dropdown" [class.open]="dropdownOpen">
@@ -79,8 +86,14 @@
         [disabled]="!empCode.trim() || !site.trim() || !currentLocation"
         [class.disabled]="!empCode.trim() || !site.trim() || !currentLocation"
       >
-        Login
+        Login Sebagai <b>{{ role | uppercase }}</b>
       </button>
+
+      <div style="width:100%; display:flex; justify-content:center;">
+        <a style="font-size:14px;  text-decoration-line: underline;" (click)="delRole()">ganti hak akses</a> 
+        <p style="margin: 0 10px;">ATAU</p>
+        <a style="font-size:14px;  text-decoration-line: underline;" (click)="delRole()">ubah password</a> 
+      </div>
     </form>
 
     <!-- Settings Button -->

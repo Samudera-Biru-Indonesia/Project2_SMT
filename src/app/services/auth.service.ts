@@ -381,11 +381,14 @@ export class AuthService {
 
     const savedSite = localStorage.getItem('lastLoginSite');
     const savedEmpCode = localStorage.getItem('lastLoginEmpCode');
+    const savedRole = localStorage.getItem('savedRole');
 
     localStorage.clear();
 
     if (savedSite) localStorage.setItem('lastLoginSite', savedSite);
     if (savedEmpCode) localStorage.setItem('lastLoginEmpCode', savedEmpCode);
+    if (savedRole) localStorage.setItem('savedRole', savedRole);
+
 
     this.stopSessionMonitoring();
     this.stopJwtMonitoring();
