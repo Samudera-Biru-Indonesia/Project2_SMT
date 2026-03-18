@@ -82,4 +82,8 @@ export class TripSelectionComponent implements OnInit {
   logout() {
     this.authService.logout();
   }
+
+  viewHistory() {
+    this.router.navigate(['/history']);
+  }
 }

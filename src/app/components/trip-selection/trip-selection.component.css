@@ -30,14 +30,38 @@
   padding: 12px 16px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
   border-bottom: 1px solid #e0e0e0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  /* spy g take up space */
   position: fixed;
   top: 0;
   width: 100%;
   z-index: 999;
+  box-sizing: border-box;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.history-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.history-btn:hover {
+  background: #5a6268;
 }
 
 .back-btn {
@@ -604,12 +628,21 @@
   }
   
   .header h1 {
-    font-size: 18px;
+    font-size: 16px;
   }
   
-  .back-btn {
-    padding: 6px 10px;
-    font-size: 12px;
+  .header-actions {
+    gap: 6px;
+  }
+  
+  .history-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .logout-btn {
+    padding: 8px 12px;
+    font-size: 13px;
   }
   
   .trip-content {
