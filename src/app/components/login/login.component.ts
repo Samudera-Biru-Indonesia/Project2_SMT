@@ -141,13 +141,6 @@ export class LoginComponent {
           this.plants = [];
         }
 
-        // After plants are loaded, try to set saved site
-        const savedSite = localStorage.getItem('lastLoginSite');
-        if (savedSite) {
-          this.setSiteIfExists(savedSite);
-        } else {
-          this.autoSelectSite();
-        }
       } else {
         this.plants = [];
       }
@@ -164,35 +157,30 @@ export class LoginComponent {
       return;
     }
 
+    const accessiblePlants = this.accessiblePlants;
+    if (accessiblePlants.length === 0) {
+      this.siteWarning = 'Tidak ada site dalam radius 1 km';
+      return;
+    }
+
+    // Check if already selected
     if (this.site) {
       return;
     }
 
-    let closestPlant: Plant | null = null;
-    let closestDistance = Infinity;
-
-    for (const plant of this.plants) {
-      if (plant.Lat == null || plant.Long == null) continue;
-      const dist = this.calculateDistance(
-        this.currentLocation.latitude,
-        this.currentLocation.longitude,
-        plant.Lat,
-        plant.Long
-      );
-      if (dist < closestDistance) {
-        closestDistance = dist;
-        closestPlant = plant;
-      }
-    }
-
-    if (closestPlant && closestDistance <= 1) {
+    // Try to use saved site from localStorage if it exists in accessible plants
+    const savedSite = localStorage.getItem('lastLoginSite');
+    const savedPlantExists = accessiblePlants.find(p => p.Plant === savedSite);
+    
+    if (savedSite && savedPlantExists) {
+      this.selectSite(savedPlantExists.Plant, savedPlantExists.Name);
       this.siteWarning = '';
-      this.selectSite(closestPlant.Plant, `${closestPlant.Plant} - ${closestPlant.Name}`);
-    } else {
-      this.siteWarning = closestPlant
-        ? `Tidak ada site dalam radius 1 km. Site terdekat: ${closestPlant.Name} (${closestDistance.toFixed(1)} km)`
-        : 'Tidak ada data koordinat site yang tersedia';
+      return;
     }
+
+    // Otherwise, set to first accessible plant
+    this.selectSite(accessiblePlants[0].Plant, accessiblePlants[0].Name);
+    this.siteWarning = '';
   }
 
   calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
