@@ -1,0 +1,76 @@
+<div class="report-container">
+  <header class="header">
+    <h1>Laporan Perjalanan</h1>
+    <button class="back-btn" onclick="window.history.back()">← Kembali</button>
+  </header>
+
+  <main class="report-content">
+    <div class="report-card">
+      <div class="report-header">
+        <h2>Data Perjalanan Truk</h2>
+        <div class="header-actions">
+          <p>Total: {{ filteredData.length }} perjalanan</p>
+          <button (click)="exportToExcel()" class="export-btn">📊 Export Excel</button>
+        </div>
+      </div>
+      
+      <!-- Filter Section -->
+      <div class="filter-section">
+        <div class="filter-row">
+          <div class="filter-group">
+            <label>Tanggal Mulai:</label>
+            <input type="date" [(ngModel)]="startDate" (change)="applyFilters()" class="filter-input">
+          </div>
+          <div class="filter-group">
+            <label>Tanggal Akhir:</label>
+            <input type="date" [(ngModel)]="endDate" (change)="applyFilters()" class="filter-input">
+          </div>
+          <div class="filter-group">
+            <label>Kode Site:</label>
+            <input type="text" [(ngModel)]="siteCode" (input)="applyFilters()" placeholder="Cari kode site..." class="filter-input">
+          </div>
+          <div class="filter-group">
+            <button (click)="clearFilters()" class="clear-btn">Reset</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="table-wrapper">
+        <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-striped table-bordered">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Tanggal</th>
+              <th>Nomor SJ</th>
+              <th>Plat Nomor</th>
+              <th>Driver</th>
+              <th>Jenis</th>
+              <th>Odometer</th>
+              <th>Muatan</th>
+              <th>Status</th>
+              <th>Site</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let trip of filteredData">
+              <td>{{ trip.id }}</td>
+              <td>{{ trip.date }}</td>
+              <td>{{ trip.sjNumber }}</td>
+              <td>{{ trip.plateNumber }}</td>
+              <td>{{ trip.driver }}</td>
+              <td>
+                <span class="trip-type" [ngClass]="trip.type.toLowerCase()">{{ trip.type }}</span>
+              </td>
+              <td>{{ trip.odometer | number }} km</td>
+              <td>{{ trip.muatan }}</td>
+              <td>
+                <span class="status" [ngClass]="trip.status.toLowerCase()">{{ trip.status }}</span>
+              </td>
+              <td>{{ trip.siteCode }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
