@@ -6,6 +6,7 @@ import { DataTablesModule } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { Config } from 'datatables.net';
 import * as XLSX from 'xlsx';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-report',
@@ -16,6 +17,9 @@ import * as XLSX from 'xlsx';
 })
 
 export class ReportComponent implements OnInit, OnDestroy {
+
+  constructor(/*private router: Router, private apiService: ApiService, */private authService: AuthService) {}
+
   dtOptions: Config = {};
   dtTrigger: Subject<any> = new Subject<any>();
   
@@ -181,5 +185,9 @@ export class ReportComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.dtTrigger.unsubscribe();
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }
