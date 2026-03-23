@@ -26,7 +26,7 @@
         <div class="custom-dropdown" [class.open]="dropdownOpen">
           <div class="dropdown-selected" 
                (click)="toggleDropdown()" 
-               [class.error]="errorMessage"
+               [class.error]="errorMessage && role === 'satpam'"
                [class.has-placeholder]="!site">
             <span class="selected-text" 
                   [class.placeholder]="!site">{{ getSelectedPlantText() }}</span>
@@ -45,13 +45,13 @@
             </div>
             <div class="options-list">
               <div class="dropdown-option"
-                   *ngFor="let plant of filteredAccessiblePlants"
+                   *ngFor="let plant of role === 'satpam' ? filteredAccessiblePlants : filteredPlants"
                    [class.selected]="site === plant.Plant"
                    (click)="selectSite(plant.Plant, plant.Name)">
                 <div class="option-name">{{ plant.Name }}</div>
               </div>
-              <div class="no-result" *ngIf="filteredAccessiblePlants.length === 0">
-                {{ accessiblePlants.length === 0 ? 'Tidak ada site tersedia' : 'Tidak ditemukan' }}
+              <div class="no-result" *ngIf="(role === 'satpam' ? filteredAccessiblePlants : filteredPlants).length === 0">
+                {{ (role === 'satpam' ? accessiblePlants : plants).length === 0 ? 'Tidak ada site tersedia' : 'Tidak ditemukan' }}
               </div>
             </div>
           </div>
@@ -72,8 +72,32 @@
         />
       </div>
 
+      <div class="form-group" *ngIf="role === 'admin'">
+        <label for="password">Password</label>
+        <div class="password-input-wrapper">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Masukkan password Anda"
+            required
+            [class.error]="errorMessage"
+          />
+          <button 
+            type="button" 
+            class="password-toggle-btn" 
+            (click)="togglePasswordVisibility()"
+            tabindex="-1">
+            <span class="eye-icon">
+              <i [class]="showPassword ? 'fi fi-rr-eye' : 'fi fi-rr-eye-crossed'"></i>
+            </span>
+          </button>
+        </div>
+      </div>
+
         <!-- Location Error -->
-        <div class="location-error" *ngIf="!currentLocation && !locationLoading">
+        <div class="location-error" *ngIf="role==='satpam' && !currentLocation && !locationLoading">
           <p>❌ Lokasi tidak terdeteksi</p>
           <button type="button" class="refresh-btn" (click)="refreshLocation()">
             🔄 Refresh Lokasi
@@ -83,16 +107,17 @@
       <button 
         type="submit" 
         class="login-btn" 
-        [disabled]="!empCode.trim() || !site.trim() || !currentLocation"
-        [class.disabled]="!empCode.trim() || !site.trim() || !currentLocation"
+        [disabled]="!empCode.trim() || !site.trim() || (role === 'satpam' && !currentLocation) || (role === 'admin' && !password.trim())"
+        [class.disabled]="!empCode.trim() || !site.trim() || (role === 'satpam' && !currentLocation) || (role === 'admin' && !password.trim())"
       >
         Login Sebagai <b>{{ role | uppercase }}</b>
       </button>
 
-      <div style="width:100%; display:flex; justify-content:center;">
+      <div style="width:100%; display:flex; justify-content:center; cursor: pointer;">
+        <i class="fi fi-rr-arrow-small-left"></i>
         <a style="font-size:14px;  text-decoration-line: underline;" (click)="delRole()">ganti hak akses</a> 
-        <p style="margin: 0 10px;">ATAU</p>
-        <a style="font-size:14px;  text-decoration-line: underline;" (click)="delRole()">ubah password</a> 
+        <!-- <p style="margin: 0 10px;">ATAU</p>
+        <a style="font-size:14px;  text-decoration-line: underline;" (click)="delRole()">ubah password</a>  -->
       </div>
     </form>
 

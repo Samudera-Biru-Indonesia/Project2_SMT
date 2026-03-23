@@ -18,6 +18,8 @@ import { EnvironmentService, ApiEnvironment } from '../../services/environment.s
 export class LoginComponent {
   empCode: string = '';
   site: string = '';
+  password: string = '';
+  showPassword: boolean = false;
   isLoading: boolean = false;
   errorMessage: string = '';
   currentLocation: UserLocation | null = null;
@@ -50,19 +52,22 @@ export class LoginComponent {
   ) {}
 
   ngOnInit() {
+    
+    this.authService.logout(false);
+
     this.environments = this.environmentService.getEnvironments();
     this.environmentService.setEnvironment('live');
     this.selectedEnvironment = 'live';
+    // this.role = localStorage.getItem('savedRole') || '';
 
-    this.role = localStorage.getItem('savedRole') || '';
-
+    // // setRole to set up the default display
+    // if (this.role.trim()) {
+    //   this.setRole(this.role);
+    // }
     const savedEmpCode = localStorage.getItem('lastLoginEmpCode');
     if (savedEmpCode) {
       this.empCode = savedEmpCode;
     }
-
-    this.getCurrentLocation();
-    this.loadPlantList();
   }
 
   async getCurrentLocation() {
@@ -72,9 +77,9 @@ export class LoginComponent {
     try {
       const location = await this.geolocationService.getCurrentLocation();
       this.currentLocation = location;
-      this.autoSelectSite();
+      this.autoSelectSite(this.role);
     } catch (error) {
-      this.errorMessage = 'Tidak dapat mendeteksi lokasi. Pastikan akses lokasi diizinkan di browser Anda.';
+      this.errorMessage = 'Tidak dapat mendeteksi lokasi. Silakan buka pengaturan browser → izin situs → lokasi, lalu aktifkan untuk situs ini dan coba lagi.';
     } finally {
       this.locationLoading = false;
     }
@@ -88,43 +93,77 @@ export class LoginComponent {
       return;
     }
 
+    if (this.role === 'admin' && !this.password.trim()) {
+      this.errorMessage = 'Silakan masukkan password Anda';
+      return;
+    }
+
     if (!this.site.trim()) {
       this.errorMessage = 'Silakan masukkan kode site';
       return;
     }
 
-    if (!this.currentLocation) {
+    if (this.role === 'satpam' && !this.currentLocation) {
       this.errorMessage = 'Lokasi belum terdeteksi. Silakan tunggu atau refresh halaman.';
+      this.getCurrentLocation()
       return;
     }
 
     this.isLoading = true;
 
-    try {
-      const result = await this.authService.loginWithLocation(
-        this.empCode.trim(),
-        this.site.trim(),
-        this.currentLocation
-      );
 
-      if (result.success) {
-        localStorage.setItem('lastLoginSite', this.site.trim());
-        localStorage.setItem('lastLoginEmpCode', this.empCode.trim());
-        localStorage.setItem('savedRole', this.role.trim());
-        
-        const plant = this.site.trim().toUpperCase();
-        const company = plant.substring(0, 3);
-        localStorage.setItem('currentPlant', plant);
-        localStorage.setItem('currentCompany', company);
-        this.router.navigate(['/trip-selection']);
+    if (this.role === 'satpam') {
+      try {
+        const result = await this.authService.loginWithLocation(
+          this.empCode.trim(),
+          this.site.trim(),
+          this.currentLocation || undefined
+        );
+
+        if (result.success) {
+          localStorage.setItem('lastLoginSite', this.site.trim());
+          localStorage.setItem('lastLoginEmpCode', this.empCode.trim());
+          localStorage.setItem('savedRole', this.role.trim());
+          
+          const plant = this.site.trim().toUpperCase();
+          const company = plant.substring(0, 3);
+          localStorage.setItem('currentPlant', plant);
+          localStorage.setItem('currentCompany', company);
+          this.router.navigate(['/trip-selection']);
+        } else {
+          this.errorMessage = result.message || 'Login gagal. Silakan coba lagi.';
+        }
+
+      } catch (error) {
+        this.errorMessage = 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.';
+      } finally {
+        this.isLoading = false;
+      }
+    } else if (this.role === 'admin') {
+
+      if(this.empCode.trim() === 'ADMIN_TRUCK_APP_ALLIGN' && this.password.trim() === 'TRUCK_APP_ALLIGN') {
+        // set variables
+          const plant = this.site.trim().toUpperCase();
+          const company = plant.substring(0, 3);
+          localStorage.setItem('lastLoginSite', this.site.trim());
+          localStorage.setItem('lastLoginEmpCode', this.empCode.trim());
+          localStorage.setItem('currentPlant', plant);
+          localStorage.setItem('currentCompany', company);
+          localStorage.setItem('adminCode', this.empCode);
+          localStorage.setItem('savedRole', this.role);
+
+          this.router.navigate(['/admin/report']);
       } else {
-        this.errorMessage = result.message || 'Login gagal. Silakan coba lagi.';
+        this.errorMessage = 'Kode Karyawan dan/atau Password salah';
       }
 
-    } catch (error) {
-      this.errorMessage = 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.';
-    } finally {
       this.isLoading = false;
+
+
+    } else {
+      this.role = '';
+      this.isLoading = false;
+      alert('Mohon pilih hak akses.');
     }
   }
 
@@ -151,6 +190,14 @@ export class LoginComponent {
         this.plants = [];
       }
 
+      // Auto-select saved site for admin after plants are loaded
+      if (this.role === 'admin') {
+        const savedSite = localStorage.getItem('lastLoginSite');
+        if (savedSite) {
+          this.setSiteIfExists(savedSite);
+        }
+      }
+
     } catch (error) {
       this.plants = [];
     } finally {
@@ -158,7 +205,23 @@ export class LoginComponent {
     }
   }
 
-  autoSelectSite() {
+  autoSelectSite(role: string) {
+
+    if (role === 'admin') {
+
+      const savedSite = localStorage.getItem('lastLoginSite');
+      if (savedSite) {
+        this.setSiteIfExists(savedSite);
+      } else {
+        // If no saved site, show all plants
+        this.site = '';
+        this.selectedPlantText = '';
+      }
+
+
+      return;
+    }
+
     if (!this.currentLocation || this.plants.length === 0) {
       return;
     }
@@ -230,6 +293,15 @@ export class LoginComponent {
     );
   }
 
+  get filteredPlants(): Plant[] {
+    if (!this.siteSearchQuery.trim()) return this.plants;
+    const q = this.siteSearchQuery.trim().toUpperCase();
+    return this.plants.filter(plant => 
+      plant.Plant.toUpperCase().includes(q) || 
+      plant.Name.toUpperCase().includes(q)
+    );
+  }
+
   // Custom dropdown methods
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;
@@ -243,9 +315,18 @@ export class LoginComponent {
   }
 
   setSiteIfExists(plantCode: string) {
-    const plant = this.plants.find(p => p.Plant === plantCode);
-    if (plant) {
-      this.selectSite(plant.Plant, plant.Name);
+    // For satpam, only select if plant is accessible (within 1km)
+    if (this.role === 'satpam') {
+      const accessiblePlant = this.accessiblePlants.find(p => p.Plant === plantCode);
+      if (accessiblePlant) {
+        this.selectSite(accessiblePlant.Plant, accessiblePlant.Name);
+      }
+    } else {
+      // For admin, select from all plants
+      const plant = this.plants.find(p => p.Plant === plantCode);
+      if (plant) {
+        this.selectSite(plant.Plant, plant.Name);
+      }
     }
   }
 
@@ -286,6 +367,25 @@ export class LoginComponent {
 
   setRole(role: string) {
     this.role = role;
+    this.password = ''; // Clear password when switching roles
+    this.showPassword = false; // Reset password visibility
+
+    // Clear current site selection when switching roles
+    this.site = '';
+    this.selectedPlantText = '';
+
+    this.loadPlantList();
+
+    if (role === 'satpam') {
+      this.getCurrentLocation();
+    } else {
+      this.currentLocation = null;
+    }
+    
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
   delRole() {

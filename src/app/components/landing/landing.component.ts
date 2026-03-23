@@ -7,7 +7,7 @@ import { EnvironmentIndicatorComponent } from '../environment-indicator/environm
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, EnvironmentIndicatorComponent],
+  imports: [CommonModule],
   templateUrl: './landing.component.html',
   styleUrls: ['./landing.component.css']
 })

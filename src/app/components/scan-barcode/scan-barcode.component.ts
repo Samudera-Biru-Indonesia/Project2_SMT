@@ -13,7 +13,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-scan-barcode',
   standalone: true,
-  imports: [CommonModule, FormsModule, EnvironmentIndicatorComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './scan-barcode.component.html',
   styleUrls: ['./scan-barcode.component.css']
 })

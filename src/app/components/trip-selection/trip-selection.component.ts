@@ -8,7 +8,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-trip-selection',
   standalone: true,
-  imports: [CommonModule, EnvironmentIndicatorComponent],
+  imports: [CommonModule],
   templateUrl: './trip-selection.component.html',
   styleUrls: ['./trip-selection.component.css']
 })

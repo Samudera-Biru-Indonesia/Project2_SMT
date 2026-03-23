@@ -1,3 +1,5 @@
+@import url('https://cdn-uicons.flaticon.com/4.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css');
+
 .login-container {
   display: flex;
   justify-content: center;
@@ -19,8 +21,8 @@
   padding: 32px;
   width: 100%;
   max-width: 400px;
-  max-height: 90vh;
-  overflow-y: auto;
+  /* max-height: 90vh; */
+  /* overflow-y: auto; */
   box-sizing: border-box;
 }
 
@@ -86,7 +88,7 @@
 }
 
 .role-buttons .satpam {
-  background-color: #193161;
+  background-color: #365280;
   color: white;
 
   margin-bottom: 12px;
@@ -96,9 +98,8 @@
 
 .role-buttons .admin {
     background-color: white;
-    color: #193161;
-
-    border-color: #193161;
+    color: #365280;
+    border: 2px solid #365280;
 }
 
 .env-toggle {
@@ -140,7 +141,7 @@
 }
 
 .env-btn.pilot.active {
-  background: #193161;
+  background: #365280;
 }
 
 .env-btn.live.active {
@@ -192,6 +193,41 @@
   font-size: 14px;
 }
 
+/* Password Input Wrapper */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  padding-right: 45px;
+  width: 100%;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  transition: opacity 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+  opacity: 0.7;
+}
+
+.eye-icon {
+  font-size: 16px;
+  user-select: none;
+}
+
 .form-group input,
 .form-group select {
   padding: 10px 12px;
@@ -212,7 +248,7 @@
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #193161;
+  border-color: #365280;
 }
 
 .form-group input.error,
@@ -398,7 +434,7 @@
 }
 
 .login-btn {
-  background: #193161;
+  background: #365280;
   color: white;
   border: none;
   border-radius: 4px;
@@ -454,7 +490,7 @@
   width: 16px;
   height: 16px;
   border: 2px solid #f3f3f3;
-  border-top: 2px solid #193161;
+  border-top: 2px solid #365280;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -539,7 +575,7 @@
   width: 32px;
   height: 32px;
   border: 3px solid #f3f3f3;
-  border-top: 3px solid #193161;
+  border-top: 3px solid #365280;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 16px;

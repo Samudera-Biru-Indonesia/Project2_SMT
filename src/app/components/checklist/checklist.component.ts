@@ -16,7 +16,7 @@ interface ChecklistItem {
 @Component({
   selector: 'app-checklist',
   standalone: true,
-  imports: [CommonModule, FormsModule, EnvironmentIndicatorComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './checklist.component.html',
   styleUrls: ['./checklist.component.css']
 })

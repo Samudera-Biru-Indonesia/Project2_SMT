@@ -374,7 +374,7 @@ export class AuthService {
   /**
    * Logout
    */
-  logout(): void {
+  logout(isRedirect: boolean = true): void {
     this.currentUserSubject.next(null);
     // localStorage.removeItem(this.STORAGE_KEY);
 
@@ -397,9 +397,11 @@ export class AuthService {
     this.environmentService.setEnvironment('live');
 
     // Redirect to login page
-    if (typeof window !== 'undefined') {
+    if (isRedirect && typeof window !== 'undefined') {
+    
       const currentEnv = this.environmentService.getCurrentEnvironment();
       window.location.href = currentEnv.name === 'live' ? '/truck/login' : '/login';
+      
     }
   }
 
