@@ -476,6 +476,8 @@ export class OdometerComponent implements OnInit {
     const savedTripData = localStorage.getItem('tripData');
     const tripNumber = localStorage.getItem('tripNumber') || '';
     const authUser = JSON.parse(localStorage.getItem('smt_auth_user') || '{}');
+    const currentCompany = localStorage.getItem('currentCompany') || '';
+    const currentPlant = localStorage.getItem('currentPlant') || '';
 
     let tripData: TripData;
     const odometerValue = this.odometerReading ? parseFloat(this.odometerReading) : 0;
@@ -498,8 +500,9 @@ export class OdometerComponent implements OnInit {
         tripData.companyName = this.customerName || '';
         tripData.fullName = authUser.fullName || '';
         tripData.empCode = authUser.empCode || '';
-        // tripData.odometerFromDb = this.odometerFromDb || 0;
         tripData.expectedMuatan = this.expectedMuatan || 0;
+        tripData.company = currentCompany;
+        tripData.site = currentPlant;
       } catch (e) {
         alert('Gagal membaca data perjalanan. Silakan masukkan data secara manual atau hubungi tim support.');
         return;
@@ -519,8 +522,9 @@ export class OdometerComponent implements OnInit {
         companyName: this.customerName || '',
         fullName: authUser.fullName || '',
         empCode: authUser.empCode || '',
-        // odometerFromDb: this.odometerFromDb || 0,
-        expectedMuatan: this.expectedMuatan || 0
+        expectedMuatan: this.expectedMuatan || 0,
+        company: currentCompany,
+        site: currentPlant
       };
     }
 

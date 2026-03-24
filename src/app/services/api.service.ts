@@ -19,8 +19,9 @@ export interface TripData {
   companyName?: string;
   fullName?: string;
   empCode?: string;
-  // odometerFromDb?: number;
   expectedMuatan?: number;
+  company?: string;
+  site?: string;
 }
 
 export interface TripInfo {
@@ -174,8 +175,9 @@ export class ApiService {
       companyName: String(data.companyName || ''),
       fullName: String(data.fullName || ''),
       empCode: String(data.empCode || ''),
-      // odometerFromDb: Number(data.odometerFromDb) || 0,
-      expectedMuatan: Number(data.expectedMuatan) || 0
+      expectedMuatan: Number(data.expectedMuatan) || 0,
+      company: String(data.company || ''),
+      site: String(data.site || '')
     };
 
     return this.http.post(url, requestData, { headers });
