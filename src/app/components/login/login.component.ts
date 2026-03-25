@@ -381,6 +381,8 @@ export class LoginComponent {
     } else {
       this.currentLocation = null;
     }
+
+    localStorage.setItem('savedRole', role);
     
   }
 
