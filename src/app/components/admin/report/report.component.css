@@ -234,14 +234,14 @@
   font-weight: 600;
 }
 
-.status.selesai {
-  background: #d4edda;
+.status.valid {
+  background: #83C86F;
   color: #155724;
 }
 
-.status.proses {
-  background: #fff3cd;
-  color: #856404;
+.status.cancelled {
+  background: #C86F6F;
+  color: #3a2c01;
 }
 
 /* DataTables controls styling */

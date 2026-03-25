@@ -40,33 +40,53 @@
           <thead>
             <tr>
               <th>No.</th>
-              <th>Tanggal</th>
-              <th>Nomor SJ</th>
-              <th>Plat Nomor</th>
-              <th>Driver</th>
-              <th>Jenis</th>
-              <th>Odometer</th>
-              <th>Muatan</th>
-              <th>Status</th>
+              <th>Employee No.</th>
+              <th>Employee Name</th>
+
+              <th>Date & Time</th>
+              <th>SJ</th>
+              <th>Nopol</th>
+              <th>Odometer (KM)</th>
               <th>Site</th>
+
+              <th>Muatan</th>
+
+              <th>Tipe</th>
+
+              <th>Catatan</th>
+              <th>Driver</th>
+              <th>Co-Driver</th>
+
+              <th>Status</th>
+              
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let trip of filteredData">
-              <td>{{ trip.id }}</td>
-              <td>{{ trip.date }}</td>
-              <td>{{ trip.sjNumber }}</td>
+            <tr *ngFor="let trip of filteredData; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ trip.empCode }}</td>
+              <td>{{ trip.empName }}</td>
+              <td>{{ trip.date + ' ' + trip.time }}</td>
+              <td>{{ trip.tripNum }}</td>
               <td>{{ trip.plateNumber }}</td>
-              <td>{{ trip.driver }}</td>
+              <td>{{ trip.odometer | number }}</td>
+
+              <td>{{ trip.siteName + '-' + trip.siteCode }}</td>
+
+              <td>{{ trip.cargoQty }}</td>
+
               <td>
-                <span class="trip-type" [ngClass]="trip.type.toLowerCase()">{{ trip.type }}</span>
+                <span class="trip-type" [ngClass]="trip.tripType.toLowerCase()">{{ trip.tripType }}</span>
               </td>
-              <td>{{ trip.odometer | number }} km</td>
-              <td>{{ trip.muatan }}</td>
+
+              <td>{{ trip.notes }}</td>
+
+              <td>{{ trip.driver }}</td>
+              <td>{{ trip.coDriver }}</td>
+              
               <td>
                 <span class="status" [ngClass]="trip.status.toLowerCase()">{{ trip.status }}</span>
               </td>
-              <td>{{ trip.siteCode }}</td>
             </tr>
           </tbody>
         </table>

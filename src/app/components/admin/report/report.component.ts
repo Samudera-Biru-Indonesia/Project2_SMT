@@ -31,101 +31,125 @@ export class ReportComponent implements OnInit, OnDestroy {
   
   reportData = [
     {
-      id: 1,
+      empCode: 'S86126836',
+      empName: 'Budi Budiman',
       date: '2024-01-15',
-      sjNumber: 'SJ001234',
+      time: '08:00',
+      tripNum: 'SGI060-00528931',
+      
       plateNumber: 'B 1234 ABC',
-      driver: 'Ahmad Suryanto',
-      type: 'OUT',
       odometer: 125430,
-      muatan: '50 cylinder',
-      status: 'Selesai',
-      siteCode: 'JKT01'
+
+      siteCode: 'SGI018',
+      siteName: 'SGI Semarang',
+      sjNumber: 'SJ001234',
+
+      cargoQty: 50,
+      tripType: 'IN',
+      notes: '',
+      
+      driver: 'Ahmad Suryanto',
+      coDriver: 'Budi Dibudikan',
+      
+      
+      status: 'VALID',
     },
     {
-      id: 2,
+      empCode: 'S86126819',
+      empName: 'Anna Grace',
+      date: '2024-01-16',
+      time: '08:09',
+      tripNum: 'SGI060-00528931',
+      
+      plateNumber: 'B 6767 GGG',
+      odometer: 123,
+
+      siteCode: 'SGI018',
+      siteName: 'SGI Semarang',
+      sjNumber: 'SJ001234',
+
+      cargoQty: 50,
+      tripType: 'IN',
+      notes: 'Tangki LO2 & LO3',
+      
+      driver: 'Ahmad Suryanto',
+      coDriver: 'Budi Dibudikan',
+      
+      
+      status: 'VALID',
+    },
+    {
+      empCode: 'S86126836',
+      empName: 'Budi Budiman',
       date: '2024-01-15',
-      sjNumber: 'SJ001235',
-      plateNumber: 'B 5678 DEF',
-      driver: 'Budi Santoso',
-      type: 'IN',
-      odometer: 98765,
-      muatan: '45 cylinder',
-      status: 'Selesai',
-      siteCode: 'JKT01'
+      time: '08:00',
+      tripNum: 'SGI060-00528931',
+      
+      plateNumber: 'B 1234 ABC',
+      odometer: 125430,
+
+      siteCode: 'SGI018',
+      siteName: 'SGI Semarang',
+      sjNumber: 'SJ001234',
+
+      cargoQty: 50,
+      tripType: 'IN',
+      notes: '',
+      
+      driver: 'Ahmad Suryanto',
+      coDriver: 'Budi Dibudikan',
+      
+      
+      status: 'CANCELLED',
     },
     {
-      id: 3,
-      date: '2024-01-14',
-      sjNumber: 'SJ001236',
-      plateNumber: 'B 9012 GHI',
-      driver: 'Candra Wijaya',
-      type: 'OUT',
-      odometer: 156789,
-      muatan: '60 cylinder',
-      status: 'Proses',
-      siteCode: 'BDG01'
+      empCode: 'S86126836',
+      empName: 'Budi Budiman',
+      date: '2024-01-15',
+      time: '08:00',
+      tripNum: 'SGI060-00528931',
+      
+      plateNumber: 'B 1234 ABC',
+      odometer: 125430,
+
+      siteCode: 'SGI018',
+      siteName: 'SGI Semarang',
+      sjNumber: 'SJ001234',
+
+      cargoQty: 50,
+      tripType: 'IN',
+      notes: '',
+      
+      driver: 'Ahmad Suryanto',
+      coDriver: 'Budi Dibudikan',
+      
+      
+      status: 'CANCELLED',
     },
     {
-      id: 4,
-      date: '2024-01-14',
-      sjNumber: 'SJ001237',
-      plateNumber: 'B 3456 JKL',
-      driver: 'Dedi Kurniawan',
-      type: 'IN',
-      odometer: 87654,
-      muatan: '35 cylinder',
-      status: 'Selesai',
-      siteCode: 'BDG01'
+      empCode: 'S86126836',
+      empName: 'Budi Budiman',
+      date: '2024-01-15',
+      time: '08:00',
+      tripNum: 'SGI060-00528931',
+      
+      plateNumber: 'B 1234 ABC',
+      odometer: 125430,
+
+      siteCode: 'SGI018',
+      siteName: 'SGI Semarang',
+      sjNumber: 'SJ001234',
+
+      cargoQty: 50,
+      tripType: 'IN',
+      notes: '',
+      
+      driver: 'Ahmad Suryanto',
+      coDriver: 'Budi Dibudikan',
+      
+      
+      status: 'CANCELLED',
     },
-    {
-      id: 5,
-      date: '2024-01-13',
-      sjNumber: 'SJ001238',
-      plateNumber: 'B 7890 MNO',
-      driver: 'Eko Prasetyo',
-      type: 'OUT',
-      odometer: 134567,
-      muatan: '55 cylinder',
-      status: 'Selesai',
-      siteCode: 'SBY01'
-    },
-    {
-      id: 6,
-      date: '2024-01-13',
-      sjNumber: 'SJ001239',
-      plateNumber: 'B 2468 PQR',
-      driver: 'Fajar Nugroho',
-      type: 'IN',
-      odometer: 112233,
-      muatan: '40 cylinder',
-      status: 'Selesai',
-      siteCode: 'SBY01'
-    },
-    {
-      id: 7,
-      date: '2024-01-12',
-      sjNumber: 'SJ001240',
-      plateNumber: 'B 1357 STU',
-      driver: 'Gunawan Saputra',
-      type: 'OUT',
-      odometer: 145678,
-      muatan: '65 cylinder',
-      status: 'Proses',
-      siteCode: 'JKT01'
-    },
-    {
-      id: 8,
-      date: '2024-01-12',
-      sjNumber: 'SJ001241',
-      plateNumber: 'B 9753 VWX',
-      driver: 'Hendra Wijaya',
-      type: 'IN',
-      odometer: 98432,
-      muatan: '30 cylinder',
-      status: 'Selesai',
-      siteCode: 'BDG01'
-    }
   ];
 
   ngOnInit(): void {
@@ -163,7 +187,6 @@ export class ReportComponent implements OnInit, OnDestroy {
 
   exportToExcel(): void {
     const exportData = this.filteredData.map(trip => ({
-      'ID': trip.id,
       'Tanggal': trip.date,
       'Nomor SJ': trip.sjNumber,
       'Plat Nomor': trip.plateNumber,
