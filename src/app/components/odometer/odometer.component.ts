@@ -626,7 +626,9 @@ export class OdometerComponent implements OnInit {
           alert('Kesalahan dari server: ' + (response.message || response.error || JSON.stringify(response)) + '\n\nSilakan masukkan data secara manual atau hubungi tim support.');
         } else {
           
-          this.processDataToEpicor(tripData.tripNum).subscribe({
+          const company = localStorage.getItem('currentCompany') || ''
+
+          this.processDataToEpicor(/*tripData.tripNum*/ company).subscribe({
             next: (epicorResponse) => {
                 // 3. EPICOR SUCCESS!
                 onSuccess(); // Navigate away
@@ -680,8 +682,8 @@ export class OdometerComponent implements OnInit {
   }
 
   // Function to process trip data to Epicor
-  processDataToEpicor(tripNum: string) {
-    return this.apiService.processTripData(tripNum);
+  processDataToEpicor(company: string) {
+    return this.apiService.processTripData(company); 
     // this.apiService.processTripData(tripNum).subscribe({
     //   next: (response) => {
     //     // alert('Data berhasil diproses ke sistem Epicor!');

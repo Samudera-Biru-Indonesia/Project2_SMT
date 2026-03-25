@@ -254,7 +254,7 @@ export class ApiService {
   /**
    * Process trip data to Epicor after staging table insert
    */
-  processTripData(tripNum: string): Observable<any> {
+  processTripData(company: string): Observable<any> {
     const currentEnv = this.environmentService.getCurrentEnvironment();
     const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
     const url = currentEnv.baseUrl + this.endpoints.processTripData;
@@ -268,7 +268,7 @@ export class ApiService {
     });
 
     const requestBody = {
-      tripNum: tripNum
+      company: company
     };
 
     return this.http.post<any>(url, requestBody, { headers })
