@@ -6,6 +6,7 @@ import { DataTablesModule } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { Config } from 'datatables.net';
 import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
 import { AuthService } from '../../../services/auth.service';
 import { ApiService } from '../../../services/api.service';
 import { DataTableDirective } from 'angular-datatables';
@@ -92,8 +93,14 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
           title: 'Tipe', 
           data: 'tripType', 
           render: (data: any) => {
-            console.log('tripType value:', data);
-            return `<span class="trip-type ${data ? data.toLowerCase() : ''}">${data || ''}</span>`;
+            if (!data) return '';
+            const lowerData = data.toLowerCase();
+            if (lowerData === 'out') {
+              return `<span style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; display: inline-block;">${data}</span>`;
+            } else if (lowerData === 'in') {
+              return `<span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; display: inline-block;">${data}</span>`;
+            }
+            return data;
           }
         },
         { title: 'Catatan', data: 'notes' },
@@ -103,8 +110,14 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
           title: 'Status', 
           data: 'status', 
           render: (data: any) => {
-            console.log('status value:', data);
-            return `<span class="status ${data ? data.toLowerCase() : ''}">${data || ''}</span>`;
+            if (!data) return '';
+            const lowerData = data.toLowerCase();
+            if (lowerData === 'valid') {
+              return `<span style="background: #83C86F; color: #155724; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block;">${data}</span>`;
+            } else if (lowerData === 'cancelled') {
+              return `<span style="background: #C86F6F; color: #3a2c01; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block;">${data}</span>`;
+            }
+            return data;
           }
         }
       ],
@@ -274,6 +287,13 @@ applyFilters(): void {
 
   toggleAdvancedFilters(): void {
     this.showAdvancedFilters = !this.showAdvancedFilters;
+    if (!this.showAdvancedFilters) {
+      this.tripNum = '';
+      this.plateNumber = '';
+      this.driver = '';
+      this.coDriver = '';
+      this.applyFilters();
+    }
   }
 
   toggleTripTypeSelection(tripType: string): void {
@@ -422,30 +442,109 @@ applyFilters(): void {
     }
   }
 
-  exportToExcel(): void {
-    const exportData = this.filteredData.map((trip, index) => ({
-      'No': index + 1,
-      'Employee No': trip.empCode,
-      'Employee Name': trip.empName,
-      'Date & Time': trip.date + ' ' + trip.time,
-      'SJ': trip.tripNum,
-      'Nopol': trip.plateNumber,
-      'Odometer (KM)': trip.odometer,
-      'Site': trip.siteName + '-' + trip.siteCode,
-      'Muatan': trip.cargoQty,
-      'Tipe': trip.tripType,
-      'Catatan': trip.notes,
-      'Driver': trip.driver,
-      'Co-Driver': trip.coDriver,
-      'Status': trip.status
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Laporan Perjalanan');
+  async exportToExcel(): Promise<void> {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Laporan Perjalanan');
     
+    // Add headers
+    worksheet.columns = [
+      { header: 'No', key: 'no', width: 5 },
+      { header: 'Employee No', key: 'empCode', width: 15 },
+      { header: 'Employee Name', key: 'empName', width: 20 },
+      { header: 'Date & Time', key: 'dateTime', width: 18 },
+      { header: 'SJ', key: 'tripNum', width: 15 },
+      { header: 'Nopol', key: 'plateNumber', width: 12 },
+      { header: 'Odometer (KM)', key: 'odometer', width: 15 },
+      { header: 'Site', key: 'site', width: 20 },
+      { header: 'Muatan', key: 'cargoQty', width: 10 },
+      { header: 'Tipe', key: 'tripType', width: 10 },
+      { header: 'Catatan', key: 'notes', width: 25 },
+      { header: 'Driver', key: 'driver', width: 20 },
+      { header: 'Co-Driver', key: 'coDriver', width: 20 },
+      { header: 'Status', key: 'status', width: 12 }
+    ];
+    
+    // Style header row
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFF8F9FA' }
+    };
+    
+    // Add data rows
+    this.filteredData.forEach((trip, index) => {
+      const row = worksheet.addRow({
+        no: index + 1,
+        empCode: trip.empCode,
+        empName: trip.empName,
+        dateTime: trip.date + ' ' + trip.time,
+        tripNum: trip.tripNum,
+        plateNumber: trip.plateNumber,
+        odometer: trip.odometer,
+        site: trip.siteName + '-' + trip.siteCode,
+        cargoQty: trip.cargoQty,
+        tripType: trip.tripType,
+        notes: trip.notes,
+        driver: trip.driver,
+        coDriver: trip.coDriver,
+        status: trip.status
+      });
+      
+      // Style Tipe column (column 10)
+      const tipeCell = row.getCell(10);
+      if (trip.tripType) {
+        const lowerType = trip.tripType.toLowerCase();
+        if (lowerType === 'out') {
+          tipeCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFDC3545' }
+          };
+          tipeCell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+        } else if (lowerType === 'in') {
+          tipeCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF28A745' }
+          };
+          tipeCell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+        }
+      }
+      
+      // Style Status column (column 14)
+      const statusCell = row.getCell(14);
+      if (trip.status) {
+        const lowerStatus = trip.status.toLowerCase();
+        if (lowerStatus === 'valid') {
+          statusCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF83C86F' }
+          };
+          statusCell.font = { color: { argb: 'FF155724' }, bold: true };
+        } else if (lowerStatus === 'cancelled') {
+          statusCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFC86F6F' }
+          };
+          statusCell.font = { color: { argb: 'FF3A2C01' }, bold: true };
+        }
+      }
+    });
+    
+    // Generate file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const fileName = `laporan-perjalanan-${new Date().toISOString().split('T')[0]}.xlsx`;
-    XLSX.writeFile(workbook, fileName);
+    
+    // Download file
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+    window.URL.revokeObjectURL(link.href);
   }
 
   ngOnDestroy(): void {

@@ -22,6 +22,7 @@
     "angular-datatables": "^19.0.0",
     "datatables.net": "^2.3.7",
     "datatables.net-dt": "^2.3.7",
+    "exceljs": "^4.4.0",
     "html2canvas": "^1.4.1",
     "jquery": "^4.0.0",
     "jwt-decode": "^4.0.0",
