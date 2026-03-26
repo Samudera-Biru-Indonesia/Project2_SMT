@@ -47,16 +47,16 @@ export class ChecklistComponent implements OnInit {
 
     this.manualTruckPlate = localStorage.getItem('manualTruckPlate') || '';
 
-    // Lainnya g perlu checklist
-    if(this.manualTruckPlate === 'LAINNYA') {
-      this.onSubmit();
-    }
-
     this.truckBarcode = localStorage.getItem('currentTruckBarcode') || '';
     this.tripType = localStorage.getItem('tripType') || '';
     this.tripNumber = localStorage.getItem('tripNumber') || '';
     this.customerName = localStorage.getItem('customerName') || '';
     this.newTruckPlate = localStorage.getItem('newTruckPlate') || '';
+
+    // Lainnya g perlu checklist
+    if(this.manualTruckPlate === 'LAINNYA') {
+      this.onSubmit();
+    }
 
     
     // Get plate number from trip data if available
