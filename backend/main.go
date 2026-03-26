@@ -25,6 +25,8 @@ type UploadRequest struct {
 	CargoPhotos    []string `json:"cargoPhotos"`
 	CarPhotos      []string `json:"carPhotos"`
 	Condition      string   `json:"condition"`
+	TruckType      string   `json:"truckType"`
+	SiteCode       string   `json:"siteCode"`
 }
 
 type UploadResponse struct {
@@ -229,8 +231,14 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		
-		// 3. Append the index (i+1) to make the filename unique (e.g., TRP123_IN_odometer_1.jpg)
-		filename := fmt.Sprintf("%s_%s_odometer_%d.jpg", req.TripNum, req.Condition, i+1)
+		var filename string
+		if req.TruckType == "LAINNYA" {
+			filename = fmt.Sprintf("LAINNYA_%s_%s_%d.jpg", req.SiteCode, req.Condition, i+1)
+		} else if req.TruckType == "GROUP/RELASI/VENDOR/EKSPEDISI" {
+			filename = fmt.Sprintf("GroupVendorRelasiEkspedisi_%s_%s_%d.jpg", req.SiteCode, req.Condition, i+1)
+		} else {
+			filename = fmt.Sprintf("%s_%s_odometer_%d.jpg", req.TripNum, req.Condition, i+1)
+		}
 		
 		id, err := uploadFileToDrive(filename, imgBytes, rootFolderID)
 		if err != nil {
@@ -257,8 +265,14 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		
-		// Append the index (i+1) to make the filename unique
-		filename := fmt.Sprintf("%s_%s_cargo_%d.jpg", req.TripNum, req.Condition, i+1)
+		var filename string
+		if req.TruckType == "LAINNYA" {
+			filename = fmt.Sprintf("LAINNYA_%s_%s_%d.jpg", req.SiteCode, req.Condition, i+1)
+		} else if req.TruckType == "GROUP/RELASI/VENDOR/EKSPEDISI" {
+			filename = fmt.Sprintf("GroupVendorRelasiEkspedisi_%s_%s_%d.jpg", req.SiteCode, req.Condition, i+1)
+		} else {
+			filename = fmt.Sprintf("%s_%s_cargo_%d.jpg", req.TripNum, req.Condition, i+1)
+		}
 		
 		id, err := uploadFileToDrive(filename, imgBytes, rootFolderID)
 		if err != nil {
@@ -274,6 +288,38 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	log.Printf("TIMESTAMP %s", timestamp)
+
+	// Loop through Car Photos
+	for i, photoData := range req.CarPhotos {
+		if photoData == "" {
+			continue
+		}
+		
+		imgBytes, err := decodeBase64Image(photoData)
+		if err != nil {
+			log.Printf("Failed to decode car photo")
+			break
+		}
+		
+		var filename string
+		if req.TruckType == "LAINNYA" {
+			filename = fmt.Sprintf("LAINNYA_%s_%s_%d.jpg", req.SiteCode, req.Condition, i+1)
+		} else if req.TruckType == "GROUP/RELASI/VENDOR/EKSPEDISI" {
+			filename = fmt.Sprintf("GroupVendorRelasiEkspedisi_%s_%s_%d.jpg", req.SiteCode, req.Condition, i+1)
+		} else {
+			filename = fmt.Sprintf("%s_%s_car_%d.jpg", req.TripNum, req.Condition, i+1)
+		}
+		
+		id, err := uploadFileToDrive(filename, imgBytes, rootFolderID)
+		if err != nil {
+			log.Printf("Failed to upload car photo: %v", err)
+			break
+		}
+		
+		fileIDs = append(fileIDs, id)
+		log.Printf("Uploaded %s — Drive ID: %s", filename, id)
+	}
+
 	json.NewEncoder(w).Encode(UploadResponse{
 		Success:   true,
 		FileIDs:   fileIDs,

@@ -528,25 +528,32 @@ export class OdometerComponent implements OnInit {
       };
     }
 
-    // 1. Send Data to API first
-    this.sendTripDataToAPI(tripData, () => {
-      // 2. Upload foto ke Google Drive via Go backend
-      const tripNum = tripData.tripNum || 'unknown';
-      this.apiService.uploadPhotos(tripNum, this.odometerPhotos, this.cargoPhotos, this.carPhotos, this.tripType).subscribe({
-        next: (response) => {
-          this.isUploading = false;
-          // Save timestamp from photo upload
-          if (response.timestamp) {
-            localStorage.setItem('photoTimestamp', response.timestamp);
-          }
-          this.continueAfterUpload(tripData, odometerValue, jumlahMuatanValue, authUser);
-        },
-        error: (err) => {
-          this.isUploading = false;
-          this.photoUploadWarning = 'Foto gagal terupload ke Drive. Harap coba lagi.';
-          this.continueAfterUpload(tripData, odometerValue, jumlahMuatanValue, authUser);
+    // Upload photos first to get timestamp
+    const tripNum = tripData.tripNum || 'unknown';
+    const truckType = this.manualTruckPlate || '';
+    const siteCode = currentPlant || '';
+    this.isUploading = true;
+    this.apiService.uploadPhotos(tripNum, this.odometerPhotos, this.cargoPhotos, this.carPhotos, this.tripType, truckType, siteCode).subscribe({
+      next: (response) => {
+        this.isUploading = false;
+        // Add timestamp to tripData
+        if (response.timestamp) {
+          tripData.photoTimestamp = response.timestamp;
+          localStorage.setItem('photoTimestamp', response.timestamp);
         }
-      });
+        // Send data to API with timestamp
+        this.sendTripDataToAPI(tripData, () => {
+          this.continueAfterUpload(tripData, odometerValue, jumlahMuatanValue, authUser);
+        });
+      },
+      error: (err) => {
+        this.isUploading = false;
+        this.photoUploadWarning = 'Foto gagal terupload ke Drive. Harap coba lagi.';
+        // Continue without timestamp
+        this.sendTripDataToAPI(tripData, () => {
+          this.continueAfterUpload(tripData, odometerValue, jumlahMuatanValue, authUser);
+        });
+      }
     });
   }
 
