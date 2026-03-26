@@ -528,7 +528,7 @@ export class OdometerComponent implements OnInit {
       };
     }
 
-    // Upload photos first to get timestamp
+    // Upload photos first to get timestamp and filenames
     const tripNum = tripData.tripNum || 'unknown';
     const truckType = this.manualTruckPlate || '';
     const siteCode = currentPlant || '';
@@ -536,11 +536,18 @@ export class OdometerComponent implements OnInit {
     this.apiService.uploadPhotos(tripNum, this.odometerPhotos, this.cargoPhotos, this.carPhotos, this.tripType, truckType, siteCode).subscribe({
       next: (response) => {
         this.isUploading = false;
+        console.log('Upload response:', response);
         // Add timestamp to tripData
         if (response.timestamp) {
           tripData.photoTimestamp = response.timestamp;
           localStorage.setItem('photoTimestamp', response.timestamp);
         }
+        // Use filename as tripNum for special truck types
+        if ((truckType === 'LAINNYA' || truckType === 'GROUP/RELASI/VENDOR/EKSPEDISI') && response.filename) {
+          console.log('Updating tripNum from', tripData.tripNum, 'to', response.filename);
+          tripData.tripNum = response.filename;
+        }
+        console.log('Final tripData before sending:', tripData);
         // Send data to API with timestamp
         this.sendTripDataToAPI(tripData, () => {
           this.continueAfterUpload(tripData, odometerValue, jumlahMuatanValue, authUser);

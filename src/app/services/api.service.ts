@@ -365,7 +365,7 @@ export class ApiService {
     return this.http.post<GetOrderDetailsResponse>(url, body, { headers });
   }
 
-  uploadPhotos(tripNum: string, odometerPhotos: string[], cargoPhotos: string[], carPhotos: string[], condition: string, truckType: string, siteCode: string): Observable<{success: boolean, fileIds: string[], timestamp: string}> {
+  uploadPhotos(tripNum: string, odometerPhotos: string[], cargoPhotos: string[], carPhotos: string[], condition: string, truckType: string, siteCode: string): Observable<{success: boolean, fileIds: string[], filename: string, timestamp: string}> {
     // Check JWT expiration before making the call
     this.checkJwtAndLogoutIfExpired();
 
@@ -388,7 +388,7 @@ export class ApiService {
         siteCode
     };
 
-    return this.http.post<{success: boolean, fileIds: string[], timestamp: string}>(url, body, { headers });
+    return this.http.post<{success: boolean, fileIds: string[], filename: string, timestamp: string}>(url, body, { headers });
   }
 
 }

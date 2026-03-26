@@ -32,6 +32,7 @@ type UploadRequest struct {
 type UploadResponse struct {
 	Success   bool     `json:"success"`
 	FileIDs   []string `json:"fileIds"`
+	Filename  string   `json:"filename"`
 	Timestamp string   `json:"timestamp"`
 }
 
@@ -186,7 +187,9 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate timestamp immediately
-	timestamp := time.Now().Format("02/01/2006 15:04")
+	now := time.Now()
+	timestamp := now.Format("02/01/2006 15:04")
+	fileTimestamp := now.Format("20060102_150405")
 
 	r.Body = http.MaxBytesReader(w, r.Body, 5<<20) // limit 20MB
 
@@ -217,6 +220,7 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var fileIDs []string
+	var baseFilename string
 
 	for i, photoData := range req.OdometerPhotos {
 		if photoData == "" {
@@ -233,9 +237,15 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		
 		var filename string
 		if req.TruckType == "LAINNYA" {
-			filename = fmt.Sprintf("LAINNYA_%s_%s_%d.jpg", req.SiteCode, req.Condition, i+1)
+			filename = fmt.Sprintf("Lainnya_%s_%s_%d.jpg", fileTimestamp, req.Condition, i+1)
+			if baseFilename == "" {
+				baseFilename = fmt.Sprintf("Lainnya_%s_%s", fileTimestamp, req.Condition)
+			}
 		} else if req.TruckType == "GROUP/RELASI/VENDOR/EKSPEDISI" {
-			filename = fmt.Sprintf("GroupVendorRelasiEkspedisi_%s_%s_%d.jpg", req.SiteCode, req.Condition, i+1)
+			filename = fmt.Sprintf("GroupVendorRelasiEkspedisi_%s_%s_%d.jpg", fileTimestamp, req.Condition, i+1)
+			if baseFilename == "" {
+				baseFilename = fmt.Sprintf("GroupVendorRelasiEkspedisi_%s_%s", fileTimestamp, req.Condition)
+			}
 		} else {
 			filename = fmt.Sprintf("%s_%s_odometer_%d.jpg", req.TripNum, req.Condition, i+1)
 		}
@@ -267,9 +277,15 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		
 		var filename string
 		if req.TruckType == "LAINNYA" {
-			filename = fmt.Sprintf("LAINNYA_%s_%s_%d.jpg", req.SiteCode, req.Condition, i+1)
+			filename = fmt.Sprintf("Lainnya_%s_%s_%d.jpg", fileTimestamp, req.Condition, i+1)
+			if baseFilename == "" {
+				baseFilename = fmt.Sprintf("Lainnya_%s_%s", fileTimestamp, req.Condition)
+			}
 		} else if req.TruckType == "GROUP/RELASI/VENDOR/EKSPEDISI" {
-			filename = fmt.Sprintf("GroupVendorRelasiEkspedisi_%s_%s_%d.jpg", req.SiteCode, req.Condition, i+1)
+			filename = fmt.Sprintf("GroupVendorRelasiEkspedisi_%s_%s_%d.jpg", fileTimestamp, req.Condition, i+1)
+			if baseFilename == "" {
+				baseFilename = fmt.Sprintf("GroupVendorRelasiEkspedisi_%s_%s", fileTimestamp, req.Condition)
+			}
 		} else {
 			filename = fmt.Sprintf("%s_%s_cargo_%d.jpg", req.TripNum, req.Condition, i+1)
 		}
@@ -303,9 +319,15 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		
 		var filename string
 		if req.TruckType == "LAINNYA" {
-			filename = fmt.Sprintf("LAINNYA_%s_%s_%d.jpg", req.SiteCode, req.Condition, i+1)
+			filename = fmt.Sprintf("Lainnya_%s_%s_%d.jpg", fileTimestamp, req.Condition, i+1)
+			if baseFilename == "" {
+				baseFilename = fmt.Sprintf("Lainnya_%s_%s", fileTimestamp, req.Condition)
+			}
 		} else if req.TruckType == "GROUP/RELASI/VENDOR/EKSPEDISI" {
-			filename = fmt.Sprintf("GroupVendorRelasiEkspedisi_%s_%s_%d.jpg", req.SiteCode, req.Condition, i+1)
+			filename = fmt.Sprintf("GroupVendorRelasiEkspedisi_%s_%s_%d.jpg", fileTimestamp, req.Condition, i+1)
+			if baseFilename == "" {
+				baseFilename = fmt.Sprintf("GroupVendorRelasiEkspedisi_%s_%s", fileTimestamp, req.Condition)
+			}
 		} else {
 			filename = fmt.Sprintf("%s_%s_car_%d.jpg", req.TripNum, req.Condition, i+1)
 		}
@@ -323,6 +345,7 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(UploadResponse{
 		Success:   true,
 		FileIDs:   fileIDs,
+		Filename:  baseFilename,
 		Timestamp: timestamp,
 	})
 }
