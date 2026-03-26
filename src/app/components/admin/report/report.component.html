@@ -26,11 +26,108 @@
             <input type="date" [(ngModel)]="endDate" (change)="applyFilters()" class="filter-input">
           </div>
           <div class="filter-group">
-            <label>Kode Site:</label>
-            <input type="text" [(ngModel)]="siteCode" (input)="applyFilters()" placeholder="Cari kode site..." class="filter-input">
+            <label>Tipe:</label>
+            <div class="multiselect-wrapper">
+              <div class="multiselect-display" (click)="showTripTypeDropdown = !showTripTypeDropdown; closeOtherDropdowns('tripType'); $event.stopPropagation()">
+                {{ selectedTripTypes.length > 0 ? selectedTripTypes.length + ' dipilih' : 'Pilih Tipe' }}
+              </div>
+              <div class="multiselect-dropdown" *ngIf="showTripTypeDropdown" (click)="$event.stopPropagation()">
+                <div class="multiselect-select-all" (click)="toggleSelectAllTripTypes(); $event.stopPropagation()">
+                  <input type="checkbox" [checked]="selectedTripTypes.length === tripTypes.length" (click)="$event.stopPropagation()">
+                  <span><strong>Select All</strong></span>
+                </div>
+                <div *ngFor="let type of tripTypes" class="multiselect-option" (click)="toggleTripTypeSelection(type); $event.stopPropagation()">
+                  <input type="checkbox" [checked]="selectedTripTypes.includes(type)" (click)="$event.stopPropagation()">
+                  <span>{{ type }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="filter-group">
+            <label>Site:</label>
+            <div class="multiselect-wrapper">
+              <div class="multiselect-display" (click)="showSiteDropdown = !showSiteDropdown; closeOtherDropdowns('site'); $event.stopPropagation()">
+                {{ selectedSites.length > 0 ? selectedSites.length + ' dipilih' : 'Pilih Site' }}
+              </div>
+              <div class="multiselect-dropdown" *ngIf="showSiteDropdown" (click)="$event.stopPropagation()">
+                <input type="text" [(ngModel)]="siteSearchTerm" (click)="$event.stopPropagation()" placeholder="Cari site..." class="multiselect-search">
+                <div class="multiselect-select-all" (click)="toggleSelectAllSites(); $event.stopPropagation()">
+                  <input type="checkbox" [checked]="selectedSites.length === sites.length" (click)="$event.stopPropagation()">
+                  <span><strong>Select All</strong></span>
+                </div>
+                <div *ngFor="let site of getFilteredSites()" class="multiselect-option" (click)="toggleSiteSelection(site.Plant); $event.stopPropagation()">
+                  <input type="checkbox" [checked]="selectedSites.includes(site.Plant)" (click)="$event.stopPropagation()">
+                  <span>{{ site.Plant }} - {{ site.Name }}</span>
+                </div>
+                <div *ngIf="getFilteredSites().length === 0" class="no-data-found">No data found</div>
+              </div>
+            </div>
+          </div>
+          <div class="filter-group">
+            <label>Employee:</label>
+            <div class="multiselect-wrapper">
+              <div class="multiselect-display" (click)="showEmployeeDropdown = !showEmployeeDropdown; closeOtherDropdowns('employee'); $event.stopPropagation()">
+                {{ selectedEmployees.length > 0 ? selectedEmployees.length + ' dipilih' : 'Pilih Employee' }}
+              </div>
+              <div class="multiselect-dropdown" *ngIf="showEmployeeDropdown" (click)="$event.stopPropagation()">
+                <input type="text" [(ngModel)]="employeeSearchTerm" (click)="$event.stopPropagation()" placeholder="Cari employee..." class="multiselect-search">
+                <div class="multiselect-select-all" (click)="toggleSelectAllEmployees(); $event.stopPropagation()">
+                  <input type="checkbox" [checked]="selectedEmployees.length === employees.length" (click)="$event.stopPropagation()">
+                  <span><strong>Select All</strong></span>
+                </div>
+                <div *ngFor="let emp of getFilteredEmployees()" class="multiselect-option" (click)="toggleEmployeeSelection(emp.EmpCode); $event.stopPropagation()">
+                  <input type="checkbox" [checked]="selectedEmployees.includes(emp.EmpCode)" (click)="$event.stopPropagation()">
+                  <span>{{ emp.EmpCode }} - {{ emp.EmpName }}</span>
+                </div>
+                <div *ngIf="getFilteredEmployees().length === 0" class="no-data-found">No data found</div>
+              </div>
+            </div>
+          </div>
+          <div class="filter-group">
+            <label>Status:</label>
+            <div class="multiselect-wrapper">
+              <div class="multiselect-display" (click)="showStatusDropdown = !showStatusDropdown; closeOtherDropdowns('status'); $event.stopPropagation()">
+                {{ selectedStatuses.length > 0 ? selectedStatuses.length + ' dipilih' : 'Pilih Status' }}
+              </div>
+              <div class="multiselect-dropdown" *ngIf="showStatusDropdown" (click)="$event.stopPropagation()">
+                <div class="multiselect-select-all" (click)="toggleSelectAllStatuses(); $event.stopPropagation()">
+                  <input type="checkbox" [checked]="selectedStatuses.length === statuses.length" (click)="$event.stopPropagation()">
+                  <span><strong>Select All</strong></span>
+                </div>
+                <div *ngFor="let status of statuses" class="multiselect-option" (click)="toggleStatusSelection(status); $event.stopPropagation()">
+                  <input type="checkbox" [checked]="selectedStatuses.includes(status)" (click)="$event.stopPropagation()">
+                  <span>{{ status }}</span>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="filter-group">
             <button (click)="clearFilters()" class="clear-btn">Reset</button>
+          </div>
+        </div>
+        
+        <div class="advanced-toggle">
+          <button (click)="toggleAdvancedFilters()" class="toggle-btn">
+            {{ showAdvancedFilters ? '▼' : '▶' }} Advanced Filters
+          </button>
+        </div>
+        
+        <div class="filter-row" *ngIf="showAdvancedFilters">
+          <div class="filter-group">
+            <label>SJ:</label>
+            <input type="text" [(ngModel)]="tripNum" (input)="applyFilters()" placeholder="Cari SJ..." class="filter-input">
+          </div>
+          <div class="filter-group">
+            <label>Nopol:</label>
+            <input type="text" [(ngModel)]="plateNumber" (input)="applyFilters()" placeholder="Cari nopol..." class="filter-input">
+          </div>
+          <div class="filter-group">
+            <label>Driver:</label>
+            <input type="text" [(ngModel)]="driver" (input)="applyFilters()" placeholder="Cari driver..." class="filter-input">
+          </div>
+          <div class="filter-group">
+            <label>Co-Driver:</label>
+            <input type="text" [(ngModel)]="coDriver" (input)="applyFilters()" placeholder="Cari co-driver..." class="filter-input">
           </div>
         </div>
       </div>
@@ -42,52 +139,20 @@
               <th>No.</th>
               <th>Employee No.</th>
               <th>Employee Name</th>
-
               <th>Date & Time</th>
               <th>SJ</th>
               <th>Nopol</th>
               <th>Odometer (KM)</th>
               <th>Site</th>
-
               <th>Muatan</th>
-
               <th>Tipe</th>
-
               <th>Catatan</th>
               <th>Driver</th>
               <th>Co-Driver</th>
-
               <th>Status</th>
-              
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let trip of filteredData; let i = index">
-              <td>{{ i + 1 }}</td>
-              <td>{{ trip.empCode }}</td>
-              <td>{{ trip.empName }}</td>
-              <td>{{ trip.date + ' ' + trip.time }}</td>
-              <td>{{ trip.tripNum }}</td>
-              <td>{{ trip.plateNumber }}</td>
-              <td>{{ trip.odometer | number }}</td>
-
-              <td>{{ trip.siteName + '-' + trip.siteCode }}</td>
-
-              <td>{{ trip.cargoQty }}</td>
-
-              <td>
-                <span class="trip-type" [ngClass]="trip.tripType.toLowerCase()">{{ trip.tripType }}</span>
-              </td>
-
-              <td>{{ trip.notes }}</td>
-
-              <td>{{ trip.driver }}</td>
-              <td>{{ trip.coDriver }}</td>
-              
-              <td>
-                <span class="status" [ngClass]="trip.status.toLowerCase()">{{ trip.status }}</span>
-              </td>
-            </tr>
           </tbody>
         </table>
       </div>
