@@ -536,7 +536,6 @@ export class OdometerComponent implements OnInit {
     this.apiService.uploadPhotos(tripNum, this.odometerPhotos, this.cargoPhotos, this.carPhotos, this.tripType, truckType, siteCode).subscribe({
       next: (response) => {
         this.isUploading = false;
-        console.log('Upload response:', response);
         // Add timestamp to tripData
         if (response.timestamp) {
           tripData.photoTimestamp = response.timestamp;
