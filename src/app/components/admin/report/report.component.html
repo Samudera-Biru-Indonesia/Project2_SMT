@@ -29,7 +29,7 @@
             <label>Tipe:</label>
             <div class="multiselect-wrapper">
               <div class="multiselect-display" (click)="showTripTypeDropdown = !showTripTypeDropdown; closeOtherDropdowns('tripType'); $event.stopPropagation()">
-                {{ selectedTripTypes.length > 0 ? selectedTripTypes.length + ' dipilih' : 'Pilih Tipe' }}
+                {{ selectedTripTypes.length === 1 ? selectedTripTypes[0] : (selectedTripTypes.length > 0 ? selectedTripTypes.length + ' dipilih' : 'Pilih Tipe') }}
               </div>
               <div class="multiselect-dropdown" *ngIf="showTripTypeDropdown" (click)="$event.stopPropagation()">
                 <div class="multiselect-select-all" (click)="toggleSelectAllTripTypes(); $event.stopPropagation()">
@@ -47,7 +47,7 @@
             <label>Site:</label>
             <div class="multiselect-wrapper">
               <div class="multiselect-display" (click)="showSiteDropdown = !showSiteDropdown; closeOtherDropdowns('site'); $event.stopPropagation()">
-                {{ selectedSites.length > 0 ? selectedSites.length + ' dipilih' : 'Pilih Site' }}
+                {{ selectedSites.length === 1 ? getSelectedSiteName() : (selectedSites.length > 0 ? selectedSites.length + ' dipilih' : 'Pilih Site') }}
               </div>
               <div class="multiselect-dropdown" *ngIf="showSiteDropdown" (click)="$event.stopPropagation()">
                 <input type="text" [(ngModel)]="siteSearchTerm" (click)="$event.stopPropagation()" placeholder="Cari site..." class="multiselect-search">
@@ -55,11 +55,13 @@
                   <input type="checkbox" [checked]="selectedSites.length === sites.length" (click)="$event.stopPropagation()">
                   <span><strong>Select All</strong></span>
                 </div>
-                <div *ngFor="let site of getFilteredSites()" class="multiselect-option" (click)="toggleSiteSelection(site.Plant); $event.stopPropagation()">
-                  <input type="checkbox" [checked]="selectedSites.includes(site.Plant)" (click)="$event.stopPropagation()">
-                  <span>{{ site.Plant }} - {{ site.Name }}</span>
+                <div class="multiselect-options-container">
+                  <div *ngFor="let site of getFilteredSites()" class="multiselect-option" (click)="toggleSiteSelection(site.Plant); $event.stopPropagation()">
+                    <input type="checkbox" [checked]="selectedSites.includes(site.Plant)" (click)="$event.stopPropagation()">
+                    <span>{{ site.Plant }} - {{ site.Name }}</span>
+                  </div>
+                  <div *ngIf="getFilteredSites().length === 0" class="no-data-found">No data found</div>
                 </div>
-                <div *ngIf="getFilteredSites().length === 0" class="no-data-found">No data found</div>
               </div>
             </div>
           </div>
@@ -67,7 +69,7 @@
             <label>Employee:</label>
             <div class="multiselect-wrapper">
               <div class="multiselect-display" (click)="showEmployeeDropdown = !showEmployeeDropdown; closeOtherDropdowns('employee'); $event.stopPropagation()">
-                {{ selectedEmployees.length > 0 ? selectedEmployees.length + ' dipilih' : 'Pilih Employee' }}
+                {{ selectedEmployees.length === 1 ? getSelectedEmployeeName() : (selectedEmployees.length > 0 ? selectedEmployees.length + ' dipilih' : 'Pilih Employee') }}
               </div>
               <div class="multiselect-dropdown" *ngIf="showEmployeeDropdown" (click)="$event.stopPropagation()">
                 <input type="text" [(ngModel)]="employeeSearchTerm" (click)="$event.stopPropagation()" placeholder="Cari employee..." class="multiselect-search">
@@ -75,11 +77,13 @@
                   <input type="checkbox" [checked]="selectedEmployees.length === employees.length" (click)="$event.stopPropagation()">
                   <span><strong>Select All</strong></span>
                 </div>
-                <div *ngFor="let emp of getFilteredEmployees()" class="multiselect-option" (click)="toggleEmployeeSelection(emp.EmpCode); $event.stopPropagation()">
-                  <input type="checkbox" [checked]="selectedEmployees.includes(emp.EmpCode)" (click)="$event.stopPropagation()">
-                  <span>{{ emp.EmpCode }} - {{ emp.EmpName }}</span>
+                <div class="multiselect-options-container">
+                  <div *ngFor="let emp of getFilteredEmployees()" class="multiselect-option" (click)="toggleEmployeeSelection(emp.EmpCode); $event.stopPropagation()">
+                    <input type="checkbox" [checked]="selectedEmployees.includes(emp.EmpCode)" (click)="$event.stopPropagation()">
+                    <span>{{ emp.EmpCode }} - {{ emp.EmpName }}</span>
+                  </div>
+                  <div *ngIf="getFilteredEmployees().length === 0" class="no-data-found">No data found</div>
                 </div>
-                <div *ngIf="getFilteredEmployees().length === 0" class="no-data-found">No data found</div>
               </div>
             </div>
           </div>
@@ -87,7 +91,7 @@
             <label>Status:</label>
             <div class="multiselect-wrapper">
               <div class="multiselect-display" (click)="showStatusDropdown = !showStatusDropdown; closeOtherDropdowns('status'); $event.stopPropagation()">
-                {{ selectedStatuses.length > 0 ? selectedStatuses.length + ' dipilih' : 'Pilih Status' }}
+                {{ selectedStatuses.length === 1 ? selectedStatuses[0] : (selectedStatuses.length > 0 ? selectedStatuses.length + ' dipilih' : 'Pilih Status') }}
               </div>
               <div class="multiselect-dropdown" *ngIf="showStatusDropdown" (click)="$event.stopPropagation()">
                 <div class="multiselect-select-all" (click)="toggleSelectAllStatuses(); $event.stopPropagation()">

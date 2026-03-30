@@ -218,9 +218,10 @@ select.filter-input {
   border-radius: 4px;
   margin-top: 4px;
   max-height: 250px;
-  overflow-y: auto;
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
 }
 
 .multiselect-search {
@@ -232,11 +233,17 @@ select.filter-input {
   box-sizing: border-box;
   outline: none;
   background: #f8f9fa;
+  flex-shrink: 0;
 }
 
 .multiselect-search:focus {
   border-bottom-color: #667eea;
   background: white;
+}
+
+.multiselect-options-container {
+  overflow-y: auto;
+  flex: 1;
 }
 
 .multiselect-option {
@@ -267,6 +274,7 @@ select.filter-input {
   background: #f8f9fa;
   border-bottom: 1px solid #e1e5e9;
   font-weight: 400;
+  flex-shrink: 0;
 }
 
 .multiselect-select-all:hover {

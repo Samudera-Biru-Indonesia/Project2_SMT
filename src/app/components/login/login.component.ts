@@ -121,14 +121,19 @@ export class LoginComponent {
         );
 
         if (result.success) {
+          // Set all localStorage items synchronously
+          const plant = this.site.trim().toUpperCase();
+          const company = plant.substring(0, 3);
+          
           localStorage.setItem('lastLoginSite', this.site.trim());
           localStorage.setItem('lastLoginEmpCode', this.empCode.trim());
           localStorage.setItem('savedRole', this.role.trim());
-          
-          const plant = this.site.trim().toUpperCase();
-          const company = plant.substring(0, 3);
           localStorage.setItem('currentPlant', plant);
           localStorage.setItem('currentCompany', company);
+          
+          // Wait a tick to ensure localStorage is committed
+          await new Promise(resolve => setTimeout(resolve, 0));
+          
           this.router.navigate(['/trip-selection']);
         } else {
           this.errorMessage = result.message || 'Login gagal. Silakan coba lagi.';
@@ -142,17 +147,24 @@ export class LoginComponent {
     } else if (this.role === 'admin') {
 
       if(this.empCode.trim() === 'ADMIN_TRUCK_APP_ALLIGN' && this.password.trim() === 'TRUCK_APP_ALLIGN') {
-        // set variables
-          const plant = this.site.trim().toUpperCase();
-          const company = plant.substring(0, 3);
-          localStorage.setItem('lastLoginSite', this.site.trim());
-          localStorage.setItem('lastLoginEmpCode', this.empCode.trim());
-          localStorage.setItem('currentPlant', plant);
-          localStorage.setItem('currentCompany', company);
-          localStorage.setItem('adminCode', this.empCode);
-          localStorage.setItem('savedRole', this.role);
-
-          this.router.navigate(['/admin/report']);
+        // Set all localStorage items synchronously
+        const plant = this.site.trim().toUpperCase();
+        const company = plant.substring(0, 3);
+        
+        localStorage.setItem('lastLoginSite', this.site.trim());
+        localStorage.setItem('lastLoginEmpCode', this.empCode.trim());
+        localStorage.setItem('currentPlant', plant);
+        localStorage.setItem('currentCompany', company);
+        localStorage.setItem('adminCode', this.empCode.trim());
+        localStorage.setItem('savedRole', this.role.trim());
+        
+        console.log('Admin code set in localStorage:', localStorage.getItem('adminCode'));
+        console.log('Saved role:', localStorage.getItem('savedRole'));
+        
+        // Wait a tick to ensure localStorage is committed
+        await new Promise(resolve => setTimeout(resolve, 0));
+        
+        this.router.navigate(['/admin/report']);
       } else {
         this.errorMessage = 'Kode Karyawan dan/atau Password salah';
       }

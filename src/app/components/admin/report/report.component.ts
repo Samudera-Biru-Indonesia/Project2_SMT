@@ -70,6 +70,14 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
   reportData: any[] = [];
 
   ngOnInit(): void {
+    // Set default date filter to last 3 days
+    const today = new Date();
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(today.getDate() - 3);
+    
+    this.startDate = threeDaysAgo.toISOString().split('T')[0];
+    this.endDate = today.toISOString().split('T')[0];
+    
     this.dtOptions = {
       pagingType: 'full_numbers',
       pageLength: 5,
@@ -169,9 +177,11 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
             coDriver: item.CoDriver || '',
             status: item.Status || ''
           }));
-          this.filteredData = [...this.reportData];
           
-          // Initialize DataTable with data
+          // Apply default date filter (last 3 days)
+          this.applyFilters();
+          
+          // Initialize DataTable with filtered data
           this.dtOptions.data = this.filteredData;
           this.dtTrigger.next(null);
           this.isDtInitialized = true;
@@ -192,17 +202,24 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
       'x-api-key': environment.api.apiKey
     });
     
-    this.http.post<any>('https://epicprodapp.samator.com/KineticPilot/api/v2/efx/SGI/SMTTruckCheckApp/getAllSites', {}, { headers })
+    this.http.post<any>('https://epicprodapp.samator.com/Kinetic/api/v2/efx/SGI/SMTTruckCheckApp/GetListPlant', {}, { headers })
       .subscribe({
         next: (response) => {
-          const sitesData = response.DataSet?.Sites || [];
-          // Filter out empty entries
-          this.sites = sitesData
-            .filter((site: any) => site.Site)
-            .map((site: any) => ({
-              Plant: site.Site,
-              Name: site.Name
+          const plantsData = response.Result?.Plant || [];
+          this.sites = plantsData
+            .filter((plant: any) => plant.Plant)
+            .map((plant: any) => ({
+              Plant: plant.Plant,
+              Name: plant.Name || ''
             }));
+          console.log('Sites loaded:', this.sites.length, 'sites');
+          
+          // Auto-select the site from login
+          const loginSite = localStorage.getItem('currentPlant');
+          if (loginSite && this.sites.some(site => site.Plant === loginSite)) {
+            this.selectedSites = [loginSite];
+            this.applyFilters();
+          }
         },
         error: (err) => console.error('Error loading sites:', err)
       });
@@ -220,19 +237,14 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe({
         next: (response) => {
           const employeesData = response.DataSet?.Employees || [];
-          // Get distinct employees by EmpCode
-          const uniqueMap = new Map();
-          employeesData
+          // Store all employees with their site information
+          this.employees = employeesData
             .filter((emp: any) => emp.EmpCode && emp.EmpName)
-            .forEach((emp: any) => {
-              if (!uniqueMap.has(emp.EmpCode)) {
-                uniqueMap.set(emp.EmpCode, {
-                  EmpCode: emp.EmpCode,
-                  EmpName: emp.EmpName
-                });
-              }
-            });
-          this.employees = Array.from(uniqueMap.values());
+            .map((emp: any) => ({
+              EmpCode: emp.EmpCode,
+              EmpName: emp.EmpName,
+              Site: emp.Site || ''
+            }));
         },
         error: (err) => console.error('Error loading employees:', err)
       });
@@ -322,6 +334,15 @@ applyFilters(): void {
     } else {
       this.selectedSites.push(siteCode);
     }
+    
+    // Clear selected employees that don't belong to the selected sites
+    if (this.selectedSites.length > 0) {
+      const validEmployees = this.getFilteredEmployees().map(emp => emp.EmpCode);
+      this.selectedEmployees = this.selectedEmployees.filter(empCode => 
+        validEmployees.includes(empCode)
+      );
+    }
+    
     this.applyFilters();
   }
 
@@ -345,10 +366,11 @@ applyFilters(): void {
   }
 
   toggleSelectAllEmployees(): void {
-    if (this.selectedEmployees.length === this.employees.length) {
+    const filteredEmployees = this.getFilteredEmployees();
+    if (this.selectedEmployees.length === filteredEmployees.length) {
       this.selectedEmployees = [];
     } else {
-      this.selectedEmployees = this.employees.map(emp => emp.EmpCode);
+      this.selectedEmployees = filteredEmployees.map(emp => emp.EmpCode);
     }
     this.applyFilters();
   }
@@ -384,14 +406,49 @@ applyFilters(): void {
   }
 
   getFilteredEmployees(): any[] {
-    if (!this.employeeSearchTerm) {
-      return this.employees;
+    let filteredBySearch = this.employees;
+    
+    // Filter by search term
+    if (this.employeeSearchTerm) {
+      const term = this.employeeSearchTerm.toLowerCase();
+      filteredBySearch = this.employees.filter(emp => 
+        emp.EmpCode.toLowerCase().includes(term) || 
+        emp.EmpName.toLowerCase().includes(term)
+      );
     }
-    const term = this.employeeSearchTerm.toLowerCase();
-    return this.employees.filter(emp => 
-      emp.EmpCode.toLowerCase().includes(term) || 
-      emp.EmpName.toLowerCase().includes(term)
-    );
+    
+    // Filter by selected sites
+    if (this.selectedSites.length > 0) {
+      filteredBySearch = filteredBySearch.filter(emp => 
+        this.selectedSites.includes(emp.Site)
+      );
+    }
+    
+    // Get distinct employees by EmpCode
+    const uniqueMap = new Map();
+    filteredBySearch.forEach((emp: any) => {
+      if (!uniqueMap.has(emp.EmpCode)) {
+        uniqueMap.set(emp.EmpCode, emp);
+      }
+    });
+    
+    return Array.from(uniqueMap.values());
+  }
+
+  getSelectedSiteName(): string {
+    if (this.selectedSites.length === 1) {
+      const site = this.sites.find(s => s.Plant === this.selectedSites[0]);
+      return site ? `${site.Plant} - ${site.Name}` : this.selectedSites[0];
+    }
+    return '';
+  }
+
+  getSelectedEmployeeName(): string {
+    if (this.selectedEmployees.length === 1) {
+      const emp = this.employees.find(e => e.EmpCode === this.selectedEmployees[0]);
+      return emp ? `${emp.EmpCode} - ${emp.EmpName}` : this.selectedEmployees[0];
+    }
+    return '';
   }
 
   closeOtherDropdowns(except: string): void {
