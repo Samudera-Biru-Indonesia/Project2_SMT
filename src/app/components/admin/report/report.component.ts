@@ -484,7 +484,8 @@ applyFilters(): void {
     this.coDriver = '';
     this.siteSearchTerm = '';
     this.employeeSearchTerm = '';
-    this.applyFilters();
+    // Reload data from API since date and site filters are cleared
+    this.loadReportData();
   }
 
   rerenderTable(): void {
