@@ -155,7 +155,14 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
       'x-api-key': environment.api.apiKey
     });
     
-    this.http.post<any>('https://epicprodapp.samator.com/KineticPilot/api/v2/efx/SGI/SMTTruckCheckApp/getReport', {}, { headers })
+    // Build payload based on filters
+    const payload: any = {
+      sites: this.selectedSites.length > 0 ? this.selectedSites.join('~') : '',
+      startDate: this.startDate || '',
+      endDate: this.endDate || ''
+    };
+    
+    this.http.post<any>('https://epicprodapp.samator.com/KineticPilot/api/v2/efx/SGI/SMTTruckCheckApp/getReport', payload, { headers })
       .subscribe({
         next: (response) => {
           const rawData = response.DataSet?.TruckCheck || [];
@@ -178,13 +185,17 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
             status: item.Status || ''
           }));
           
-          // Apply default date filter (last 3 days)
+          // Apply client-side filters (for other filters like employee, status, etc.)
           this.applyFilters();
           
-          // Initialize DataTable with filtered data
-          this.dtOptions.data = this.filteredData;
-          this.dtTrigger.next(null);
-          this.isDtInitialized = true;
+          // Initialize or update DataTable with filtered data
+          if (!this.isDtInitialized) {
+            this.dtOptions.data = this.filteredData;
+            this.dtTrigger.next(null);
+            this.isDtInitialized = true;
+          } else {
+            this.rerenderTable();
+          }
         },
         error: (err) => {
           console.error('Error loading report data:', err);
@@ -263,18 +274,8 @@ applyFilters(): void {
     
     // Always filter from the original reportData, not from filteredData
     this.filteredData = this.reportData.filter(trip => {
-      const tripDate = new Date(trip.date);
-      const start = this.startDate ? new Date(this.startDate) : null;
-      const end = this.endDate ? new Date(this.endDate) : null;
-      
-      // Date filter
-      const dateMatch = (!start || tripDate >= start) && (!end || tripDate <= end);
-      
       // Trip type filter
       const typeMatch = this.selectedTripTypes.length === 0 || this.selectedTripTypes.includes(trip.tripType);
-      
-      // Site filter - if no sites selected, show all; otherwise show if trip.siteCode matches ANY selected site (OR logic)
-      const siteMatch = this.selectedSites.length === 0 || this.selectedSites.includes(trip.siteCode);
       
       // Employee filter - if no employees selected, show all; otherwise check if empCode matches ANY selected employee (OR logic)
       const empMatch = this.selectedEmployees.length === 0 || this.selectedEmployees.includes(trip.empCode);
@@ -289,7 +290,7 @@ applyFilters(): void {
       const advCoDriverMatch = !this.coDriver || trip.coDriver.toLowerCase().includes(this.coDriver.toLowerCase());
       
       // All conditions must be true (AND logic between different filter types)
-      return dateMatch && typeMatch && siteMatch && empMatch && statusMatch && advTripNumMatch && advPlateMatch && advDriverMatch && advCoDriverMatch;
+      return typeMatch && empMatch && statusMatch && advTripNumMatch && advPlateMatch && advDriverMatch && advCoDriverMatch;
     });
     
     console.log('Filtered data count:', this.filteredData.length);
@@ -343,7 +344,8 @@ applyFilters(): void {
       );
     }
     
-    this.applyFilters();
+    // Reload data from API with new site filter
+    this.loadReportData();
   }
 
   toggleSelectAllSites(): void {
@@ -352,7 +354,8 @@ applyFilters(): void {
     } else {
       this.selectedSites = this.sites.map(site => site.Plant);
     }
-    this.applyFilters();
+    // Reload data from API with new site filter
+    this.loadReportData();
   }
 
   toggleEmployeeSelection(empKey: string): void {

@@ -19,11 +19,11 @@
         <div class="filter-row">
           <div class="filter-group">
             <label>Tanggal Mulai:</label>
-            <input type="date" [(ngModel)]="startDate" (change)="applyFilters()" class="filter-input">
+            <input type="date" [(ngModel)]="startDate" (change)="loadReportData()" class="filter-input">
           </div>
           <div class="filter-group">
             <label>Tanggal Akhir:</label>
-            <input type="date" [(ngModel)]="endDate" (change)="applyFilters()" class="filter-input">
+            <input type="date" [(ngModel)]="endDate" (change)="loadReportData()" class="filter-input">
           </div>
           <div class="filter-group">
             <label>Tipe:</label>
