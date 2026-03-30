@@ -91,11 +91,19 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
         { title: 'No.', data: null, render: (data: any, type: any, row: any, meta: any) => meta.row + 1 },
         { title: 'Employee No.', data: 'empCode' },
         { title: 'Employee Name', data: 'empName' },
-        { title: 'Date & Time', data: null, render: (data: any, type: any, row: any) => row.date + ' ' + row.time },
+        { title: 'Date & Time', data: null, render: (data: any, type: any, row: any) => {
+          const date = row.date || '';
+          const time = row.time || '';
+          return date && time ? `${date} ${time}` : (date || time || '');
+        }},
         { title: 'SJ', data: 'tripNum' },
         { title: 'Nopol', data: 'plateNumber' },
         { title: 'Odometer (KM)', data: 'odometer' },
-        { title: 'Site', data: null, render: (data: any, type: any, row: any) => row.siteName + '-' + row.siteCode },
+        { title: 'Site', data: null, render: (data: any, type: any, row: any) => {
+          const siteName = row.siteName || '';
+          const siteCode = row.siteCode || '';
+          return siteName && siteCode ? `${siteName}-${siteCode}` : (siteName || siteCode || '');
+        }},
         { title: 'Muatan', data: 'cargoQty' },
         { 
           title: 'Tipe', 
@@ -537,19 +545,19 @@ applyFilters(): void {
     this.filteredData.forEach((trip, index) => {
       const row = worksheet.addRow({
         no: index + 1,
-        empCode: trip.empCode,
-        empName: trip.empName,
-        dateTime: trip.date + ' ' + trip.time,
-        tripNum: trip.tripNum,
-        plateNumber: trip.plateNumber,
-        odometer: trip.odometer,
-        site: trip.siteName + '-' + trip.siteCode,
-        cargoQty: trip.cargoQty,
-        tripType: trip.tripType,
-        notes: trip.notes,
-        driver: trip.driver,
-        coDriver: trip.coDriver,
-        status: trip.status
+        empCode: trip.empCode || '',
+        empName: trip.empName || '',
+        dateTime: trip.date && trip.time ? `${trip.date} ${trip.time}` : (trip.date || trip.time || ''),
+        tripNum: trip.tripNum || '',
+        plateNumber: trip.plateNumber || '',
+        odometer: trip.odometer || '',
+        site: trip.siteName && trip.siteCode ? `${trip.siteName}-${trip.siteCode}` : (trip.siteName || trip.siteCode || ''),
+        cargoQty: trip.cargoQty || '',
+        tripType: trip.tripType || '',
+        notes: trip.notes || '',
+        driver: trip.driver || '',
+        coDriver: trip.coDriver || '',
+        status: trip.status || ''
       });
       
       // Style Tipe column (column 10)
