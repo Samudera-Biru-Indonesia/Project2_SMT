@@ -43,6 +43,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
   
   filteredData: any[] = [];
   reportData: any[] = [];
+  isLoading: boolean = false;
 
   ngOnInit(): void {
     // Set default date filter to last 3 days
@@ -60,6 +61,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
   }
 
   loadReportData(): void {
+    this.isLoading = true;
     const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
@@ -94,6 +96,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
             cargoQty: item.CargoQty || 0,
             tripType: item.TripType || '',
             notes: item.Notes || '',
+            notesExpanded: false,
             driver: item.Driver || '',
             coDriver: item.CoDriver || '',
             status: item.Status || '',
@@ -101,11 +104,13 @@ export class HistoryComponent implements OnInit, OnDestroy {
           }));
           
           this.applyFilters();
+          this.isLoading = false;
         },
         error: (err) => {
           console.error('Error loading report data:', err);
           this.reportData = [];
           this.filteredData = [];
+          this.isLoading = false;
         }
       });
   }
@@ -225,6 +230,10 @@ export class HistoryComponent implements OnInit, OnDestroy {
       trip.status = 'VALID';
     }
     console.log('Status toggled for trip:', trip);
+  }
+
+  toggleNotes(trip: any): void {
+    trip.notesExpanded = !trip.notesExpanded;
   }
 
   ngOnDestroy(): void {

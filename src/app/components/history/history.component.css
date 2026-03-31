@@ -400,6 +400,36 @@
   word-break: break-word;
 }
 
+.notes-value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.notes-collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notes-toggle {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.notes-toggle:hover {
+  color: #0056b3;
+}
+
 /* Card Footer */
 .card-footer {
   padding: 12px 16px;
@@ -472,6 +502,56 @@
   color: #999;
   font-size: 16px;
   margin: 0;
+}
+
+/* Loading Spinner */
+.loading-container {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.loading-container p {
+  color: #666;
+  font-size: 16px;
+  margin: 16px 0 0 0;
+}
+
+.loading-spinner {
+  animation: rotate 2s linear infinite;
+  width: 50px;
+  height: 50px;
+  margin: 0 auto;
+}
+
+.loading-spinner .path {
+  stroke: #007bff;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
 }
 
 /* Mobile Responsiveness */

@@ -146,7 +146,12 @@
           </div>
           <div class="card-row" *ngIf="trip.notes">
             <span class="label">Catatan:</span>
-            <span class="value">{{ trip.notes }}</span>
+            <span class="value notes-value">
+              <span [class.notes-collapsed]="!trip.notesExpanded">{{ trip.notes }}</span>
+              <button *ngIf="trip.notes.length > 50" class="notes-toggle" (click)="toggleNotes(trip)">
+                {{ trip.notesExpanded ? 'Sembunyikan' : 'Selengkapnya' }}
+              </button>
+            </span>
           </div>
         </div>
         
@@ -158,8 +163,15 @@
       </div>
     </div>
 
-    <div *ngIf="filteredData.length === 0" class="no-data">
+    <div *ngIf="filteredData.length === 0 && !isLoading" class="no-data">
       <p>Tidak ada data perjalanan</p>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-container">
+      <svg class="loading-spinner" viewBox="0 0 50 50">
+        <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+      </svg>
+      <p>Memuat data...</p>
     </div>
   </main>
 </div>
