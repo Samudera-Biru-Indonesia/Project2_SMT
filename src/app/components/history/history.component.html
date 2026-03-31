@@ -1,0 +1,165 @@
+<div class="history-container">
+  <header class="header">
+    <button class="back-btn" (click)="goBack()">
+      <i class="fi fi-br-arrow-left"></i> Kembali
+    </button>
+    <h1>Riwayat Perjalanan</h1>
+  </header>
+
+  <main class="history-content">
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Tanggal Mulai:</label>
+          <input type="date" [(ngModel)]="startDate" (change)="loadReportData()" class="filter-input">
+        </div>
+        <div class="filter-group">
+          <label>Tanggal Akhir:</label>
+          <input type="date" [(ngModel)]="endDate" (change)="loadReportData()" class="filter-input">
+        </div>
+        <div class="filter-group">
+          <label>Tipe:</label>
+          <div class="multiselect-wrapper">
+            <div class="multiselect-display" (click)="showTripTypeDropdown = !showTripTypeDropdown; closeOtherDropdowns('tripType'); $event.stopPropagation()">
+              {{ selectedTripTypes.length === 1 ? selectedTripTypes[0] : (selectedTripTypes.length > 0 ? selectedTripTypes.length + ' dipilih' : 'Pilih Tipe') }}
+            </div>
+            <div class="multiselect-dropdown" *ngIf="showTripTypeDropdown" (click)="$event.stopPropagation()">
+              <div class="multiselect-select-all" (click)="toggleSelectAllTripTypes(); $event.stopPropagation()">
+                <input type="checkbox" [checked]="selectedTripTypes.length === tripTypes.length" (click)="$event.stopPropagation()">
+                <span><strong>Select All</strong></span>
+              </div>
+              <div class="multiselect-options-container">
+                <div *ngFor="let type of tripTypes" class="multiselect-option" (click)="toggleTripTypeSelection(type); $event.stopPropagation()">
+                  <input type="checkbox" [checked]="selectedTripTypes.includes(type)" (click)="$event.stopPropagation()">
+                  <span>{{ type }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label>Status:</label>
+          <div class="multiselect-wrapper">
+            <div class="multiselect-display" (click)="showStatusDropdown = !showStatusDropdown; closeOtherDropdowns('status'); $event.stopPropagation()">
+              {{ selectedStatuses.length === 1 ? selectedStatuses[0] : (selectedStatuses.length > 0 ? selectedStatuses.length + ' dipilih' : 'Pilih Status') }}
+            </div>
+            <div class="multiselect-dropdown" *ngIf="showStatusDropdown" (click)="$event.stopPropagation()">
+              <div class="multiselect-select-all" (click)="toggleSelectAllStatuses(); $event.stopPropagation()">
+                <input type="checkbox" [checked]="selectedStatuses.length === statuses.length" (click)="$event.stopPropagation()">
+                <span><strong>Select All</strong></span>
+              </div>
+              <div class="multiselect-options-container">
+                <div *ngFor="let status of statuses" class="multiselect-option" (click)="toggleStatusSelection(status); $event.stopPropagation()">
+                  <input type="checkbox" [checked]="selectedStatuses.includes(status)" (click)="$event.stopPropagation()">
+                  <span>{{ status }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="filter-group">
+          <button (click)="clearFilters()" class="clear-btn">Reset</button>
+        </div>
+      </div>
+      
+      <div class="advanced-toggle">
+        <button (click)="toggleAdvancedFilters()" class="toggle-btn">
+          {{ showAdvancedFilters ? '▼' : '▶' }} Advanced Filters
+        </button>
+      </div>
+      
+      <div class="filter-row" *ngIf="showAdvancedFilters">
+        <div class="filter-group">
+          <label>SJ:</label>
+          <input type="text" [(ngModel)]="tripNum" (input)="applyFilters()" placeholder="Cari SJ..." class="filter-input">
+        </div>
+        <div class="filter-group">
+          <label>Nopol:</label>
+          <input type="text" [(ngModel)]="plateNumber" (input)="applyFilters()" placeholder="Cari nopol..." class="filter-input">
+        </div>
+        <div class="filter-group">
+          <label>Driver:</label>
+          <input type="text" [(ngModel)]="driver" (input)="applyFilters()" placeholder="Cari driver..." class="filter-input">
+        </div>
+        <div class="filter-group">
+          <label>Co-Driver:</label>
+          <input type="text" [(ngModel)]="coDriver" (input)="applyFilters()" placeholder="Cari co-driver..." class="filter-input">
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Summary -->
+    <div class="results-summary">
+      <p>Total: <strong>{{ filteredData.length }}</strong> perjalanan</p>
+      <p style="margin-left: auto;">Site: <strong>{{ siteCode }}</strong></p>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="cards-grid">
+      <div *ngFor="let trip of filteredData; let i = index" class="trip-card" 
+           [class.card-out]="trip.tripType.toLowerCase() === 'out' && trip.status.toLowerCase() !== 'cancelled'"
+           [class.card-in]="trip.tripType.toLowerCase() === 'in' && trip.status.toLowerCase() !== 'cancelled'">
+        <div class="card-header">
+          <span class="card-number">#{{ i + 1 }}</span>
+          <span class="trip-type" [class.out]="trip.tripType.toLowerCase() === 'out'" [class.in]="trip.tripType.toLowerCase() === 'in'">
+            {{ trip.tripType }}
+          </span>
+           <span class="status" (click)="toggleStatus(trip)"> 
+            <input type="checkbox" [class.disabled]="trip.status.toLowerCase() === 'cancelled'" [checked]="trip.status.toLowerCase() === 'cancelled'" (click)="$event.stopPropagation()">
+            <span style="font-size: 14px;">Batalkan?</span>
+          </span>
+        </div>
+        
+        <div class="card-body">
+          <div class="card-row">
+            <span class="label">Tanggal & Waktu:</span>
+            <span class="value">{{ trip.date }} {{ trip.time }}</span>
+          </div>
+          <div class="card-row">
+            <span class="label">SJ:</span>
+            <span class="value">{{ trip.tripNum || '-' }}</span>
+          </div>
+          <div class="card-row">
+            <span class="label">Nopol:</span>
+            <span class="value">{{ trip.plateNumber || '-' }}</span>
+          </div>
+          <div class="card-row">
+            <span class="label">Odometer:</span>
+            <span class="value">{{ trip.odometer }} KM</span>
+          </div>
+          <div class="card-row">
+            <span class="label">Site:</span>
+            <span class="value">{{ trip.siteName }} - {{ trip.siteCode }}</span>
+          </div>
+          <div class="card-row">
+            <span class="label">Muatan:</span>
+            <span class="value">{{ trip.cargoQty }}</span>
+          </div>
+          <div class="card-row">
+            <span class="label">Driver:</span>
+            <span class="value">{{ trip.driver || '-' }}</span>
+          </div>
+          <div class="card-row">
+            <span class="label">Co-Driver:</span>
+            <span class="value">{{ trip.coDriver || '-' }}</span>
+          </div>
+          <div class="card-row" *ngIf="trip.notes">
+            <span class="label">Catatan:</span>
+            <span class="value">{{ trip.notes }}</span>
+          </div>
+        </div>
+        
+        <div class="card-footer">
+          <button class="view-photos-btn" (click)="viewPhotos(trip)">
+            <i class="fi fi-br-picture"></i> Lihat Foto
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="filteredData.length === 0" class="no-data">
+      <p>Tidak ada data perjalanan</p>
+    </div>
+  </main>
+</div>

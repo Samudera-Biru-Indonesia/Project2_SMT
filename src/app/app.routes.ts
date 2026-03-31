@@ -8,6 +8,7 @@ import { OdometerComponent } from './components/odometer/odometer.component';
 import { TripCompleteComponent } from './components/trip-complete/trip-complete.component';
 import { ForceLoginComponent } from './components/force-login/force-login.component';
 import { ReportComponent } from './components/admin/report/report.component';
+import { HistoryComponent } from './components/history/history.component';
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -21,6 +22,7 @@ export const routes: Routes = [
   { path: 'checklist', component: ChecklistComponent, canActivate: [AuthGuard] },
   { path: 'odometer', component: OdometerComponent, canActivate: [AuthGuard] },
   { path: 'trip-complete', component: TripCompleteComponent, canActivate: [AuthGuard] },
+  { path: 'history', component: HistoryComponent, canActivate: [AuthGuard], data: { expectedRole: 'satpam' } },
 
 
   /*admin page*/
