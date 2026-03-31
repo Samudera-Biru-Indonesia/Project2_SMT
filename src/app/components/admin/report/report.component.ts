@@ -97,6 +97,7 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
           return date && time ? `${date} ${time}` : (date || time || '');
         }},
         { title: 'SJ', data: 'tripNum' },
+        { title: 'Kategori Kendaraan', data: 'truckCategory' },
         { title: 'Nopol', data: 'plateNumber' },
         { title: 'Odometer (KM)', data: 'odometer' },
         { title: 'Site', data: null, render: (data: any, type: any, row: any) => {
@@ -176,21 +177,22 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
           const rawData = response.DataSet?.TruckCheck || [];
           // Map API response to expected format
           this.reportData = rawData.map((item: any) => ({
-            empCode: item.EmpCode || '',
-            empName: item.EmpName || '',
-            date: item.TripDate ? item.TripDate.split('T')[0] : '',
-            time: item.TripTime || '',
-            tripNum: item.TripNum || '',
-            plateNumber: item.PlateNum || '',
+            empCode: item.EmpCode || '-',
+            empName: item.EmpName || '-',
+            date: item.TripDate ? item.TripDate.split('T')[0] : '-',
+            time: item.TripTime || '-',
+            tripNum: item.TripNum || '-',
+            truckCategory: item.TruckCategory || '-',
+            plateNumber: item.PlateNum || item.SystemPlateNum || '-',
             odometer: item.OdometerReading || 0,
-            siteCode: item.SiteCode || '',
-            siteName: item.SiteName || '',
+            siteCode: item.SiteCode || '-',
+            siteName: item.SiteName || '-',
             cargoQty: item.CargoQty || 0,
-            tripType: item.TripType || '',
-            notes: item.Notes || '',
-            driver: item.Driver || '',
-            coDriver: item.CoDriver || '',
-            status: item.Status || ''
+            tripType: item.TripType || '-',
+            notes: item.Notes || '-',
+            driver: item.Driver || '-',
+            coDriver: item.CoDriver || '-',
+            status: item.Status || '-'
           }));
           
           // Apply client-side filters (for other filters like employee, status, etc.)
@@ -522,6 +524,7 @@ applyFilters(): void {
       { header: 'Employee Name', key: 'empName', width: 20 },
       { header: 'Date & Time', key: 'dateTime', width: 18 },
       { header: 'SJ', key: 'tripNum', width: 15 },
+      { header: 'Kategori Kendaraan', key: 'truckCategory', width: 15 },
       { header: 'Nopol', key: 'plateNumber', width: 12 },
       { header: 'Odometer (KM)', key: 'odometer', width: 15 },
       { header: 'Site', key: 'site', width: 20 },
@@ -549,6 +552,7 @@ applyFilters(): void {
         empName: trip.empName || '',
         dateTime: trip.date && trip.time ? `${trip.date} ${trip.time}` : (trip.date || trip.time || ''),
         tripNum: trip.tripNum || '',
+        truckCategory: trip.truckCategory || '',
         plateNumber: trip.plateNumber || '',
         odometer: trip.odometer || '',
         site: trip.siteName && trip.siteCode ? `${trip.siteName}-${trip.siteCode}` : (trip.siteName || trip.siteCode || ''),
@@ -560,8 +564,8 @@ applyFilters(): void {
         status: trip.status || ''
       });
       
-      // Style Tipe column (column 10)
-      const tipeCell = row.getCell(10);
+      // Style Tipe column (column 11)
+      const tipeCell = row.getCell(11);
       if (trip.tripType) {
         const lowerType = trip.tripType.toLowerCase();
         if (lowerType === 'out') {
@@ -581,8 +585,8 @@ applyFilters(): void {
         }
       }
       
-      // Style Status column (column 14)
-      const statusCell = row.getCell(14);
+      // Style Status column (column 15)
+      const statusCell = row.getCell(15);
       if (trip.status) {
         const lowerStatus = trip.status.toLowerCase();
         if (lowerStatus === 'valid') {
