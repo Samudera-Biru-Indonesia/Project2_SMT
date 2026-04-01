@@ -294,7 +294,8 @@ export class ApiService {
 
     const body = {
       Company: localStorage.getItem('currentCompany') || '',
-      Plant: localStorage.getItem('currentPlant') || ''
+      Plant: localStorage.getItem('currentPlant') || '',
+      TripNumber: localStorage.getItem('tripNumber')
     };
 
     return this.http.post<GetOutTruckCheckResponse>(url, body, { headers });

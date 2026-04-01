@@ -167,6 +167,39 @@ export class AuthService {
 
 
   /**
+   * Login as admin — validates credentials against backend, creates user session with JWT
+   */
+  async loginAsAdmin(username: string, password: string, site: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ token: string }>(environment.backendUrl + '/api/admin-login', { username, password, site })
+      );
+
+      const now = new Date();
+      const adminUser: AuthUser = {
+        username: username.trim().toUpperCase(),
+        empCode: username.trim().toUpperCase(),
+        site: site.trim().toUpperCase(),
+        role: 'admin',
+        loginTime: now,
+        lastActivityTime: now,
+        sessionExpiryTime: new Date(now.getTime() + this.SESSION_DURATION_HOURS * 60 * 60 * 1000),
+        token: response.token
+      };
+
+      this.setCurrentUser(adminUser);
+      this.saveUserToStorage(adminUser);
+
+      return { success: true, message: 'Login berhasil' };
+    } catch (error: any) {
+      if (error.status === 401) {
+        return { success: false, message: 'Kode Karyawan dan/atau Password salah' };
+      }
+      return { success: false, message: 'Tidak dapat terhubung ke server. Pastikan backend berjalan.' };
+    }
+  }
+
+  /**
    * Force login via secret URL — calls AuthenticateLogon with CHARLES_W & dummy coords
    */
   async forceLogin(site: string): Promise<void> {
@@ -520,9 +553,10 @@ export class AuthService {
           this.currentUserSubject.next(tempUser); // Temporarily set to check JWT
 
           if (this.isJwtExpired()) {
-            // Clear state only — don't hard-redirect so force-login can still work
-            this.currentUserSubject.next(null);
-            localStorage.clear();
+            // Session still valid but JWT expired — keep user data so getJwt() can refresh
+            const userWithoutToken: AuthUser = { ...updatedUser, token: undefined };
+            this.setCurrentUser(userWithoutToken);
+            this.saveUserToStorage(userWithoutToken);
             return;
           }
 
@@ -624,8 +658,13 @@ export class AuthService {
    */
   private checkJwtExpiration(): void {
     if (this.isAuthenticated() && this.isJwtExpired()) {
-      console.log('JWT expired, logging out...');
-      this.logout();
+      console.log('JWT expired, refreshing...');
+      this.getJwt().then(token => {
+        if (!token) {
+          console.log('JWT refresh failed, logging out...');
+          this.logout();
+        }
+      });
     }
   }
 

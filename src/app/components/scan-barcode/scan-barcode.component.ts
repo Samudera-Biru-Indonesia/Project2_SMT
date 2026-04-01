@@ -440,38 +440,29 @@ export class ScanBarcodeComponent implements OnInit, OnDestroy {
         const tripType = localStorage.getItem('tripType');
 
         if (tripType === 'IN') {
-          this.apiService.getOutTruckCheck().subscribe({
-            next: (response: any) => {
-              const tripOut: any[] = response?.TruckCheckData?.Result ?? [];
-              const tripOutSet = new Set(tripOut.map((t: any) => t.TripNum));
 
-              this.spkOptions = trips
-                .filter((t: any) => {
-                    const num = t.tripNumber ?? '';
-                    return num.length > 0 && tripOutSet.has(num);
-                })
-                // 2. MAP TO A NEW OBJECT (keeping both properties)
-                .map((t: any) => {
-                    return {
-                        tripNumber: t.tripNumber,
-                        waktuKeluar: t.waktuKeluar
-                    };
-                });
-                
+            this.spkOptions = trips
+              .filter((t: any) => {
+                  const num = t.tripNumber ?? '';
+                  return num.length > 0
+              })
+              // 2. MAP TO A NEW OBJECT (keeping both properties)
+              .map((t: any) => {
+                  return {
+                      tripNumber: t.tripNumber,
+                      waktuKeluar: t.waktuKeluar
+                  };
+              });
+              
 
-              if (this.spkOptions.length === 1) {
-                this.barcodeInput = this.spkOptions[0].tripNumber;
-              } else {
-                this.loadSavedBarcodeIfExists();
-              }
-
-              this.isLoadingSpk = false;
-            },
-            error: (error) => {
-              this.isLoadingSpk = false;
-              this.handleApiError(error);
+            if (this.spkOptions.length === 1) {
+              this.barcodeInput = this.spkOptions[0].tripNumber;
+            } else {
+              this.loadSavedBarcodeIfExists();
             }
-          });
+
+            this.isLoadingSpk = false;
+            
         } else {
           this.spkOptions = trips
             .map((t: any) => ({
