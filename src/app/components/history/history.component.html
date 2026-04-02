@@ -39,10 +39,32 @@
           </div>
         </div>
         <div class="filter-group">
+          <label>Employee:</label>
+          <div class="multiselect-wrapper">
+            <div class="multiselect-display" (click)="showEmployeeDropdown = !showEmployeeDropdown; closeOtherDropdowns('employee'); $event.stopPropagation()">
+              {{ selectedEmployees.length === 1 ? getSelectedEmployeeName() : (selectedEmployees.length > 0 ? selectedEmployees.length + ' dipilih' : 'Pilih Employee') }}
+            </div>
+            <div class="multiselect-dropdown" *ngIf="showEmployeeDropdown" (click)="$event.stopPropagation()">
+              <input type="text" [(ngModel)]="employeeSearchTerm" (click)="$event.stopPropagation()" placeholder="Cari employee..." class="multiselect-search">
+              <div class="multiselect-select-all" (click)="toggleSelectAllEmployees(); $event.stopPropagation()">
+                <input type="checkbox" [checked]="selectedEmployees.length === getFilteredEmployees().length" (click)="$event.stopPropagation()">
+                <span><strong>Select All</strong></span>
+              </div>
+              <div class="multiselect-options-container">
+                <div *ngFor="let emp of getFilteredEmployees()" class="multiselect-option" (click)="toggleEmployeeSelection(emp.EmpCode); $event.stopPropagation()">
+                  <input type="checkbox" [checked]="selectedEmployees.includes(emp.EmpCode)" (click)="$event.stopPropagation()">
+                  <span>{{ emp.EmpCode }} - {{ emp.EmpName }}</span>
+                </div>
+                <div *ngIf="getFilteredEmployees().length === 0" class="no-data-found">No data found</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="filter-group">
           <label>Status:</label>
           <div class="multiselect-wrapper">
             <div class="multiselect-display" (click)="showStatusDropdown = !showStatusDropdown; closeOtherDropdowns('status'); $event.stopPropagation()">
-              {{ selectedStatuses.length === 1 ? selectedStatuses[0] : (selectedStatuses.length > 0 ? selectedStatuses.length + ' dipilih' : 'Pilih Status') }}
+              {{ selectedStatuses.length === 1 ? getStatusLabel(selectedStatuses[0]) : (selectedStatuses.length > 0 ? selectedStatuses.length + ' dipilih' : 'Pilih Status') }}
             </div>
             <div class="multiselect-dropdown" *ngIf="showStatusDropdown" (click)="$event.stopPropagation()">
               <div class="multiselect-select-all" (click)="toggleSelectAllStatuses(); $event.stopPropagation()">
@@ -50,9 +72,9 @@
                 <span><strong>Select All</strong></span>
               </div>
               <div class="multiselect-options-container">
-                <div *ngFor="let status of statuses" class="multiselect-option" (click)="toggleStatusSelection(status); $event.stopPropagation()">
-                  <input type="checkbox" [checked]="selectedStatuses.includes(status)" (click)="$event.stopPropagation()">
-                  <span>{{ status }}</span>
+                <div *ngFor="let status of statuses" class="multiselect-option" (click)="toggleStatusSelection(status.value); $event.stopPropagation()">
+                  <input type="checkbox" [checked]="selectedStatuses.includes(status.value)" (click)="$event.stopPropagation()">
+                  <span>{{ status.label }}</span>
                 </div>
               </div>
             </div>
@@ -97,11 +119,11 @@
 
     <!-- Cards Grid -->
     <div class="cards-grid">
-      <div *ngFor="let trip of filteredData; let i = index" class="trip-card" 
+      <div *ngFor="let trip of paginatedData; let i = index" class="trip-card" 
            [class.card-out]="trip.tripType.toLowerCase() === 'out' && trip.status.toLowerCase() !== 'cancelled'"
            [class.card-in]="trip.tripType.toLowerCase() === 'in' && trip.status.toLowerCase() !== 'cancelled'">
         <div class="card-header">
-          <span class="card-number">#{{ i + 1 }}</span>
+          <span class="card-number">#{{ (currentPage - 1) * itemsPerPage + i + 1 }}</span>
           <span class="trip-type" [class.out]="trip.tripType.toLowerCase() === 'out'" [class.in]="trip.tripType.toLowerCase() === 'in'">
             {{ trip.tripType }}
           </span>
@@ -116,7 +138,9 @@
             <span class="label">Tanggal & Waktu:</span>
             <span class="value">{{ trip.date }} {{ trip.time }}</span>
           </div>
-          <div class="card-row">
+          <div class="card-row" *ngIf="trip.tripNum && 
+             !trip.tripNum.startsWith('Lainnya') && 
+             !trip.tripNum.startsWith('GroupVendorRelasiEkspedisi')">
             <span class="label">SJ:</span>
             <span class="value">{{ trip.tripNum || '-' }}</span>
           </div>
@@ -165,6 +189,27 @@
 
     <div *ngIf="filteredData.length === 0 && !isLoading" class="no-data">
       <p>Tidak ada data perjalanan</p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="filteredData.length > 0">
+      <button class="pagination-btn" (click)="previousPage()" [disabled]="currentPage === 1">
+        ←
+      </button>
+      
+      <div class="pagination-numbers">
+        <button 
+          *ngFor="let page of pageNumbers" 
+          class="pagination-number" 
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      </div>
+      
+      <button class="pagination-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        →
+      </button>
     </div>
 
     <div *ngIf="isLoading" class="loading-container">

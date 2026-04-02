@@ -25,11 +25,16 @@ export class HistoryComponent implements OnInit, OnDestroy {
   startDate: string = '';
   endDate: string = '';
   selectedTripTypes: string[] = [];
+  selectedEmployees: string[] = [];
   selectedStatuses: string[] = [];
   showAdvancedFilters: boolean = false;
   showTripTypeDropdown: boolean = false;
+  showEmployeeDropdown: boolean = false;
   showStatusDropdown: boolean = false;
   siteCode: string = localStorage.getItem('currentPlant') || '';
+  
+  // Search terms for multiselect
+  employeeSearchTerm: string = '';
   
   // Advanced filter properties
   tripNum: string = '';
@@ -38,12 +43,31 @@ export class HistoryComponent implements OnInit, OnDestroy {
   coDriver: string = '';
   
   // Dropdown data
+  employees: any[] = [];
   tripTypes = ['IN', 'OUT'];
-  statuses = ['VALID', 'CANCELLED'];
+  statuses = [
+    { value: 'VALID', label: 'TIDAK BATAL' },
+    { value: 'CANCELLED', label: 'BATAL' }
+  ];
   
   filteredData: any[] = [];
   reportData: any[] = [];
   isLoading: boolean = false;
+  
+  // Pagination
+  currentPage: number = 1;
+  itemsPerPage: number = 12;
+  totalPages: number = 0;
+
+  get paginatedData(): any[] {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return this.filteredData.slice(startIndex, endIndex);
+  }
+
+  get pageNumbers(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
 
   ngOnInit(): void {
     // Set default date filter to last 3 days
@@ -54,6 +78,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
     this.startDate = threeDaysAgo.toISOString().split('T')[0];
     this.endDate = today.toISOString().split('T')[0];
     
+    this.loadEmployees();
     this.loadReportData();
     
     // Close dropdowns when clicking outside
@@ -69,12 +94,8 @@ export class HistoryComponent implements OnInit, OnDestroy {
       'x-api-key': environment.api.apiKey
     });
     
-    const empCode = localStorage.getItem('employeeCode') || '';
-    const siteCode = localStorage.getItem('currentPlant') || '';
-    
     const payload: any = {
-      EmpCode: empCode,
-      sites: siteCode,
+      sites: this.siteCode || '',
       startDate: this.startDate || '',
       endDate: this.endDate || ''
     };
@@ -115,19 +136,46 @@ export class HistoryComponent implements OnInit, OnDestroy {
       });
   }
 
-
+  loadEmployees(): void {
+    const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${basicAuth}`,
+      'x-api-key': environment.api.apiKey
+    });
+    
+    this.http.post<any>('https://epicprodapp.samator.com/KineticPilot/api/v2/efx/SGI/SMTTruckCheckApp/getAllSatpam', {}, { headers })
+      .subscribe({
+        next: (response) => {
+          const employeesData = response.DataSet?.Employees || [];
+          this.employees = employeesData
+            .filter((emp: any) => emp.EmpCode && emp.EmpName)
+            .map((emp: any) => ({
+              EmpCode: emp.EmpCode,
+              EmpName: emp.EmpName,
+              Site: emp.Site || ''
+            }));
+        },
+        error: (err) => console.error('Error loading employees:', err)
+      });
+  }
 
   applyFilters(): void {
     this.filteredData = this.reportData.filter(trip => {
       const typeMatch = this.selectedTripTypes.length === 0 || this.selectedTripTypes.includes(trip.tripType);
+      const empMatch = this.selectedEmployees.length === 0 || this.selectedEmployees.includes(trip.empCode);
       const statusMatch = this.selectedStatuses.length === 0 || this.selectedStatuses.includes(trip.status);
       const advTripNumMatch = !this.tripNum || trip.tripNum.toLowerCase().includes(this.tripNum.toLowerCase());
       const advPlateMatch = !this.plateNumber || trip.plateNumber.toLowerCase().includes(this.plateNumber.toLowerCase());
       const advDriverMatch = !this.driver || trip.driver.toLowerCase().includes(this.driver.toLowerCase());
       const advCoDriverMatch = !this.coDriver || trip.coDriver.toLowerCase().includes(this.coDriver.toLowerCase());
       
-      return typeMatch && statusMatch && advTripNumMatch && advPlateMatch && advDriverMatch && advCoDriverMatch;
+      return typeMatch && empMatch && statusMatch && advTripNumMatch && advPlateMatch && advDriverMatch && advCoDriverMatch;
     });
+    
+    // Update pagination
+    this.totalPages = Math.ceil(this.filteredData.length / this.itemsPerPage);
+    this.currentPage = 1; // Reset to first page when filters change
   }
 
   toggleAdvancedFilters(): void {
@@ -160,7 +208,25 @@ export class HistoryComponent implements OnInit, OnDestroy {
     this.applyFilters();
   }
 
+  toggleEmployeeSelection(empKey: string): void {
+    const index = this.selectedEmployees.indexOf(empKey);
+    if (index > -1) {
+      this.selectedEmployees.splice(index, 1);
+    } else {
+      this.selectedEmployees.push(empKey);
+    }
+    this.applyFilters();
+  }
 
+  toggleSelectAllEmployees(): void {
+    const filteredEmployees = this.getFilteredEmployees();
+    if (this.selectedEmployees.length === filteredEmployees.length) {
+      this.selectedEmployees = [];
+    } else {
+      this.selectedEmployees = filteredEmployees.map(emp => emp.EmpCode);
+    }
+    this.applyFilters();
+  }
 
   toggleStatusSelection(status: string): void {
     const index = this.selectedStatuses.indexOf(status);
@@ -176,15 +242,54 @@ export class HistoryComponent implements OnInit, OnDestroy {
     if (this.selectedStatuses.length === this.statuses.length) {
       this.selectedStatuses = [];
     } else {
-      this.selectedStatuses = [...this.statuses];
+      this.selectedStatuses = this.statuses.map(s => s.value);
     }
     this.applyFilters();
   }
 
+  getStatusLabel(value: string): string {
+    const status = this.statuses.find(s => s.value === value);
+    return status ? status.label : value;
+  }
 
+  getFilteredEmployees(): any[] {
+    let filteredBySearch = this.employees;
+    
+    if (this.employeeSearchTerm) {
+      const term = this.employeeSearchTerm.toLowerCase();
+      filteredBySearch = this.employees.filter(emp => 
+        emp.EmpCode.toLowerCase().includes(term) || 
+        emp.EmpName.toLowerCase().includes(term)
+      );
+    }
+    
+    if (this.siteCode) {
+      filteredBySearch = filteredBySearch.filter(emp => 
+        emp.Site === this.siteCode
+      );
+    }
+    
+    const uniqueMap = new Map();
+    filteredBySearch.forEach((emp: any) => {
+      if (!uniqueMap.has(emp.EmpCode)) {
+        uniqueMap.set(emp.EmpCode, emp);
+      }
+    });
+    
+    return Array.from(uniqueMap.values());
+  }
+
+  getSelectedEmployeeName(): string {
+    if (this.selectedEmployees.length === 1) {
+      const emp = this.employees.find(e => e.EmpCode === this.selectedEmployees[0]);
+      return emp ? `${emp.EmpCode} - ${emp.EmpName}` : this.selectedEmployees[0];
+    }
+    return '';
+  }
 
   closeOtherDropdowns(except: string): void {
     if (except !== 'tripType') this.showTripTypeDropdown = false;
+    if (except !== 'employee') this.showEmployeeDropdown = false;
     if (except !== 'status') this.showStatusDropdown = false;
   }
 
@@ -192,6 +297,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLElement;
     if (!target.closest('.multiselect-wrapper')) {
       this.showTripTypeDropdown = false;
+      this.showEmployeeDropdown = false;
       this.showStatusDropdown = false;
     }
   }
@@ -204,16 +310,46 @@ export class HistoryComponent implements OnInit, OnDestroy {
     this.startDate = threeDaysAgo.toISOString().split('T')[0];
     this.endDate = today.toISOString().split('T')[0];
     this.selectedTripTypes = [];
+    this.selectedEmployees = [];
     this.selectedStatuses = [];
     this.tripNum = '';
     this.plateNumber = '';
     this.driver = '';
     this.coDriver = '';
+    this.employeeSearchTerm = '';
     this.loadReportData();
   }
 
   goBack(): void {
     this.router.navigate(['/trip-selection']);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.scrollToTop();
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.scrollToTop();
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.scrollToTop();
+    }
+  }
+
+  private scrollToTop(): void {
+    const historyContent = document.querySelector('.history-content');
+    if (historyContent) {
+      historyContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   viewPhotos(trip: any): void {
