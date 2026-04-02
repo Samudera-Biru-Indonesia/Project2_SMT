@@ -9,6 +9,7 @@ import * as XLSX from 'xlsx';
 import * as ExcelJS from 'exceljs';
 import { AuthService } from '../../../services/auth.service';
 import { ApiService } from '../../../services/api.service';
+import { EnvironmentService } from '../../../services/environment.service';
 import { DataTableDirective } from 'angular-datatables';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
@@ -29,6 +30,7 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private apiService: ApiService,
+    private environmentService: EnvironmentService,
     private http: HttpClient,
     private cdr: ChangeDetectorRef
   ) {}
@@ -69,6 +71,24 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
   filteredData: any[] = [];
   reportData: any[] = [];
 
+  // Photo modal
+  showPhotoModal: boolean = false;
+  modalTripNum: string = '';
+  modalPhotos: { id: string; name: string; url: string }[] = [];
+  loadingPhotos: boolean = false;
+  selectedPhotoUrl: string = '';
+  photoError: string = '';
+
+  private photoBtnClickHandler = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    if (target.classList.contains('view-photos-btn')) {
+      //const status = target.getAttribute('status')
+      const tripNum = target.getAttribute('data-tripnum') || '';
+      const tripType = target.getAttribute('data-triptype') || '';
+      this.openPhotoModal(tripNum, tripType).catch(err => console.error(err));
+    }
+  };
+
   ngOnInit(): void {
     // Set default date filter to last 3 days
     const today = new Date();
@@ -77,7 +97,13 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
     
     this.startDate = threeDaysAgo.toISOString().split('T')[0];
     this.endDate = today.toISOString().split('T')[0];
-    
+
+    // Pre-set site filter from login before first API call
+    const loginSite = localStorage.getItem('currentPlant');
+    if (loginSite) {
+      this.selectedSites = [loginSite];
+    }
+
     this.dtOptions = {
       pagingType: 'full_numbers',
       pageLength: 5,
@@ -85,6 +111,7 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
       lengthMenu: [5, 10, 25, 50],
       searching: false,
       ordering: true,
+      order: [],
       info: true,
       data: [],
       columns: [
@@ -120,12 +147,18 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
             return data;
           }
         },
-        { title: 'Catatan', data: 'notes' },
+        { title: 'Catatan', data: 'notes', render: (data: any) => {
+          if (!data) return '';
+          const maxLen = 40;
+          if (data.length <= maxLen) return data;
+          const wrapped = data.replace(new RegExp(`(.{${maxLen}})`, 'g'), '$1<br>');
+          return `<span style="white-space:normal;">${wrapped}</span>`;
+        }},
         { title: 'Driver', data: 'driver' },
         { title: 'Co-Driver', data: 'coDriver' },
-        { 
-          title: 'Status', 
-          data: 'status', 
+        {
+          title: 'Status',
+          data: 'status',
           render: (data: any) => {
             if (!data) return '';
             const lowerData = data.toLowerCase();
@@ -135,6 +168,16 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
               return `<span style="background: #C86F6F; color: #3a2c01; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block;">${data}</span>`;
             }
             return data;
+          }
+        },
+        {
+          title: 'Foto',
+          data: 'status',
+          orderable: false,
+          render: (data: any, type: any, row: any) => {
+            if (!data) return '';
+            const lowerData = data.toLowerCase();
+            return lowerData === 'valid' ? `<button class="view-photos-btn" data-tripnum="${row.tripNum}" data-triptype="${row.tripType}" style="background:#17a2b8;color:white;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;white-space:nowrap;">&#128247; Lihat</button>` : '';
           }
         }
       ],
@@ -157,21 +200,22 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadReportData(): void {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
     const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'x-api-key': environment.api.apiKey
+      'x-api-key': currentEnv.apiKey
     });
-    
+
     // Build payload based on filters
     const payload: any = {
       sites: this.selectedSites.length > 0 ? this.selectedSites.join('~') : '',
       startDate: this.startDate || '',
       endDate: this.endDate || ''
     };
-    
-    this.http.post<any>('https://epicprodapp.samator.com/KineticPilot/api/v2/efx/SGI/SMTTruckCheckApp/getReport', payload, { headers })
+
+    this.http.post<any>(currentEnv.baseUrl + '/getReport', payload, { headers })
       .subscribe({
         next: (response) => {
           const rawData = response.DataSet?.TruckCheck || [];
@@ -216,14 +260,15 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadSites(): void {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
     const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'x-api-key': environment.api.apiKey
+      'x-api-key': currentEnv.apiKey
     });
-    
-    this.http.post<any>('https://epicprodapp.samator.com/Kinetic/api/v2/efx/SGI/SMTTruckCheckApp/GetListPlant', {}, { headers })
+
+    this.http.post<any>(currentEnv.baseUrl + '/GetListPlant', {}, { headers })
       .subscribe({
         next: (response) => {
           const plantsData = response.Result?.Plant || [];
@@ -235,11 +280,10 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
             }));
           console.log('Sites loaded:', this.sites.length, 'sites');
           
-          // Auto-select the site from login
+          // Confirm pre-selected site still exists in the sites list
           const loginSite = localStorage.getItem('currentPlant');
-          if (loginSite && this.sites.some(site => site.Plant === loginSite)) {
-            this.selectedSites = [loginSite];
-            this.applyFilters();
+          if (loginSite && !this.sites.some(site => site.Plant === loginSite)) {
+            this.selectedSites = [];
           }
         },
         error: (err) => console.error('Error loading sites:', err)
@@ -247,14 +291,15 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadEmployees(): void {
+    const currentEnv = this.environmentService.getCurrentEnvironment();
     const basicAuth = btoa(`${environment.api.basicAuth.username}:${environment.api.basicAuth.password}`);
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': `Basic ${basicAuth}`,
-      'x-api-key': environment.api.apiKey
+      'x-api-key': currentEnv.apiKey
     });
-    
-    this.http.post<any>('https://epicprodapp.samator.com/KineticPilot/api/v2/efx/SGI/SMTTruckCheckApp/getAllSatpam', {}, { headers })
+
+    this.http.post<any>(currentEnv.baseUrl + '/getAllSatpam', {}, { headers })
       .subscribe({
         next: (response) => {
           const employeesData = response.DataSet?.Employees || [];
@@ -272,7 +317,7 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    // Don't trigger immediately, wait for data to load
+    document.addEventListener('click', this.photoBtnClickHandler);
   }
 
 applyFilters(): void {
@@ -620,9 +665,79 @@ applyFilters(): void {
     window.URL.revokeObjectURL(link.href);
   }
 
+  async openPhotoModal(tripNum: string, tripType: string): Promise<void> {
+    this.showPhotoModal = true;
+    this.modalTripNum = tripNum;
+    this.modalPhotos = [];
+    this.selectedPhotoUrl = '';
+    this.photoError = '';
+    this.loadingPhotos = true;
+    this.cdr.detectChanges();
+
+    let token = this.authService.getToken();
+    if (!token || this.authService.isJwtExpired()) {
+      token = await this.authService.getJwt();
+    }
+
+    if (!token) {
+      this.loadingPhotos = false;
+      this.photoError = 'Sesi tidak valid. Silakan logout lalu login kembali.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    const condition = encodeURIComponent(tripType);
+
+    this.http.get<{ id: string; name: string }[]>(
+      `${environment.backendUrl}/api/get-photos?tripNum=${encodeURIComponent(tripNum)}&condition=${condition}`,
+      { headers }
+    ).subscribe({
+      next: (photos) => {
+        const bust = Date.now();
+        this.modalPhotos = photos.map(p => ({
+          id: p.id,
+          name: p.name,
+          url: `${environment.backendUrl}/api/photo/${p.id}?t=${bust}`
+        }));
+        this.loadingPhotos = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading photos:', err);
+        this.loadingPhotos = false;
+        if (err.status === 0) {
+          this.photoError = 'Tidak dapat terhubung ke backend. Pastikan server backend sudah berjalan.';
+        } else if (err.status === 401) {
+          this.photoError = 'Sesi habis. Silakan logout lalu login kembali.';
+        } else if (err.status === 503) {
+          this.photoError = 'Layanan Google Drive tidak tersedia di backend.';
+        } else {
+          this.photoError = `Gagal memuat foto (${err.status}). Cek console untuk detail.`;
+        }
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  closePhotoModal(): void {
+    this.showPhotoModal = false;
+    this.selectedPhotoUrl = '';
+    this.modalPhotos = [];
+  }
+
+  selectPhoto(url: string): void {
+    this.selectedPhotoUrl = url;
+  }
+
+  closeSelectedPhoto(): void {
+    this.selectedPhotoUrl = '';
+  }
+
   ngOnDestroy(): void {
     this.dtTrigger.unsubscribe();
     document.removeEventListener('click', this.closeDropdowns.bind(this));
+    document.removeEventListener('click', this.photoBtnClickHandler);
   }
 
   logout() {
