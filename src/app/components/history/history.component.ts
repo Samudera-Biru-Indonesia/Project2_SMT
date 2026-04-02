@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +18,8 @@ export class HistoryComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   // Filter properties
@@ -53,6 +54,14 @@ export class HistoryComponent implements OnInit, OnDestroy {
   filteredData: any[] = [];
   reportData: any[] = [];
   isLoading: boolean = false;
+
+  // Photo modal
+  showPhotoModal: boolean = false;
+  modalTripNum: string = '';
+  modalPhotos: { id: string; name: string; url: string }[] = [];
+  loadingPhotos: boolean = false;
+  selectedPhotoUrl: string = '';
+  photoError: string = '';
   
   // Pagination
   currentPage: number = 1;
@@ -353,8 +362,76 @@ export class HistoryComponent implements OnInit, OnDestroy {
   }
 
   viewPhotos(trip: any): void {
-    // TODO: Implement photo viewing logic
-    console.log('View photos for trip:', trip);
+    this.openPhotoModal(trip.tripNum, trip.tripType).catch(err => console.error(err));
+  }
+
+  async openPhotoModal(tripNum: string, tripType: string): Promise<void> {
+    this.showPhotoModal = true;
+    this.modalTripNum = tripNum;
+    this.modalPhotos = [];
+    this.selectedPhotoUrl = '';
+    this.photoError = '';
+    this.loadingPhotos = true;
+    this.cdr.detectChanges();
+
+    let token = this.authService.getToken();
+    if (!token || this.authService.isJwtExpired()) {
+      token = await this.authService.getJwt();
+    }
+
+    if (!token) {
+      this.loadingPhotos = false;
+      this.photoError = 'Sesi tidak valid. Silakan logout lalu login kembali.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    const condition = encodeURIComponent(tripType);
+
+    this.http.get<{ id: string; name: string }[]>(
+      `${environment.backendUrl}/api/get-photos?tripNum=${encodeURIComponent(tripNum)}&condition=${condition}`,
+      { headers }
+    ).subscribe({
+      next: (photos) => {
+        const bust = Date.now();
+        this.modalPhotos = photos.map(p => ({
+          id: p.id,
+          name: p.name,
+          url: `${environment.backendUrl}/api/photo/${p.id}?t=${bust}`
+        }));
+        this.loadingPhotos = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading photos:', err);
+        this.loadingPhotos = false;
+        if (err.status === 0) {
+          this.photoError = 'Tidak dapat terhubung ke backend. Pastikan server backend sudah berjalan.';
+        } else if (err.status === 401) {
+          this.photoError = 'Sesi habis. Silakan logout lalu login kembali.';
+        } else if (err.status === 503) {
+          this.photoError = 'Layanan Google Drive tidak tersedia di backend.';
+        } else {
+          this.photoError = `Gagal memuat foto (${err.status}). Cek console untuk detail.`;
+        }
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  closePhotoModal(): void {
+    this.showPhotoModal = false;
+    this.selectedPhotoUrl = '';
+    this.modalPhotos = [];
+  }
+
+  selectPhoto(url: string): void {
+    this.selectedPhotoUrl = url;
+  }
+
+  closeSelectedPhoto(): void {
+    this.selectedPhotoUrl = '';
   }
 
   toggleStatus(trip: any): void {

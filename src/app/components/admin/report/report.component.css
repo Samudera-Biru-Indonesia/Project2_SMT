@@ -555,6 +555,10 @@ table.dataTable tbody tr:hover td,
   }
 }
 
+table.dataTable tbody td.foto-cell {
+  vertical-align: bottom !important;
+}
+
 /* Photo Modal */
 .photo-modal-overlay {
   position: fixed;

@@ -174,6 +174,7 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
           title: 'Foto',
           data: 'status',
           orderable: false,
+          className: 'foto-cell',
           render: (data: any, type: any, row: any) => {
             if (!data) return '';
             const lowerData = data.toLowerCase();

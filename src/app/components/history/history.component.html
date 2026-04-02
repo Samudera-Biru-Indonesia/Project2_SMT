@@ -220,3 +220,30 @@
     </div>
   </main>
 </div>
+
+<!-- Photo Modal -->
+<div class="photo-modal-overlay" *ngIf="showPhotoModal" (click)="closePhotoModal()">
+  <div class="photo-modal" (click)="$event.stopPropagation()">
+    <div class="photo-modal-header">
+      <h3>Foto — {{ modalTripNum }}</h3>
+      <button class="photo-modal-close" (click)="closePhotoModal()">&#10005;</button>
+    </div>
+    <div class="photo-modal-body">
+      <div *ngIf="loadingPhotos" class="photo-loading">Memuat foto...</div>
+      <div *ngIf="!loadingPhotos && photoError" class="photo-error">{{ photoError }}</div>
+      <div *ngIf="!loadingPhotos && !photoError && modalPhotos.length === 0" class="photo-empty">Tidak ada foto untuk perjalanan ini.</div>
+      <div *ngIf="!loadingPhotos && !photoError && modalPhotos.length > 0" class="photo-grid">
+        <div *ngFor="let photo of modalPhotos" class="photo-thumb" (click)="selectPhoto(photo.url)">
+          <img [src]="photo.url" [alt]="photo.name" loading="lazy">
+          <span class="photo-label">{{ photo.name }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Fullscreen Photo Viewer -->
+<div class="photo-fullscreen-overlay" *ngIf="selectedPhotoUrl" (click)="closeSelectedPhoto()">
+  <img [src]="selectedPhotoUrl" alt="Foto" (click)="$event.stopPropagation()">
+  <button class="photo-fullscreen-close" (click)="closeSelectedPhoto()">&#10005;</button>
+</div>
