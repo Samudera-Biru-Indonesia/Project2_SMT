@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -18,6 +19,11 @@ import (
 	"google.golang.org/api/drive/v3"
 	"google.golang.org/api/option"
 )
+
+type PhotoInfo struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
 
 type UploadRequest struct {
 	TripNum        string   `json:"tripNum"`
@@ -48,10 +54,22 @@ var jwtSecret = []byte("your-secret-key") // In production, use environment vari
 var driveService *drive.Service
 
 func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	allowedOrigins := map[string]bool{
+		"https://smxapp.samator.com": true,
+		"http://localhost:4200":      true,
+	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := r.Header.Get("Origin")
+
+		if origin != "" && allowedOrigins[origin] {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+		}
+
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, x-api-key, Company")
+		w.Header().Set("Vary", "Origin")
 
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
@@ -60,6 +78,52 @@ func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 
 		next(w, r)
 	}
+}
+
+func adminLoginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+		Site     string `json:"site"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	adminUsername := os.Getenv("ADMIN_USERNAME")
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+
+	if req.Username != adminUsername || req.Password != adminPassword {
+		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		return
+	}
+
+	claims := Claims{
+		Username: req.Username,
+		EmpCode:  req.Username,
+		Site:     req.Site,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(3 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtSecret)
+	if err != nil {
+		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
 }
 
 func getJwtHandler(w http.ResponseWriter, r *http.Request) {
@@ -157,7 +221,31 @@ func initDriveService() error {
 	return nil
 }
 
-func uploadFileToDrive(filename string, data []byte, parentID string) (string, error) {
+func upsertFileToDrive(filename string, data []byte, parentID string) (string, error) {
+	// Check if file with same name already exists in folder
+	query := fmt.Sprintf("'%s' in parents and name = '%s' and trashed = false", parentID, filename)
+	list, err := driveService.Files.List().
+		Q(query).
+		Fields("files(id)").
+		SupportsAllDrives(true).
+		IncludeItemsFromAllDrives(true).
+		Do()
+
+	if err == nil && len(list.Files) > 0 {
+		// File exists — update content in place (no delete permission needed)
+		existingID := list.Files[0].Id
+		_, err = driveService.Files.Update(existingID, &drive.File{}).
+			Media(bytes.NewReader(data)).
+			SupportsAllDrives(true).
+			Do()
+		if err != nil {
+			return "", fmt.Errorf("failed to update file: %w", err)
+		}
+		log.Printf("Updated existing file: %s (ID: %s)", filename, existingID)
+		return existingID, nil
+	}
+
+	// File does not exist — create new
 	f := &drive.File{
 		Name:    filename,
 		Parents: []string{parentID},
@@ -219,6 +307,7 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("DRIVE_FOLDER_ID environment variable not set")
 	}
 
+
 	var fileIDs []string
 	var baseFilename string
 
@@ -250,7 +339,7 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 			filename = fmt.Sprintf("%s_%s_odometer_%d.jpg", req.TripNum, req.Condition, i+1)
 		}
 		
-		id, err := uploadFileToDrive(filename, imgBytes, rootFolderID)
+		id, err := upsertFileToDrive(filename, imgBytes, rootFolderID)
 		if err != nil {
 			log.Printf("Failed to upload odometer photo: %v", err)
 			break
@@ -290,7 +379,7 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 			filename = fmt.Sprintf("%s_%s_cargo_%d.jpg", req.TripNum, req.Condition, i+1)
 		}
 		
-		id, err := uploadFileToDrive(filename, imgBytes, rootFolderID)
+		id, err := upsertFileToDrive(filename, imgBytes, rootFolderID)
 		if err != nil {
 			log.Printf("Failed to upload cargo photo: %v", err)
 			break
@@ -332,7 +421,7 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 			filename = fmt.Sprintf("%s_%s_car_%d.jpg", req.TripNum, req.Condition, i+1)
 		}
 		
-		id, err := uploadFileToDrive(filename, imgBytes, rootFolderID)
+		id, err := upsertFileToDrive(filename, imgBytes, rootFolderID)
 		if err != nil {
 			log.Printf("Failed to upload car photo: %v", err)
 			break
@@ -348,6 +437,108 @@ func uploadPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		Filename:  baseFilename,
 		Timestamp: timestamp,
 	})
+}
+
+func getPhotosHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	tripNum := r.URL.Query().Get("tripNum")
+	condition := r.URL.Query().Get("condition")
+
+	if tripNum == "" {
+		http.Error(w, "tripNum is required", http.StatusBadRequest)
+		return
+	}
+
+	if driveService == nil {
+		http.Error(w, "Drive service not available", http.StatusServiceUnavailable)
+		return
+	}
+
+	rootFolderID := os.Getenv("DRIVE_FOLDER_ID")
+
+	searchByTripNum := func(q string) ([]PhotoInfo, error) {
+		list, err := driveService.Files.List().
+			Q(q).
+			Fields("files(id, name)").
+			SupportsAllDrives(true).
+			IncludeItemsFromAllDrives(true).
+			Do()
+		if err != nil {
+			return nil, err
+		}
+		var result []PhotoInfo
+		for _, f := range list.Files {
+			result = append(result, PhotoInfo{ID: f.Id, Name: f.Name})
+		}
+		return result, nil
+	}
+
+	var photos []PhotoInfo
+	var err error
+
+	if condition != "" {
+		q := fmt.Sprintf("'%s' in parents and name contains '%s_%s' and trashed = false", rootFolderID, tripNum, condition)
+		photos, err = searchByTripNum(q)
+		if err != nil {
+			http.Error(w, "Failed to list files: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		// Fallback: cari by tripNum saja (e.g. trip CANCELLED dengan TripType kosong/berbeda)
+		if len(photos) == 0 {
+			q = fmt.Sprintf("'%s' in parents and name contains '%s' and trashed = false", rootFolderID, tripNum)
+			photos, err = searchByTripNum(q)
+			if err != nil {
+				http.Error(w, "Failed to list files: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+	} else {
+		q := fmt.Sprintf("'%s' in parents and name contains '%s' and trashed = false", rootFolderID, tripNum)
+		photos, err = searchByTripNum(q)
+		if err != nil {
+			http.Error(w, "Failed to list files: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if photos == nil {
+		photos = []PhotoInfo{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(photos)
+}
+
+func proxyPhotoHandler(w http.ResponseWriter, r *http.Request) {
+	fileId := strings.TrimPrefix(r.URL.Path, "/api/photo/")
+	if fileId == "" {
+		http.Error(w, "fileId is required", http.StatusBadRequest)
+		return
+	}
+
+	if driveService == nil {
+		http.Error(w, "Drive service not available", http.StatusServiceUnavailable)
+		return
+	}
+
+	resp, err := driveService.Files.Get(fileId).SupportsAllDrives(true).Download()
+	if err != nil {
+		http.Error(w, "Failed to get file: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	contentType := resp.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "image/jpeg"
+	}
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	io.Copy(w, resp.Body)
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
@@ -466,8 +657,11 @@ func main() {
 	}
 
 	// Real endpoints
+	http.HandleFunc("/api/admin-login", corsMiddleware(adminLoginHandler))
 	http.HandleFunc("/api/get-jwt", corsMiddleware(getJwtHandler))
 	http.HandleFunc("/api/upload-photos", corsMiddleware(jwtMiddleware(uploadPhotosHandler)))
+	http.HandleFunc("/api/get-photos", corsMiddleware(jwtMiddleware(getPhotosHandler)))
+	http.HandleFunc("/api/photo/", corsMiddleware(proxyPhotoHandler))
 	http.HandleFunc("/test", corsMiddleware(testHandler))
 
 	// Dummy data endpoints (prefix: /api/dummy/)

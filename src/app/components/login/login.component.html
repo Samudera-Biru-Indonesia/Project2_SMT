@@ -22,7 +22,7 @@
     <!-- Login Form -->
     <form (ngSubmit)="onLogin()" class="login-form" *ngIf="!isLoading && role.trim()">
       <div class="form-group">
-        <label for="site">Kode Site</label>
+        <label>Kode Site</label>
         <div class="custom-dropdown" [class.open]="dropdownOpen">
           <div class="dropdown-selected" 
                (click)="toggleDropdown()" 
